@@ -12,7 +12,10 @@ jobs:
         node: [10, 12]
     name: ${{ matrix.os }} and node ${{ matrix.node }}
     steps:
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Build
         uses: actions/setup-node@v1
         with:

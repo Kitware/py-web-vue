@@ -1,4 +1,4 @@
-name: Build and Publish
+name: Build on all the platforms
 on: [push, pull_request]
 
 jobs:

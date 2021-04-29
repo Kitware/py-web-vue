@@ -1,4 +1,4 @@
-name: Release
+name: Publish Release
 on:
   push:
     branches:
@@ -25,40 +25,48 @@ jobs:
           npm run lint
           npm run build
         working-directory: ${{env.webclient}}
-      - name: Release
+      - name: Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install setuptools
+        run: python -m pip install --upgrade setuptools wheel twine
+      - name: Release (JS + Python)
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           git config --global user.name "Github Actions"
           git config --global user.email "sebastien.jourdain@kitware.com"
           npm run semantic-release
         working-directory: ${{env.webclient}}
-      - name: Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - name: Install pypa/build
-        run: >-
-          python -m
-          pip install
-          build
-          --user
-      - name: Build a binary wheel and a source tarball
-        run: >-
-          python -m
-          build
-          --sdist
-          --wheel
-          --outdir dist/
-          ./python
+
+      # Should be done by semantic release now...
+      # - name: Install pypa/build
+      #   run: >-
+      #     python -m
+      #     pip install
+      #     build
+      #     --user
+      # - name: Build a binary wheel and a source tarball
+      #   run: >-
+      #     python -m
+      #     build
+      #     --sdist
+      #     --wheel
+      #     --outdir dist/
+      #     ./python
+
       - name: Publish distribution 📦 to Test PyPI
+        continue-on-error: true
         uses: pypa/gh-action-pypi-publish@master
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
-      - name: Publish distribution 📦 to PyPI
-        if: startsWith(github.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      # - name: Publish distribution 📦 to PyPI
+      #   continue-on-error: true
+      #   # if: startsWith(github.ref, 'refs/tags')
+      #   uses: pypa/gh-action-pypi-publish@master
+      #   with:
+      #     password: ${{ secrets.PYPI_API_TOKEN }}

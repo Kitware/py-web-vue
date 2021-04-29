@@ -5,25 +5,14 @@ import re
 
 from setuptools import setup, find_packages
 
-MODULE_NAME = 'pywebvue'
-VERSION = '0.0.1'
-
-with open(os.path.join(os.path.dirname(__file__), 'src', MODULE_NAME, '__init__.py')) as fd:
-    VERSION = re.search(
-        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-        fd.read(),
-        re.MULTILINE
-    ).group(1)
-
 # perform the install
 setup(
-    name=MODULE_NAME,
-    version=VERSION,
+    name='pywebvue',
     description='Python server creating interactive vue app over WebSocket',
-    long_description='',
+    long_description='Build a 3D Web application using VTK or ParaView while only writing a Python script. This project aims to streamline the existing ParaViewWeb infrastructure into something that is simpler to use by lowering the entry point complexity.',
     author='Kitware, Inc.',
     author_email='kitware@kitware.com',
-    url=f'https://github.com/kitware/{MODULE_NAME}',
+    url=f'https://github.com/kitware/py-web-vue',
     license='BSD-3-Clause',
     classifiers=[
         'Development Status :: 4 - Beta',

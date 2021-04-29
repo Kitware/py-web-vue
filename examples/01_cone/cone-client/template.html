@@ -1,0 +1,37 @@
+<v-app>
+  <v-app-bar app>
+    <img
+      :src="get('logo')"
+      @click="$refs.view.resetCamera()"
+      style="height: 35px"
+      class="pr-4"
+    />
+    <span class="title">Cone Application</span>
+    <v-spacer />
+    <v-slider
+      hide-details
+      :value="get('resolution')"
+      @input="set('resolution', $event)"
+      :max="60"
+      :min="3"
+      :step="1"
+      style="max-width: 300px"
+    />
+    <v-switch hide-details v-model="$vuetify.theme.dark" />
+    <v-btn icon @click="$refs.view.resetCamera()">
+      <v-icon>mdi-crop-free</v-icon>
+    </v-btn>
+  </v-app-bar>
+  <v-main>
+    <v-container fluid fill-height class="pa-0">
+      <vtk-view ref="view">
+        <vtk-geometry-representation>
+          <vtk-algorithm
+            vtkClass="vtkConeSource"
+            :state="{ resolution: get('resolution') }"
+          />
+        </vtk-geometry-representation>
+      </vtk-view>
+    </v-container>
+  </v-main>
+</v-app>

@@ -1,0 +1,35 @@
+<v-app>
+  <v-app-bar app>
+    <v-icon
+      @click="$refs.view.resetCamera()"
+      class="pr-4"
+    >
+    mdi-menu
+    </v-icon>
+    <span class="title">Contour Application</span>
+    <v-spacer />
+    <v-slider
+      hide-details
+      :value="get('contour_value')"
+      @change="set('contour_value', $event)"
+      :max="get('data_range')[1]"
+      :min="get('data_range')[0]"
+      :step="1"
+      style="max-width: 300px"
+    />
+    <v-switch hide-details v-model="$vuetify.theme.dark" />
+    <v-btn icon @click="$refs.view.resetCamera()">
+      <v-icon>mdi-crop-free</v-icon>
+    </v-btn>
+    <v-progress-linear indeterminate absolute bottom :active="busy" />
+  </v-app-bar>
+  <v-main>
+    <v-container fluid fill-height class="pa-0">
+      <vtk-view ref="view">
+        <vtk-geometry-representation v-if="get('contour')">
+          <vtk-polydata v-bind="get('contour').mesh" />
+        </vtk-geometry-representation>
+      </vtk-view>
+    </v-container>
+  </v-main>
+</v-app>

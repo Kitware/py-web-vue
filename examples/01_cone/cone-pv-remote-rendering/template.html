@@ -1,0 +1,36 @@
+<v-app>
+  <v-app-bar app>
+    <v-icon
+      @click="$refs.view.resetCamera()"
+      class="pr-4"
+    >
+    mdi-menu
+    </v-icon>
+    <span class="title">Cone Application</span>
+    <v-spacer />
+    <v-slider
+      hide-details
+      :value="get('resolution')"
+      @input="set('resolution', $event)"
+      :max="60"
+      :min="3"
+      :step="1"
+      style="max-width: 300px"
+    />
+    <v-switch hide-details v-model="$vuetify.theme.dark" />
+    <v-btn icon @click="$refs.view.resetCamera()">
+      <v-icon>mdi-crop-free</v-icon>
+    </v-btn>
+  </v-app-bar>
+  <v-main>
+    <v-container fluid fill-height class="pa-0">
+      <vtk-remote-view
+        ref="view"
+        :wsClient="wsClient"
+        id="-1"
+        :interactiveQuality="60"
+        :interactiveRatio="1"
+      />
+    </v-container>
+  </v-main>
+</v-app>

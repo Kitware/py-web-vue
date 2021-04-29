@@ -1,0 +1,7 @@
+python/src/pywebvue/www/
+__pycache__
+py-env
+py-lib
+*.egg-info
+dist
+python/build

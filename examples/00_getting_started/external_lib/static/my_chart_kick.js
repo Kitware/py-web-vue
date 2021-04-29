@@ -1,0 +1,1 @@
+var charts_use = Chartkick.use(Chart);

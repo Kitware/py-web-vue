@@ -28,5 +28,6 @@ setup(
     keywords='Python Vue.js websocket VTK ParaView Web3D',
     packages=find_packages('src', exclude=('tests.*', 'tests')),
     package_dir={'':'src'},
+    package_data={"pywebvue":["www/*", "www/*/*"]},
     install_requires=['wslink'],
 )

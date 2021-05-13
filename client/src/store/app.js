@@ -86,8 +86,11 @@ export default {
 
       use.forEach((libName) => {
         window.get = get;
-        const lib = get(window, libName);
-        console.log(`Vue.use(${libName})`, !!lib);
+        let lib = get(window, libName);
+        if (lib.default) {
+          lib = lib.default;
+        }
+        console.log(`Vue.use(${libName}) - ${!!lib} - install(${!!lib.install})`);
         if (lib.install) {
           Vue.use(lib);
         } else {

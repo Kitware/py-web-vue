@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/Kitware/py-web-vue/compare/v1.0.3...v1.0.4) (2021-05-15)
+
+
+### Bug Fixes
+
+* **Use:** Better handling of vue initialization ([31cccff](https://github.com/Kitware/py-web-vue/commit/31cccff8a2e2784dc16ce2eae57f0d81b93e7836))
+
 ## [1.0.3](https://github.com/Kitware/py-web-vue/compare/v1.0.2...v1.0.3) (2021-05-13)
 
 

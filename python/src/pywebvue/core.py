@@ -88,7 +88,7 @@ class App:
 
     @property
     def favicon(self):
-        return self._layout
+        return self._favicon
 
     @favicon.setter
     def favicon(self, value):

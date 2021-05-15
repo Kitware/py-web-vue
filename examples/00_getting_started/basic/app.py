@@ -63,7 +63,15 @@ app.vuetify = {
 app.layout = '''
     <v-app>
       <v-app-bar app>
-        <v-icon v-text="`$menu`" class="mr-4"/> Welcome
+        <v-icon v-text="`$menu`" class="mr-4"/> {{ Date.now() }}
+        <v-spacer />
+        <v-select
+          :value="get('select')"
+          :items="get('items')"
+          @change="set('select', $event)"
+          hide-details dense
+          style="max-width: 200px"
+        />
         <v-spacer />
         <v-btn icon @click="trigger('plus', [Math.random()])">
             <v-icon v-text="`$add`" />
@@ -84,7 +92,15 @@ app.state = {
     'value': 0,
     'name': 'World',
     'superlatif': '',
+    'select': 'World',
+    'items': [
+      { 'text': 'Simple', 'value': 'World' },
+      { 'text': 'You', 'value': 'me' },
+      { 'text': 'Anonymous', 'value': '' },
+    ],
 }
+
+app.vue_use = ['vuetify']
 
 # -----------------------------------------------------------------------------
 # Callbacks

@@ -1,6 +1,5 @@
 import VRuntimeTemplate from 'v-runtime-template';
 import { mapGetters, mapActions } from 'vuex';
-import merge from 'lodash/fp/merge.js';
 
 export default {
   name: 'App',
@@ -11,7 +10,6 @@ export default {
     ...mapGetters({
       get: 'APP_GET',
       contentTemplate: 'APP_TEMPLATE',
-      vuetifyConfig: 'APP_VUETIFY_CONFIG',
       busy: 'WS_BUSY',
       wsClient: 'WS_CLIENT',
       actions: 'APP_ACTIONS',
@@ -19,9 +17,6 @@ export default {
     }),
   },
   watch: {
-    vuetifyConfig(newConfig) {
-      merge(this.$vuetify, newConfig);
-    },
     actions(list) {
       for (let i = 0; i < list.length; i++) {
         const action = list[i];
@@ -42,15 +37,18 @@ export default {
         this.$router.addRoute(route);
       });
     },
+    contentTemplate() {
+      this.vApp = this.$el;
+    },
   },
   data() {
     return {
       window,
+      vApp: null,
     };
   },
   methods: {
     ...mapActions({
-      connect: 'APP_INIT',
       serverSet: 'APP_SET',
       serverTrigger: 'APP_TRIGGER',
       clearActions: 'APP_ACTIONS_PROCESSED',
@@ -65,9 +63,6 @@ export default {
       return this.$refs.root.$children[0].$refs[ref];
     },
   },
-  created() {
-    this.connect();
-  },
   provide() {
     return {
       get: (key) => this.get(key),
@@ -75,6 +70,10 @@ export default {
       trigger: (name, args, kwargs) => this.trigger(name, args, kwargs),
       wsClient: this.wsClient,
       busy: this.busy,
+      vApp: this.vApp,
     };
+  },
+  mounted() {
+    this.vApp = this.$el;
   },
 };

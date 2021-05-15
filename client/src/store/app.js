@@ -22,6 +22,7 @@ export default {
     serverStateKeys: [],
     actions: [],
     routes: [],
+    use: [],
   },
   getters: {
     APP_GET(state) {
@@ -40,6 +41,9 @@ export default {
     },
     APP_ROUTES(state) {
       return state.routes;
+    },
+    APP_USE(state) {
+      return state.use;
     },
     APP_HTML_SCRIPTS(state) {
       return state.htmlScripts;
@@ -73,6 +77,7 @@ export default {
       state.vuetifyConfig = vuetify;
       state.serverStateKeys = stateListening;
       state.routes = routes;
+      state.use = use;
 
       // Load exteranl scripts/css
       await Promise.all(styles.map(loadCSS));
@@ -87,9 +92,16 @@ export default {
       use.forEach((libName) => {
         window.get = get;
         let lib = get(window, libName);
+
+        // Invalid lib name
+        if (!lib) {
+          return;
+        }
+
         if (lib.default) {
           lib = lib.default;
         }
+
         console.log(`Vue.use(${libName}) - ${!!lib} - install(${!!lib.install})`);
         if (lib.install) {
           Vue.use(lib);
@@ -109,11 +121,8 @@ export default {
     },
   },
   actions: {
-    async APP_INIT({ state, dispatch, commit }) {
-      await dispatch('WS_CONNECT');
-      const serverState = await dispatch('WS_INIT');
+    async APP_INIT({ state, dispatch, commit }, serverState) {
       commit('APP_INIT_SET', serverState);
-
       dispatch('WS_STATE_SUBSCRIBE', ([modifiedState]) => {
         Object.assign(SHARED_STATE, modifiedState);
         state.stateTS++;

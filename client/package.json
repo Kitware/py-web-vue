@@ -16,11 +16,11 @@
     "semantic-release-pypi": "^2.0.3",
     "typeface-roboto": "^1.1.13",
     "v-runtime-template": "^1.10.0",
-    "vtk.js": "17.2.4",
+    "vtk.js": "17.17.0",
     "vue": "^2.6.11",
     "vue-router": "^3.5.1",
     "vue-vtk-js": "1.0.10",
-    "vuetify": "^2.4.8",
+    "vuetify": "2.5.0",
     "vuex": "^3.4.0",
     "wslink": "^0.1.15"
   },

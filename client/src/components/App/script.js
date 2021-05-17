@@ -32,11 +32,6 @@ export default {
       }
       this.clearActions();
     },
-    routes(list) {
-      list.forEach((route) => {
-        this.$router.addRoute(route);
-      });
-    },
     contentTemplate() {
       this.vApp = this.$el;
     },
@@ -75,5 +70,8 @@ export default {
   },
   mounted() {
     this.vApp = this.$el;
+    this.routes.forEach((route) => {
+      this.$router.addRoute(route);
+    });
   },
 };

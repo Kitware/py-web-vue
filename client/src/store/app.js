@@ -1,6 +1,7 @@
 import { loadScript, loadCSS } from 'vtk.js/Sources/IO/Core/ResourceLoader';
 import Vue from 'vue';
 
+let VUE_OPTIONS = {};
 const SHARED_STATE = {};
 const SHARED_STATE_DIRTY_KEYS = new Set();
 
@@ -105,6 +106,9 @@ export default {
         console.log(`Vue.use(${libName}) - ${!!lib} - install(${!!lib.install})`);
         if (lib.install) {
           Vue.use(lib);
+          if (lib.getOptions) {
+            VUE_OPTIONS = { ...VUE_OPTIONS, ...lib.getOptions() };
+          }
         } else {
           Vue.use({ install: lib });
         }
@@ -121,7 +125,7 @@ export default {
     },
   },
   actions: {
-    async APP_INIT({ state, dispatch, commit }, serverState) {
+    APP_INIT({ state, dispatch, commit }, serverState) {
       commit('APP_INIT_SET', serverState);
       dispatch('WS_STATE_SUBSCRIBE', ([modifiedState]) => {
         Object.assign(SHARED_STATE, modifiedState);
@@ -133,6 +137,7 @@ export default {
       dispatch('WS_LAYOUT_SUBSCRIBE', ([template]) => {
         commit('APP_TEMPLATE_SET', template);
       });
+      return VUE_OPTIONS;
     },
     APP_SET({ state, dispatch }, { key, value }) {
       SHARED_STATE[key] = value;

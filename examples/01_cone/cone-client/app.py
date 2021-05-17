@@ -24,6 +24,7 @@ app.state = {
     'logo': app.url('./logo.svg'),
     'resolution': 6,
 }
+app.vue_use = ['vuetify', 'vtk']
 
 # -----------------------------------------------------------------------------
 # MAIN

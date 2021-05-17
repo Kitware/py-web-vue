@@ -26,6 +26,7 @@ app.layout = './template.html'
 app.state = {
     'resolution': 6,
 }
+app.vue_use = ['vuetify', 'vtk']
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

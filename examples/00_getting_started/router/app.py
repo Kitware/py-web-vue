@@ -65,6 +65,8 @@ app.layout = '''
     </v-app>
 '''
 
+app.vue_use = ['vuetify', 'router']
+
 # -----------------------------------------------------------------------------
 # MAIN
 #   python ./examples/.../app.py --port 1234

@@ -20,7 +20,7 @@ app.scripts = [
     'https://unpkg.com/fusioncharts/fusioncharts.charts',
     'https://unpkg.com/fusioncharts/themes/fusioncharts.theme.fusion',
 ]
-app.vue_use = ['VueFusionCharts', 'FusionCharts']
+app.vue_use = ['vuetify', 'VueFusionCharts', 'FusionCharts']
 
 app.state = {
     'type': "column2d",

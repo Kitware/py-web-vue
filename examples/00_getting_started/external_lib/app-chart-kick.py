@@ -22,7 +22,7 @@ app.scripts = [
     'https://unpkg.com/chart.js',
     '/static/my_chart_kick.js'
 ]
-app.vue_use = ['charts_use']
+app.vue_use = ['vuetify', 'charts_use']
 
 app.state = {
     'line': {'2017-01-01': 11, '2017-01-02': 6},

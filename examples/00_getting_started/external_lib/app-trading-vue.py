@@ -17,7 +17,7 @@ app = pywebvue.App('External chart library - CDN')
 app.scripts = [
     'https://unpkg.com/trading-vue-js',
 ]
-app.vue_use = ['TradingVueJs.TradingVue']
+app.vue_use = ['vuetify', 'TradingVueJs.TradingVue']
 
 app.state = {
   'chartData': {

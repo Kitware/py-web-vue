@@ -31,6 +31,7 @@ app.state = {
     'view.mode': 'local',
     'override': 'auto',
 }
+app.vue_use = ['vuetify', 'vtk']
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

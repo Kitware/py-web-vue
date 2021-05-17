@@ -1,3 +1,12 @@
+## [1.0.5](https://github.com/Kitware/py-web-vue/compare/v1.0.4...v1.0.5) (2021-05-17)
+
+
+### Bug Fixes
+
+* **client:** Dynamically load core components vuetify, router, vtk ([29a770a](https://github.com/Kitware/py-web-vue/commit/29a770a313d65eb1a9cc8ffed279a151c4a27387))
+* **server:** Enable all modules by default ([caebae9](https://github.com/Kitware/py-web-vue/commit/caebae9b777f983462741debe499b0c12531ea9e))
+* **Vue:** Allow components to update root vue options ([542bffe](https://github.com/Kitware/py-web-vue/commit/542bffe7a43bbe8afdc76b06d2930fba89a72aa9))
+
 ## [1.0.4](https://github.com/Kitware/py-web-vue/compare/v1.0.3...v1.0.4) (2021-05-15)
 
 

@@ -23,7 +23,7 @@ class App:
         self.state = {}
         self.scripts = []
         self.styles = []
-        self.vue_use = []
+        self.vue_use = ['vuetify', 'router', 'vtk']
         self.serve = {}
 
         # properties

@@ -32,6 +32,7 @@ app.state = {
     'demo.mode': 'local',
     'override': 'auto',
 }
+app.vue_use = ['vuetify', 'vtk']
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

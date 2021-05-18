@@ -35,11 +35,15 @@ export default {
     contentTemplate() {
       this.vApp = this.$el;
     },
+    busy(v) {
+      this.reactiveBusy = v;
+    },
   },
   data() {
     return {
       window,
       vApp: null,
+      reactiveBusy: false,
     };
   },
   methods: {
@@ -64,8 +68,10 @@ export default {
       set: (key, value) => this.set(key, value),
       trigger: (name, args, kwargs) => this.trigger(name, args, kwargs),
       wsClient: this.wsClient,
-      busy: this.busy,
+      isBusy: () => this.busy,
+      reactiveBusy: this.reactiveBusy,
       vApp: this.vApp,
+      window: this.window,
     };
   },
   mounted() {

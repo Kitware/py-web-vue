@@ -7,9 +7,11 @@ Vue.config.productionTip = false;
 // ----------------------------------------------------------------------------
 
 export async function connect(store, done = null) {
+  window.Vue = Vue;
+
   await store.dispatch('WS_CONNECT');
   const serverState = await store.dispatch('WS_INIT');
-  const options = store.dispatch('APP_INIT', serverState);
+  const options = await store.dispatch('APP_INIT', serverState);
 
   if (done) {
     done(store, options);
@@ -20,7 +22,7 @@ export async function connect(store, done = null) {
 
 // ----------------------------------------------------------------------------
 
-export async function createVueApp(store, options={}) {
+export async function createVueApp(store, options = {}) {
   Vue.component('vtk-loading', Loading);
 
   const finalOptions = options || {};

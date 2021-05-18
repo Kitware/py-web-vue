@@ -1,7 +1,6 @@
 import { loadScript, loadCSS } from 'vtk.js/Sources/IO/Core/ResourceLoader';
 import Vue from 'vue';
 
-let VUE_OPTIONS = {};
 const SHARED_STATE = {};
 const SHARED_STATE_DIRTY_KEYS = new Set();
 
@@ -51,7 +50,29 @@ export default {
     },
   },
   mutations: {
-    async APP_INIT_SET(state, {
+    APP_TEMPLATE_SET(state, value) {
+      state.mainPageTemplate = value;
+    },
+    APP_ACTIONS_SET(state, value) {
+      state.actions = value;
+    },
+  },
+  actions: {
+    async APP_INIT({ state, dispatch, commit }, serverState) {
+      dispatch('WS_STATE_SUBSCRIBE', ([modifiedState]) => {
+        Object.assign(SHARED_STATE, modifiedState);
+        state.stateTS++;
+      });
+      dispatch('WS_ACTIONS_SUBSCRIBE', ([actions]) => {
+        commit('APP_ACTIONS_SET', actions);
+      });
+      dispatch('WS_LAYOUT_SUBSCRIBE', ([template]) => {
+        commit('APP_TEMPLATE_SET', template);
+      });
+      const options = await dispatch('APP_INIT_SET', serverState);
+      return options;
+    },
+    async APP_INIT_SET({ state }, {
       name,
       vuetify,
       layout,
@@ -63,6 +84,7 @@ export default {
       stateListening,
       favicon,
     }) {
+      let vueOptions = {};
       // First update state
       Object.assign(SHARED_STATE, sharedState);
       state.stateTS++;
@@ -107,7 +129,7 @@ export default {
         if (lib.install) {
           Vue.use(lib);
           if (lib.getOptions) {
-            VUE_OPTIONS = { ...VUE_OPTIONS, ...lib.getOptions() };
+            vueOptions = { ...vueOptions, ...lib.getOptions() };
           }
         } else {
           Vue.use({ install: lib });
@@ -116,28 +138,8 @@ export default {
 
       // Last update template
       state.mainPageTemplate = layout;
-    },
-    APP_TEMPLATE_SET(state, value) {
-      state.mainPageTemplate = value;
-    },
-    APP_ACTIONS_SET(state, value) {
-      state.actions = value;
-    },
-  },
-  actions: {
-    APP_INIT({ state, dispatch, commit }, serverState) {
-      commit('APP_INIT_SET', serverState);
-      dispatch('WS_STATE_SUBSCRIBE', ([modifiedState]) => {
-        Object.assign(SHARED_STATE, modifiedState);
-        state.stateTS++;
-      });
-      dispatch('WS_ACTIONS_SUBSCRIBE', ([actions]) => {
-        commit('APP_ACTIONS_SET', actions);
-      });
-      dispatch('WS_LAYOUT_SUBSCRIBE', ([template]) => {
-        commit('APP_TEMPLATE_SET', template);
-      });
-      return VUE_OPTIONS;
+
+      return vueOptions;
     },
     APP_SET({ state, dispatch }, { key, value }) {
       SHARED_STATE[key] = value;

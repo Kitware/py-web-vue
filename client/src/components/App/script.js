@@ -15,6 +15,12 @@ export default {
       actions: 'APP_ACTIONS',
       routes: 'APP_ROUTES',
     }),
+    rootComponent() {
+      if (this.contentTemplate.startsWith('#')) {
+        return this.contentTemplate.substring(1);
+      }
+      return 'v-runtime-template';
+    },
   },
   watch: {
     actions(list) {
@@ -59,7 +65,11 @@ export default {
       this.serverTrigger({ name, args, kwargs });
     },
     getRef(ref) {
-      return this.$refs.root.$children[0].$refs[ref];
+      const root = this.$refs.root;
+      if (root.$refs && root.$refs[ref]) {
+        return root.$refs[ref];
+      }
+      return root.$children[0].$refs[ref];
     },
   },
   provide() {

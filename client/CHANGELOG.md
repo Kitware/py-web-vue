@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/Kitware/py-web-vue/compare/v1.0.5...v1.0.6) (2021-05-18)
+
+
+### Bug Fixes
+
+* **client:** Properly handle external vuetify ([7329c15](https://github.com/Kitware/py-web-vue/commit/7329c15e0f6c6852913e9c480308d78a4efc1b9b))
+
 ## [1.0.5](https://github.com/Kitware/py-web-vue/compare/v1.0.4...v1.0.5) (2021-05-17)
 
 

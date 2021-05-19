@@ -1,7 +1,7 @@
 import os
 import argparse
 from .protocol import CoreServer
-from .utils import ChangeHandler, CallbackSet, read_file_as_txt, read_file_as_base64_url, validate, abs_path
+from .utils import ChangeHandler, read_file_as_txt, read_file_as_base64_url, validate, abs_path
 from .backends import create_backend
 
 from wslink import server
@@ -9,10 +9,10 @@ from wslink import server
 WWW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www')
 
 class App:
-    def __init__(self, name, root=None, backend=False, debug=False, **kwargs):
+    def __init__(self, name, root=None, backend=False, debug=False, create_protocols=None, **kwargs):
         self.name = name
         self._root = root
-        self._backend = create_backend(self, backend)
+        self._backend = create_backend(self, backend, create_protocols)
         self._debug = debug
 
         self.on_ready = None
@@ -38,6 +38,9 @@ class App:
 
         # @trigger
         self._triggers = {}
+
+        # CLI argument handling
+        self._parser = None
 
     # -------------------------------------------------------------------------
     # Annotations
@@ -69,6 +72,23 @@ class App:
 
         return register_trigger
 
+    # -------------------------------------------------------------------------
+    # CLI handling
+    # -------------------------------------------------------------------------
+
+    @property
+    def cli_parser(self):
+        if self._parser:
+            return self._parser
+
+        self._parser = argparse.ArgumentParser(description="PyWebVue server By Kitware")
+        CoreServer.add_arguments(self._parser)
+
+        return self._parser
+
+    @property
+    def cli_args(self):
+        return self.cli_parser.parse_known_args()[0]
 
     # -------------------------------------------------------------------------
     # Properties
@@ -221,9 +241,7 @@ class App:
         CoreServer.app = self
         CoreServer.DEBUG = self._debug
 
-        parser = argparse.ArgumentParser(description="PyWebVue server By Kitware")
-        CoreServer.add_arguments(parser)
-        args = parser.parse_known_args()[0]
+        args = self.cli_args
 
         if port:
             args.port = port

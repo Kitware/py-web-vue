@@ -9,9 +9,10 @@ def getReferenceId(ref):
     return '0x0'
 
 class Backend:
-    def __init__(self, app):
+    def __init__(self, app, create_protocols=None):
         self._app = app
         self._protocol = None
+        self._create_protocols = create_protocols
         self._instance_map = {}
 
     def id(self, obj):
@@ -39,3 +40,9 @@ class Backend:
 
     def configure_protocol(self, protocol):
         self._protocol = protocol
+
+        # Register custom protocols
+        if self._create_protocols:
+            protocols = self._create_protocols()
+            for p in protocols:
+                self._protocol.registerLinkProtocol(p)

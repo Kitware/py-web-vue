@@ -1,13 +1,13 @@
 from .utils import mesh
 
 class Backend:
-    def __init__(self, app):
+    def __init__(self, app, create_protocols=None):
         from vtk.vtkWebCore import vtkWebApplication
         self._app = app
         self._protocol = None
+        self._create_protocols = create_protocols
 
         # Need it for id/object methods
-        self._app_helper = vtkWebApplication()
         self._app_helper = vtkWebApplication()
         self._app_helper.SetImageEncoding(0)
 
@@ -74,6 +74,12 @@ class Backend:
 
         # Remote rendering - geometry delivery
         self._protocol.registerLinkProtocol(vtkWebLocalRendering())
+
+        # Register custom protocols
+        if self._create_protocols:
+            protocols = self._create_protocols()
+            for p in protocols:
+                self._protocol.registerLinkProtocol(p)
 
         # Register active view/source/...
         for key in self._app.active_objects:

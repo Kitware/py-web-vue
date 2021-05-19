@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/Kitware/py-web-vue/compare/v1.0.7...v1.0.8) (2021-05-19)
+
+
+### Bug Fixes
+
+* **cli:** Better handling for CLI arguments ([48c7d0f](https://github.com/Kitware/py-web-vue/commit/48c7d0f7e9fd2db52807d608a81b5f66509d78fe))
+
 ## [1.0.7](https://github.com/Kitware/py-web-vue/compare/v1.0.6...v1.0.7) (2021-05-19)
 
 

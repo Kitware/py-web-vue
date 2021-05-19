@@ -65,6 +65,8 @@ def update_page(index=1):
     app.layout = f'./template-{index}.html'
 ```
 
+More over if you are loading an external library using `app.vue_use = [...]` you could replace the runtime compiled template to an existing component by setting `app.layout = '#my-component-name'`.
+
 ### State handling
 
 If you want to involve a Python server it is most likely because you want to control the Web UI from some functions at the Python level. A convinient approach that we took was to define a state and let both the client and the server read and write to it. The library will take care of synchronizing both side for you. You just need to use `set(key, value)` and `get(key)` along with the annotation `@app.change(key1, key2, ...)` to automatically bind a method execution when a given value for a key has been modified by either side. You should also define an initial state inside your app.
@@ -158,26 +160,112 @@ To serve several local directory, you will have to set the `app.serve` field as 
 ```python
 app.serve = {
     'assets': './www/assets',
-    'css': './www/css',
+    'local/css': './www/css',
+    'local/js': './www/js',
     'data': './data',
 }
 ```
 
-### Handling routing
+### Loading CSS
 
-TODO
+Since you can serve your own CSS files, you can also load them in your web application by referencing them with `app.styles = ['/local/css/main.css', '/local/css/add-on.css']`.
+### Loading Scripts
+
+Since you can serve your own JavaScript files, you can also load them in your web application by using the following setup:
+
+```python
+app.scripts = ['/local/js/Vuetify.umd.min.js', '/local/js/AddOnWidgets.umd.min.js']
+app.vue_use = ['Vuetify', 'AddOnWidgets'] # => Vue.use(window.Vuetify) + Vue.use(window.AddOnWidgets)
+```
 
 ### Vue.use(...)
 
-TODO
+PyWebVue comes with `vuetify`, `router` and `vtk` built-in but if you plan to use the bundled ones, you will have to list them in `app.vue_use = ['vuetify']`.
+Those 3 lowercase names are reserved to reference the built-in ones. But if you want to build your own Vuetify or else, you can do so by serving your library while triggering the `Vue.use()` for your plugin/library.
+
+The string provided in your `vue_use` array will be processed like you will write it in JavaScript.
+You can see some example below:
+
+```python
+app.vue_use = ['Vuetify', 'complex.example.Widget']
+# Vue.use(window['Vuetify'])
+# Vue.use(window['complex']['example']['Widget'])
+```
+
+### Handling routing
+
+Vue Router is part of the bundle and you can enable it by registering it in your app as follow:
+
+```python
+app.vue_use = ['vuetify', 'router']
+```
+
+Then you can register your routes as follow:
+
+```python
+app.routes = [
+  {
+    'name': 'home',
+    'path': '/',
+    'component': {
+      'template': '<div>Root path</div>',
+    },
+  },
+  {
+    'name': 'foo',
+    'path': '/foo',
+    'component': {
+      'template': '<div>Foo path</div>'
+    },
+  },
+  {
+    'name': 'bar',
+    'path': '/bar',
+    'component': {
+      'template': '<div>Bar path</div>',
+    },
+  },
+]
+```
+
+And if you want a full working example, you can look at `./examples/00_getting_started/router/app.py`.
 
 ### Vuetify configuration
 
-TODO
+When using the built-in `vuetify` you can customize it by providing the option argument when instanciated inside the root `Vue` component.
+
+This is done as follow:
+
+```
+app.vuetify = {
+    'icons': {
+        'iconfont': 'mdi',
+        'values': {
+          'add': 'mdi-database-plus-outline',
+          'remove': 'mdi-database-minus-outline',
+          'menu': 'mdi-menu',
+        },
+    },
+    'theme': {
+        'themes': {
+          'light': {
+            'primary': '#3f51b5',
+            'secondary': '#b0bec5',
+            'accent': '#8c9eff',
+            'error': '#b71c1c',
+          },
+        },
+    },
+}
+```
 
 ### FavIcon
 
-TODO
+You can provide your own favicon by pointing to an image file like below.
+
+```
+app.favicon = './favicon-196x196.png'
+```
 
 ## Development tools
 

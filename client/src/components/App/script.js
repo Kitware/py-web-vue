@@ -65,7 +65,7 @@ export default {
       this.serverTrigger({ name, args, kwargs });
     },
     getRef(ref) {
-      const root = this.$refs.root;
+      const { root } = this.$refs;
       if (root.$refs && root.$refs[ref]) {
         return root.$refs[ref];
       }

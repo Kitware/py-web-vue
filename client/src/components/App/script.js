@@ -1,5 +1,6 @@
 import VRuntimeTemplate from 'v-runtime-template';
 import { mapGetters, mapActions } from 'vuex';
+import { generateModels } from '../../store/app';
 
 export default {
   name: 'App',
@@ -7,6 +8,7 @@ export default {
     VRuntimeTemplate,
   },
   computed: {
+    ...generateModels(),
     ...mapGetters({
       get: 'APP_GET',
       contentTemplate: 'APP_TEMPLATE',

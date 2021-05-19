@@ -13,6 +13,12 @@ function get(obj, path) {
   return current;
 }
 
+let COMPUTED_MODELS = {};
+
+export function generateModels() {
+  return COMPUTED_MODELS;
+}
+
 export default {
   state: {
     appName: 'PyWebVue',
@@ -72,7 +78,7 @@ export default {
       const options = await dispatch('APP_INIT_SET', serverState);
       return options;
     },
-    async APP_INIT_SET({ state }, {
+    async APP_INIT_SET({ state, getters, dispatch }, {
       name,
       vuetify,
       layout,
@@ -101,6 +107,15 @@ export default {
       state.serverStateKeys = stateListening;
       state.routes = routes;
       state.use = use;
+
+      // Export PyWebVue
+      COMPUTED_MODELS = await dispatch('APP_UPDATE_COMPUTED_MODELS');
+      window.PyWebVue = {
+        generateModels,
+        get: (key) => getters.APP_GET(key),
+        set: (key, value) => dispatch('APP_SET', { key, value }),
+        trigger: (mehodName, args = [], kwargs = {}) => dispatch('APP_TRIGGER', { name: mehodName, args, kwargs }),
+      };
 
       // Load exteranl scripts/css
       await Promise.all(styles.map(loadCSS));
@@ -166,6 +181,22 @@ export default {
       if (state.actions.length) {
         state.actions.length = 0;
       }
+    },
+    APP_UPDATE_COMPUTED_MODELS({ getters, dispatch }) {
+      const computed = {};
+      const keys = Object.keys(SHARED_STATE);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        computed[key] = {
+          get() {
+            return getters.APP_GET(key);
+          },
+          set(value) {
+            dispatch('APP_SET', { key, value });
+          },
+        };
+      }
+      return computed;
     },
   },
 };

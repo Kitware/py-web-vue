@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import App from './components/App';
 import Loading from './components/Loading';
 
 // ----------------------------------------------------------------------------
@@ -51,6 +50,10 @@ export async function createVueApp(store, options = {}) {
     const { default: VueVTK } = await import('vue-vtk-js');
     Vue.use(VueVTK);
   }
+
+  // Need to wait till last minute before importing the app component
+  // that way the models could be created properly
+  const { default: App } = await import('./components/App');
 
   new Vue({
     ...finalOptions,

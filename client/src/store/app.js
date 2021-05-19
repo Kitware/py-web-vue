@@ -184,6 +184,8 @@ export default {
     },
     APP_UPDATE_COMPUTED_MODELS({ getters, dispatch }) {
       const computed = {};
+
+      // Get state keys
       const keys = Object.keys(SHARED_STATE);
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -196,6 +198,10 @@ export default {
           },
         };
       }
+
+      // Get wsBusy
+      computed.busy = () => getters.WS_BUSY;
+
       return computed;
     },
   },

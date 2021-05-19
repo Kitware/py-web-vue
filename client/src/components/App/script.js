@@ -12,7 +12,6 @@ export default {
     ...mapGetters({
       get: 'APP_GET',
       contentTemplate: 'APP_TEMPLATE',
-      busy: 'WS_BUSY',
       wsClient: 'WS_CLIENT',
       actions: 'APP_ACTIONS',
       routes: 'APP_ROUTES',
@@ -40,18 +39,10 @@ export default {
       }
       this.clearActions();
     },
-    contentTemplate() {
-      this.vApp = this.$el;
-    },
-    busy(v) {
-      this.reactiveBusy = v;
-    },
   },
   data() {
     return {
       window,
-      vApp: null,
-      reactiveBusy: false,
     };
   },
   methods: {
@@ -81,13 +72,10 @@ export default {
       trigger: (name, args, kwargs) => this.trigger(name, args, kwargs),
       wsClient: this.wsClient,
       isBusy: () => this.busy,
-      reactiveBusy: this.reactiveBusy,
-      vApp: this.vApp,
       window: this.window,
     };
   },
   mounted() {
-    this.vApp = this.$el;
     this.routes.forEach((route) => {
       this.$router.addRoute(route);
     });

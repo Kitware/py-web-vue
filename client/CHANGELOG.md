@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/Kitware/py-web-vue/compare/v1.0.8...v1.0.9) (2021-05-19)
+
+
+### Bug Fixes
+
+* **model:** Allow to use model rather than get/set ([8d26cee](https://github.com/Kitware/py-web-vue/commit/8d26cee4e91801815a7bdd0aefb079cde5573675))
+
 ## [1.0.8](https://github.com/Kitware/py-web-vue/compare/v1.0.7...v1.0.8) (2021-05-19)
 
 

@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/Kitware/py-web-vue/compare/v1.0.9...v1.0.10) (2021-05-19)
+
+
+### Bug Fixes
+
+* **busy:** Add busy to computed models ([7685b23](https://github.com/Kitware/py-web-vue/commit/7685b23fe66f9ddea726c597e840729b030a6489))
+
 ## [1.0.9](https://github.com/Kitware/py-web-vue/compare/v1.0.8...v1.0.9) (2021-05-19)
 
 

@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/Kitware/py-web-vue/compare/v1.0.6...v1.0.7) (2021-05-19)
+
+
+### Bug Fixes
+
+* **RootComponent:** Allow to swap root component dynamically ([d57c386](https://github.com/Kitware/py-web-vue/commit/d57c386c51ea1f9836c16f00152a9b3902120f6e))
+
 ## [1.0.6](https://github.com/Kitware/py-web-vue/compare/v1.0.5...v1.0.6) (2021-05-18)
 
 

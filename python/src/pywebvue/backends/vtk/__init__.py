@@ -18,7 +18,7 @@ class Backend:
         return self._app_helper().GetObjectIdMap().GetVTKObject(int(vtk_id))
 
     def mesh(self, dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
-        return mesh(dataset, field_name=field_to_keep, point_arrays=point_arrays, cell_arrays=cell_arrays)
+        return mesh(dataset, field_to_keep=field_to_keep, point_arrays=point_arrays, cell_arrays=cell_arrays)
 
     def scene(self, render_window):
         return self._app.protocol_call('viewport.geometry.view.get.state', self.id(render_window), True)

@@ -1,3 +1,12 @@
+## [1.0.11](https://github.com/Kitware/py-web-vue/compare/v1.0.10...v1.0.11) (2021-05-24)
+
+
+### Bug Fixes
+
+* **client:** Update dependencies ([4974f54](https://github.com/Kitware/py-web-vue/commit/4974f54873725545f2bf43fc67ebef4e42442f84))
+* **mesh:** Proper api call on the vtk side ([234bd00](https://github.com/Kitware/py-web-vue/commit/234bd0013d0cd1dd8c7ba16617e57ed7dbe5570c))
+* **mesh:** properly handle np encoding ([e8c992d](https://github.com/Kitware/py-web-vue/commit/e8c992d8a04dd2ee735dc85316e1228205f85435))
+
 ## [1.0.10](https://github.com/Kitware/py-web-vue/compare/v1.0.9...v1.0.10) (2021-05-19)
 
 

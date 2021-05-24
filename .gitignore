@@ -2,6 +2,7 @@ python/src/pywebvue/www/
 __pycache__
 py-env
 py-lib
+vtk-env
 *.egg-info
 dist
 python/build

@@ -1,3 +1,6 @@
+import base64
+import numpy as np
+
 try:
     # v9 and above
     from vtkmodules.util.numpy_support import vtk_to_numpy
@@ -24,9 +27,10 @@ to_js_type = {
 
 def np_encode(array, np_type=None):
     if np_type:
+        n_array = array.astype(np_type).ravel(order="C")
         return {
-            'bvals': base64.b64encode(memoryview(array.astype(np_type).ravel(order="C"))).decode("utf-8"),
-            'dtype': str(np_type),
+            'bvals': base64.b64encode(memoryview(n_array)).decode("utf-8"),
+            'dtype': str(n_array.dtype),
             'shape': list(array.shape),
         }
     return {

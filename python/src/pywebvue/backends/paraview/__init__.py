@@ -38,7 +38,7 @@ class Backend:
     def mesh(self, proxy, field_to_keep=None, point_arrays=None, cell_arrays=None):
         source = proxy.GetClientSideObject()
         dataset = source.GetOutput()
-        return mesh(dataset, field_name=field_to_keep, point_arrays=point_arrays, cell_arrays=cell_arrays)
+        return mesh(dataset, field_to_keep=field_to_keep, point_arrays=point_arrays, cell_arrays=cell_arrays)
 
     def scene(self, view_proxy):
         # flush data without requireing a render/picture

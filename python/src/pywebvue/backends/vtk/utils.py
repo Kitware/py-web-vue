@@ -127,23 +127,6 @@ def mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
     nb_comp = 1
     dataRange = [0, 1]
     location = None
-    if field_to_keep is not None:
-        p_array = polydata.GetPointData().GetArray(field_to_keep)
-        c_array = polydata.GetCellData().GetArray(field_to_keep)
-
-        if c_array:
-            dataRange = c_array.GetRange(-1)
-            nb_comp = c_array.GetNumberOfComponents()
-            values = vtk_to_numpy(c_array)
-            js_types = to_js_type[str(values.dtype)]
-            location = "CellData"
-
-        if p_array:
-            dataRange = p_array.GetRange(-1)
-            nb_comp = p_array.GetNumberOfComponents()
-            values = vtk_to_numpy(p_array)
-            js_types = to_js_type[str(values.dtype)]
-            location = "PointData"
 
     # other arrays (points)
     point_data = []
@@ -185,8 +168,28 @@ def mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
                 }
             )
 
+    # Extract field
+    values = None
+    if field_to_keep is not None:
+        p_array = polydata.GetPointData().GetArray(field_to_keep)
+        c_array = polydata.GetCellData().GetArray(field_to_keep)
+
+        if c_array:
+            dataRange = c_array.GetRange(-1)
+            nb_comp = c_array.GetNumberOfComponents()
+            values = vtk_to_numpy(c_array)
+            js_types = to_js_type[str(values.dtype)]
+            location = "CellData"
+
+        if p_array:
+            dataRange = p_array.GetRange(-1)
+            nb_comp = p_array.GetNumberOfComponents()
+            values = vtk_to_numpy(p_array)
+            js_types = to_js_type[str(values.dtype)]
+            location = "PointData"
+
     state = {
-        "mesh": {"points": points,},
+        "mesh": {"points": points}
     }
     if len(verts):
         state["mesh"]["verts"] = verts

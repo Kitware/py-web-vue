@@ -23,7 +23,7 @@ class Backend:
     def object(self, obj_id):
         return self._instance_map[obj_id]
 
-    def mesh(self, dataset, field_name=None):
+    def mesh(self, dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
         raise Exception('The "mesh" method is not suppored with the default Backend')
 
     def scene(self, view_of_backend):

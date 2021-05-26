@@ -106,8 +106,8 @@ class CoreServer(ServerProtocol):
     def update_state(self, changes):
         values_to_ignore = {}
         for change in changes:
-            values_to_ignore[change['key']] = change['value']
+            values_to_ignore[change['key']] = change['value'] if 'value' in change else None
 
         with self.app.capture_changes(values_to_ignore):
             for change in changes:
-                self.app.set(change['key'], change['value'])
+                self.app.set(change['key'], change['value'] if 'value' in change else None)

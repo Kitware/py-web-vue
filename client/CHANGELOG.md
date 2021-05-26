@@ -1,3 +1,18 @@
+# [1.1.0](https://github.com/Kitware/py-web-vue/compare/v1.0.11...v1.1.0) (2021-05-26)
+
+
+### Bug Fixes
+
+* **core:** dirty, monitor, mesh ([29bb2d0](https://github.com/Kitware/py-web-vue/commit/29bb2d0afc1060ea6af74cea790621573a8df38c))
+* **mesh:** backend api fixed ([1c3039e](https://github.com/Kitware/py-web-vue/commit/1c3039e64bac2b3073f94e9409bfc8b5491cd152))
+* **protocol:** Allow state value to be None/null ([b1d552e](https://github.com/Kitware/py-web-vue/commit/b1d552e8fcdfbef79531e18fb704539325409712))
+
+
+### Features
+
+* **client:** add support for url config ([f614d46](https://github.com/Kitware/py-web-vue/commit/f614d464c5c55e769f64f0b2ee9dd15a79d8004b))
+* **monitor:** Add template monitoring in debug ([8326955](https://github.com/Kitware/py-web-vue/commit/83269554ff96fe21a3b683028d13ce131ef73014))
+
 ## [1.0.11](https://github.com/Kitware/py-web-vue/compare/v1.0.10...v1.0.11) (2021-05-24)
 
 

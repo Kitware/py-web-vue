@@ -14,6 +14,12 @@ function configDecorator(config) {
   if (userParams.dev) {
     config.sessionURL = `ws://${window.location.hostname}:1234/ws`; // Configured to work on seperate server
   }
+  // If name is provided we use it as our application and
+  // expand any other url params into our config.
+  if (userParams.name) {
+    config.application = userParams.name;
+    return { ...config, ...userParams };
+  }
   return config;
 }
 /* eslint-enable no-param-reassign */

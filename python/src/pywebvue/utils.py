@@ -1,8 +1,12 @@
 import os
 import base64
 import mimetypes
+import time
+import threading
 
 mimetypes.init()
+
+MONITORS = {}
 
 def abs_path(file_path, root=None):
     basepath = os.getcwd()
@@ -44,6 +48,42 @@ def validate(txt, method, root):
             return method(full_path)
 
     return txt
+
+def monitor(key, txt, method, root):
+    global MONITORS
+    full_path = abs_path(txt, root)
+    if os.path.isfile(full_path):
+        if key in MONITORS:
+            if MONITORS[key].get('full_path') == full_path:
+                return
+            MONITORS[key]['running'] = False
+            MONITORS[key].get('thread').join()
+
+        MONITORS[key] = {
+            'full_path': full_path,
+            'running': True,
+        }
+
+        def update():
+            last_ts = os.stat(full_path).st_mtime
+            while MONITORS[key]['running']:
+                time.sleep(1)
+                ts = os.stat(full_path).st_mtime
+                if ts != last_ts:
+                    last_ts = ts
+                    method(read_file_as_txt(full_path))
+
+        thread = threading.Thread(target=update, args=())
+        thread.daemon = True
+        thread.start()
+        MONITORS[key]['thread'] = thread
+
+
+def stop_all_monitors():
+    global MONITORS
+    for key in MONITORS:
+        MONITORS[key]['running'] = False
+        MONITORS[key]['thread'].join()
 
 # =============================================================================
 # Internal classes
@@ -101,6 +141,7 @@ class ChangeHandler():
         self._actions.append(action)
 
     def __enter__(self):
+        self._app._dirty_set = self._known_state
         if self not in self._app._change_handlers:
             self._app._change_handlers.append(self)
         return self
@@ -122,6 +163,7 @@ class ChangeHandler():
             callbacks.clear()
 
         self._app._change_handlers.remove(self)
+        self._app._dirty_set = None
 
         if self._protocol:
             modified_state = {}

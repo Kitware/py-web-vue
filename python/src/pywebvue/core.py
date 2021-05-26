@@ -1,7 +1,7 @@
 import os
 import argparse
 from .protocol import CoreServer
-from .utils import ChangeHandler, read_file_as_txt, read_file_as_base64_url, validate, abs_path
+from .utils import ChangeHandler, read_file_as_txt, read_file_as_base64_url, validate, abs_path, monitor
 from .backends import create_backend
 
 from wslink import server
@@ -29,9 +29,11 @@ class App:
         # properties
         self._favicon = None
         self._layout = '<div>Ws Vue default</div>'
+        self._layout_monitor = None
         self._routes = []
 
         # @change
+        self._dirty_set = None
         self._change_callbacks = {}
         self._change_handlers = []
         self._server_keys = set()
@@ -41,6 +43,10 @@ class App:
 
         # CLI argument handling
         self._parser = None
+
+        # Watch template if debug=True
+        if self._debug:
+            pass
 
     # -------------------------------------------------------------------------
     # Annotations
@@ -104,6 +110,9 @@ class App:
         if self.protocol:
             self.protocol.push_layout(self._layout)
 
+        if self._debug:
+            monitor('layout', value, lambda v : setattr(self, 'layout', v), self._root)
+
     # -------------------------------------------------------------------------
 
     @property
@@ -143,6 +152,20 @@ class App:
 
     # -------------------------------------------------------------------------
 
+    def dirty(self, *args):
+        if self._dirty_set is not None:
+            return len(set(args).intersection(self._dirty_set)) > 0
+        return False
+
+    # -------------------------------------------------------------------------
+
+    def dirty_all(self, *args):
+        if self._dirty_set is not None:
+            return len(set(args).intersection(self._dirty_set)) == len(args)
+        return False
+
+    # -------------------------------------------------------------------------
+
     def update(self, **kwargs):
         for change_handler in self._change_handlers:
             change_handler.add_action(**kwargs)
@@ -176,8 +199,8 @@ class App:
 
     # -------------------------------------------------------------------------
 
-    def mesh(self, mesh_obj, field_name=None):
-        return self._backend.mesh(mesh_obj, field_name)
+    def mesh(self, mesh_obj, field_to_keep=None, point_arrays=None, cell_arrays=None):
+        return self._backend.mesh(mesh_obj, field_to_keep, point_arrays, cell_arrays)
 
     # -------------------------------------------------------------------------
 

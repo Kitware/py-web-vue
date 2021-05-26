@@ -1,0 +1,84 @@
+<v-app>
+  <v-app-bar app dense>
+    <span class="title">F1 exploration</span>
+    <v-spacer />
+    <v-btn-toggle v-model="pickingModes" dense>
+      <v-btn :value="item.value" v-for="item, idx in modes">
+        <v-icon v-text="item.icon" />
+      </v-btn>
+    </v-btn-toggle>
+    <v-select
+      v-model="field"
+      :items="fields"
+      class="ml-8"
+      dense
+      hide-details
+      style="max-width: 150px"
+    />
+    <v-select
+      v-model="colorMap"
+      :items="''|vtkColorPresetItems"
+      class="ml-8"
+      dense
+      hide-details
+      style="max-width: 200px"
+    />
+    <v-spacer />
+    <v-btn icon @click="f1Visible = !f1Visible">
+      <v-icon v-if="f1Visible">mdi-eye-outline</v-icon>
+      <v-icon v-else>mdi-eye-off-outline</v-icon>
+    </v-btn>
+    <v-btn icon @click="$refs.view.resetCamera()">
+      <v-icon>mdi-crop-free</v-icon>
+    </v-btn>
+    <v-progress-linear indeterminate absolute bottom :active="busy" />
+  </v-app-bar>
+  <v-main>
+    <v-container fluid fill-height class="pa-0" style="position: relative">
+      <v-card :style="tooltipStyle" elevation="2" outlined>
+        <v-card-text>
+          <pre>{{ tooltip }}</pre>
+        </v-card-text>
+      </v-card>
+      <vtk-view
+        ref="view"
+        :pickingModes="[pickingModes]"
+        :interactorSettings="interactorSettings"
+        @click="set('pickData', $event)"
+        @hover="set('pickData', $event)"
+        @select="set('selectData', $event)"
+      >
+        <vtk-geometry-representation
+          id="f1"
+          v-if="f1"
+          :colorMapPreset="colorMap"
+          :colorDataRange="fieldsInformations[field].range"
+          :actor="{ visibility: f1Visible }"
+          :mapper="{ colorByArrayName: field, scalarMode: 3, interpolateScalarsBeforeMapping: true, scalarVisibility: field !== 'solid' }"
+        >
+          <vtk-mesh :state="f1" />
+        </vtk-geometry-representation>
+        <vtk-geometry-representation
+          id="selection"
+          :actor="{ visibility: !!selection }"
+          :property="{ color: [0.99,0.13,0.37], representation: 0, pointSize: 10 }"
+        >
+          <vtk-mesh :state="selection" />
+        </vtk-geometry-representation>
+        <vtk-geometry-representation
+          id="frustrum"
+          :actor="{ visibility: !!frustrum }"
+        >
+          <vtk-mesh :state="frustrum" />
+        </vtk-geometry-representation>
+        <vtk-geometry-representation
+          id="pointer"
+          :property="{ color: [1, 0, 0]}"
+          :actor="{ visibility: coneVisibility }"
+        >
+          <vtk-algorithm vtkClass="vtkConeSource" :state="cone" />
+        </vtk-geometry-representation>
+      </vtk-view>
+    </v-container>
+  </v-main>
+</v-app>

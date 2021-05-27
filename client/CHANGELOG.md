@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/Kitware/py-web-vue/compare/v1.1.0...v1.1.1) (2021-05-27)
+
+
+### Bug Fixes
+
+* **pv:** Expect PV 5.9+ nightly ([5bfbab6](https://github.com/Kitware/py-web-vue/commit/5bfbab6576bbeb5bf892ffa0c7c5c2ba739ddb74))
+* **vtk:** remove custom code but rely on 9+ wheels ([ad84522](https://github.com/Kitware/py-web-vue/commit/ad84522e92571de645aa6623cf0043c40c5b7c29))
+
 # [1.1.0](https://github.com/Kitware/py-web-vue/compare/v1.0.11...v1.1.0) (2021-05-26)
 
 

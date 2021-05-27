@@ -1,5 +1,5 @@
 # To load patched methods
-from ..vtk.render_window_serializer import getReferenceId
+from vtkmodules.web import getReferenceId
 
 from paraview.web.protocols import ParaViewWebMouseHandler
 from paraview.web.protocols import ParaViewWebViewPort
@@ -16,7 +16,7 @@ from twisted.internet import reactor
 from vtkmodules.vtkWebCore import vtkWebInteractionEvent
 
 # Fix geometry delivery
-from ..vtk.render_window_serializer import (
+from vtkmodules.web.render_window_serializer import (
     serializeInstance,
     SynchronizationContext,
     getReferenceId,

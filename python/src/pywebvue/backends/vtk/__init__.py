@@ -1,9 +1,9 @@
-from .utils import mesh
+from vtkmodules.web.utils import mesh
 
 
 class Backend:
     def __init__(self, app, create_protocols=None):
-        from vtk.vtkWebCore import vtkWebApplication
+        from vtkmodules.vtkWebCore import vtkWebApplication
 
         self._app = app
         self._protocol = None
@@ -73,7 +73,7 @@ class Backend:
 
     def configure_protocol(self, protocol):
         self._protocol = protocol
-        from .protocols import (
+        from vtkmodules.web.protocols import (
             vtkWebMouseHandler,
             vtkWebViewPort,
             vtkWebPublishImageDelivery,

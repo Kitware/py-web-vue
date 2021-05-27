@@ -26,21 +26,6 @@ to_js_type = {
 }
 
 
-def np_encode(array, np_type=None):
-    if np_type:
-        n_array = array.astype(np_type).ravel(order="C")
-        return {
-            "bvals": base64.b64encode(memoryview(n_array)).decode("utf-8"),
-            "dtype": str(n_array.dtype),
-            "shape": list(array.shape),
-        }
-    return {
-        "bvals": base64.b64encode(memoryview(array.ravel(order="C"))).decode("utf-8"),
-        "dtype": str(array.dtype),
-        "shape": list(array.shape),
-    }
-
-
 def b64_encode_numpy(obj):
     # Convert 1D numpy arrays with numeric types to memoryviews with
     # datatype and shape metadata.
@@ -77,15 +62,57 @@ def b64_encode_numpy(obj):
     return obj.tolist()
 
 
+def np_encode(array, np_type=None):
+    if np_type:
+        n_array = array.astype(np_type).ravel(order="C")
+        return {
+            "bvals": base64.b64encode(memoryview(n_array)).decode("utf-8"),
+            "dtype": str(n_array.dtype),
+            "shape": list(array.shape),
+        }
+    return {
+        "bvals": base64.b64encode(memoryview(array.ravel(order="C"))).decode("utf-8"),
+        "dtype": str(array.dtype),
+        "shape": list(array.shape),
+    }
+
+
+def mesh_array(array):
+    if array:
+        return b64_encode_numpy(vtk_to_numpy(array.GetData()))
+
+
+def data_array(data_array, location="PointData", name=None):
+    if data_array:
+        dataRange = data_array.GetRange(-1)
+        nb_comp = data_array.GetNumberOfComponents()
+        values = vtk_to_numpy(data_array)
+        js_types = to_js_type[str(values.dtype)]
+        return {
+            "name": name if name else data_array.GetName(),
+            "values": b64_encode_numpy(values),
+            "numberOfComponents": nb_comp,
+            "type": js_types,
+            "location": location,
+            "dataRange": dataRange,
+        }
+
+
+def field_data(field_data, names, location="PointData"):
+    fields = []
+    for name in names:
+        array = field_data.GetArray(name)
+        js_array = data_array(array, location, name)
+        if js_array:
+            fields.append(js_array)
+
+    return fields
+
+
 def mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
     """Expect any dataset and extract its surface into a dash_vtk.Mesh state property"""
     if dataset is None:
         return None
-
-    if point_arrays is None:
-        point_arrays = []
-    if cell_arrays is None:
-        cell_arrays = []
 
     # Make sure we have a polydata to export
     polydata = None
@@ -101,123 +128,54 @@ def mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
         return None
 
     # Extract mesh
-    points = b64_encode_numpy(vtk_to_numpy(polydata.GetPoints().GetData()))
-    verts = (
-        b64_encode_numpy(vtk_to_numpy(polydata.GetVerts().GetData()))
-        if polydata.GetVerts()
-        else []
-    )
-    lines = (
-        b64_encode_numpy(vtk_to_numpy(polydata.GetLines().GetData()))
-        if polydata.GetLines()
-        else []
-    )
-    polys = (
-        b64_encode_numpy(vtk_to_numpy(polydata.GetPolys().GetData()))
-        if polydata.GetPolys()
-        else []
-    )
-    strips = (
-        b64_encode_numpy(vtk_to_numpy(polydata.GetStrips().GetData()))
-        if polydata.GetStrips()
-        else []
-    )
+    state = {"mesh": {}}
 
-    # Extract field
-    values = None
-    js_types = "Float32Array"
-    nb_comp = 1
-    dataRange = [0, 1]
-    location = None
+    points = mesh_array(polydata.GetPoints())
+    if points:
+        state["mesh"]["points"] = points
 
-    # other arrays (points)
-    point_data = []
-    for name in point_arrays:
-        array = polydata.GetPointData().GetArray(name)
-        if array:
-            dataRange = array.GetRange(-1)
-            nb_comp = array.GetNumberOfComponents()
-            values = vtk_to_numpy(array)
-            js_types = to_js_type[str(values.dtype)]
-            point_data.append(
-                {
-                    "name": name,
-                    "values": b64_encode_numpy(values),
-                    "numberOfComponents": nb_comp,
-                    "type": js_types,
-                    "location": "PointData",
-                    "dataRange": dataRange,
-                }
-            )
+    verts = mesh_array(polydata.GetVerts())
+    if verts:
+        state["mesh"]["verts"] = verts
 
-    # other arrays (cells)
-    cell_data = []
-    for name in point_arrays:
-        array = polydata.GetCellData().GetArray(name)
-        if array:
-            dataRange = array.GetRange(-1)
-            nb_comp = array.GetNumberOfComponents()
-            values = vtk_to_numpy(array)
-            js_types = to_js_type[str(values.dtype)]
-            cell_data.append(
-                {
-                    "name": name,
-                    "values": b64_encode_numpy(values),
-                    "numberOfComponents": nb_comp,
-                    "type": js_types,
-                    "location": "CellData",
-                    "dataRange": dataRange,
-                }
-            )
+    lines = mesh_array(polydata.GetLines())
+    if lines:
+        state["mesh"]["lines"] = lines
 
-    # Extract field
-    values = None
+    polys = mesh_array(polydata.GetPolys())
+    if polys:
+        state["mesh"]["polys"] = polys
+
+    strips = mesh_array(polydata.GetStrips())
+    if strips:
+        state["mesh"]["strips"] = strips
+
+    # Scalars
     if field_to_keep is not None:
+        field = None
         p_array = polydata.GetPointData().GetArray(field_to_keep)
         c_array = polydata.GetCellData().GetArray(field_to_keep)
 
         if c_array:
-            dataRange = c_array.GetRange(-1)
-            nb_comp = c_array.GetNumberOfComponents()
-            values = vtk_to_numpy(c_array)
-            js_types = to_js_type[str(values.dtype)]
-            location = "CellData"
+            field = data_array(c_array, location="CellData", name=field_to_keep)
 
         if p_array:
-            dataRange = p_array.GetRange(-1)
-            nb_comp = p_array.GetNumberOfComponents()
-            values = vtk_to_numpy(p_array)
-            js_types = to_js_type[str(values.dtype)]
-            location = "PointData"
+            field = data_array(p_array, location="PointData", name=field_to_keep)
 
-    state = {"mesh": {"points": points}}
-    if len(verts):
-        state["mesh"]["verts"] = verts
-    if len(lines):
-        state["mesh"]["lines"] = lines
-    if len(polys):
-        state["mesh"]["polys"] = polys
-    if len(strips):
-        state["mesh"]["strips"] = strips
+        if field:
+            state.update({"field": field})
 
-    if values is not None:
-        state.update(
-            {
-                "field": {
-                    "name": field_to_keep,
-                    "values": b64_encode_numpy(values),
-                    "numberOfComponents": nb_comp,
-                    "type": js_types,
-                    "location": location,
-                    "dataRange": dataRange,
-                },
-            }
-        )
+    # PointData Fields
+    if point_arrays:
+        point_data = field_data(polydata.GetPointData(), point_arrays, "PointData")
+        if len(point_data):
+            state.update({"pointArrays": point_data})
 
-    if len(point_data):
-        state.update({"pointArrays": point_data})
-    if len(cell_data):
-        state.update({"cellArrays": cell_data})
+    # CellData Fields
+    if cell_arrays:
+        cell_data = field_data(polydata.GetCellData(), cell_arrays, "CellData")
+        if len(cell_data):
+            state.update({"cellArrays": cell_data})
 
     return state
 
@@ -246,17 +204,9 @@ def volume(dataset):
         state["image"]["direction"] = js_mat
 
     scalars = dataset.GetPointData().GetScalars()
-
-    if scalars is not None:
-        values = vtk_to_numpy(scalars)
-        js_types = to_js_type[str(values.dtype)]
-        state["field"] = {
-            "name": scalars.GetName(),
-            "numberOfComponents": scalars.GetNumberOfComponents(),
-            "dataRange": scalars.GetRange(-1),
-            "type": js_types,
-            "values": b64_encode_numpy(values),
-        }
+    field = data_array(scalars, location="PointData")
+    if field:
+        state["field"] = field
 
     return state
 

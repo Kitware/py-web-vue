@@ -1,4 +1,3 @@
-import base64, time
 import os, sys, logging, types, inspect, traceback, re, base64, time
 
 from vtk.vtkWebCore import vtkWebApplication, vtkWebInteractionEvent
@@ -15,6 +14,10 @@ from twisted.internet import reactor
 from wslink import register as exportRpc
 from wslink.websocket import LinkProtocol
 
+# =============================================================================
+#
+# Base class for any VTK Web based protocol
+#
 # =============================================================================
 
 

@@ -194,7 +194,6 @@ def initializeSerializers():
 
     # Mapper (update input + ignore lut)
     registerInstanceSerializer("vtkOpenGLPolyDataMapper", genericMapperSerializer)
-    registerInstanceSerializer("vtkOpenGLPolyDataMapper", genericMapperSerializer)
     registerInstanceSerializer("vtkCompositePolyDataMapper2", genericMapperSerializer)
     registerInstanceSerializer("vtkDataSetMapper", genericMapperSerializer)
 

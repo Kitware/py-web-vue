@@ -1,4 +1,4 @@
-from ..vtk.utils import mesh
+from vtkmodules.web.utils import mesh
 from paraview import servermanager
 
 
@@ -110,7 +110,7 @@ class Backend:
     def configure_protocol(self, protocol):
         self._protocol = protocol
 
-        from .protocols import (
+        from paraview.web.protocols import (
             ParaViewWebMouseHandler,
             ParaViewWebViewPort,
             ParaViewWebPublishImageDelivery,

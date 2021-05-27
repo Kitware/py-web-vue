@@ -4,10 +4,10 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
@@ -37,16 +37,13 @@ import pywebvue
 #     .trigger(key)                                 # bind server side trigger to client call
 # -----------------------------------------------------------------------------
 
-app = pywebvue.App('Getting started')
+app = pywebvue.App("Getting started")
 
-app.layout = '''
+app.layout = """
    <div>Hello {{ get('name') }}<button @click="set('name', get('names')[Math.floor(Math.random() * 3)])">Change</button></div>
-'''
+"""
 
-app.state = {
-    'name': 'World',
-    'names': ['World', 'Seb', 'Everyone']
-}
+app.state = {"name": "World", "names": ["World", "Seb", "Everyone"]}
 
 app.vue_use = []
 

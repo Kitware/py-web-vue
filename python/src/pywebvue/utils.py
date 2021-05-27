@@ -8,6 +8,7 @@ mimetypes.init()
 
 MONITORS = {}
 
+
 def abs_path(file_path, root=None):
     basepath = os.getcwd()
     if root:
@@ -28,15 +29,18 @@ def read_file_as_txt(file_path, root=None):
     with open(full_path) as txt_file:
         return str(txt_file.read())
 
+
 def to_mime(file_path):
     return mimetypes.guess_type(file_path)[0]
 
+
 def read_file_as_base64_url(file_path, root=None):
     full_path = abs_path(file_path, root)
-    with open(full_path, 'rb') as bin_file:
+    with open(full_path, "rb") as bin_file:
         encoded = base64.b64encode(bin_file.read()).decode("ascii")
         mime = to_mime(file_path)
-        return f'data:{mime};base64,{encoded}'
+        return f"data:{mime};base64,{encoded}"
+
 
 def validate(txt, method, root):
     if not txt:
@@ -49,24 +53,25 @@ def validate(txt, method, root):
 
     return txt
 
+
 def monitor(key, txt, method, root):
     global MONITORS
     full_path = abs_path(txt, root)
     if os.path.isfile(full_path):
         if key in MONITORS:
-            if MONITORS[key].get('full_path') == full_path:
+            if MONITORS[key].get("full_path") == full_path:
                 return
-            MONITORS[key]['running'] = False
-            MONITORS[key].get('thread').join()
+            MONITORS[key]["running"] = False
+            MONITORS[key].get("thread").join()
 
         MONITORS[key] = {
-            'full_path': full_path,
-            'running': True,
+            "full_path": full_path,
+            "running": True,
         }
 
         def update():
             last_ts = os.stat(full_path).st_mtime
-            while MONITORS[key]['running']:
+            while MONITORS[key]["running"]:
                 time.sleep(1)
                 ts = os.stat(full_path).st_mtime
                 if ts != last_ts:
@@ -76,18 +81,20 @@ def monitor(key, txt, method, root):
         thread = threading.Thread(target=update, args=())
         thread.daemon = True
         thread.start()
-        MONITORS[key]['thread'] = thread
+        MONITORS[key]["thread"] = thread
 
 
 def stop_all_monitors():
     global MONITORS
     for key in MONITORS:
-        MONITORS[key]['running'] = False
-        MONITORS[key]['thread'].join()
+        MONITORS[key]["running"] = False
+        MONITORS[key]["thread"].join()
+
 
 # =============================================================================
 # Internal classes
 # =============================================================================
+
 
 class CallbackSet:
     def __init__(self):
@@ -110,11 +117,13 @@ class CallbackSet:
     def __iter__(self):
         return iter(self.data)
 
+
 # =============================================================================
 # ChangeHandler
 # =============================================================================
 
-class ChangeHandler():
+
+class ChangeHandler:
     def __init__(self, app, known_state={}):
         self._app = app
         self._protocol = app.protocol
@@ -127,16 +136,16 @@ class ChangeHandler():
         self._modified_keys.add(name)
 
     def add_action(self, ref, args=[], value=None, method=None, property=None):
-        action = { 'ref': ref }
+        action = {"ref": ref}
         if method:
-            action['type'] = 'method'
-            action['method'] = method
-            action['args'] = args
+            action["type"] = "method"
+            action["method"] = method
+            action["args"] = args
 
         if property:
-            action['type'] = 'property'
-            action['property'] = property
-            action['value'] = value
+            action["type"] = "property"
+            action["property"] = property
+            action["value"] = value
 
         self._actions.append(action)
 
@@ -168,7 +177,10 @@ class ChangeHandler():
         if self._protocol:
             modified_state = {}
             for key in self._all_modified_keys:
-                if key in self._known_state and self._known_state[key] == self._app.state[key]:
+                if (
+                    key in self._known_state
+                    and self._known_state[key] == self._app.state[key]
+                ):
                     pass
                 else:
                     modified_state[key] = self._app.state[key]

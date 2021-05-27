@@ -4,39 +4,36 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
 import pywebvue
 
-app = pywebvue.App('External chart library - CDN', root=__file__)
+app = pywebvue.App("External chart library - CDN", root=__file__)
 app.serve = {
-    'static': './static',
+    "static": "./static",
 }
 app.scripts = [
-    'https://unpkg.com/vue-chartkick@0.6.1',
-    'https://unpkg.com/chart.js',
-    '/static/my_chart_kick.js'
+    "https://unpkg.com/vue-chartkick@0.6.1",
+    "https://unpkg.com/chart.js",
+    "/static/my_chart_kick.js",
 ]
-app.vue_use = ['vuetify', 'charts_use']
+app.vue_use = ["vuetify", "charts_use"]
 
 app.state = {
-    'line': {'2017-01-01': 11, '2017-01-02': 6},
-    'pieData': [
-        ['Blueberry', 44],
-        ['Strawberry', 23]
-    ],
-    'columnData': [['Sun', 32], ['Mon', 46], ['Tue', 28]],
-    'scatter': [[174.0, 80.0], [176.5, 82.3]],
-    'area': {'2017-01-01': 11, '2017-01-02': 6},
-    'bar': [['Work', 32], ['Play', 1492]],
+    "line": {"2017-01-01": 11, "2017-01-02": 6},
+    "pieData": [["Blueberry", 44], ["Strawberry", 23]],
+    "columnData": [["Sun", 32], ["Mon", 46], ["Tue", 28]],
+    "scatter": [[174.0, 80.0], [176.5, 82.3]],
+    "area": {"2017-01-01": 11, "2017-01-02": 6},
+    "bar": [["Work", 32], ["Play", 1492]],
 }
 
-app.layout = '''
+app.layout = """
     <v-app>
       <v-app-bar app>
         <v-icon v-text="`$menu`" class="mr-4"/> Fusion Charts
@@ -66,7 +63,7 @@ app.layout = '''
         </v-container>
       </v-main>
     </v-app>
-'''
+"""
 
 # -----------------------------------------------------------------------------
 # MAIN

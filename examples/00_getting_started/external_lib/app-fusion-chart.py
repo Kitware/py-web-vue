@@ -4,76 +4,52 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
 import pywebvue
 
-app = pywebvue.App('External chart library - CDN')
+app = pywebvue.App("External chart library - CDN")
 app.scripts = [
-    'https://unpkg.com/vue-fusioncharts',
-    'https://unpkg.com/fusioncharts',
-    'https://unpkg.com/fusioncharts/fusioncharts.charts',
-    'https://unpkg.com/fusioncharts/themes/fusioncharts.theme.fusion',
+    "https://unpkg.com/vue-fusioncharts",
+    "https://unpkg.com/fusioncharts",
+    "https://unpkg.com/fusioncharts/fusioncharts.charts",
+    "https://unpkg.com/fusioncharts/themes/fusioncharts.theme.fusion",
 ]
-app.vue_use = ['vuetify', 'VueFusionCharts', 'FusionCharts']
+app.vue_use = ["vuetify", "VueFusionCharts", "FusionCharts"]
 
 app.state = {
-    'type': "column2d",
-    'width': "700",
-    'height': "400",
-    'dataFormat': "json",
-    'dataSource': {
-      'chart': {
-        'caption': "Countries With Most Oil Reserves [2017-18]",
-        'subCaption': "In MMbbl = One Million barrels",
-        'xAxisName': "Country",
-        'yAxisName': "Reserves (MMbbl)",
-        'numberSuffix': "K",
-        'theme': "fusion"
-      },
-      'data': [
-        {
-          'label': "Venezuela",
-          'value': "290"
+    "type": "column2d",
+    "width": "700",
+    "height": "400",
+    "dataFormat": "json",
+    "dataSource": {
+        "chart": {
+            "caption": "Countries With Most Oil Reserves [2017-18]",
+            "subCaption": "In MMbbl = One Million barrels",
+            "xAxisName": "Country",
+            "yAxisName": "Reserves (MMbbl)",
+            "numberSuffix": "K",
+            "theme": "fusion",
         },
-        {
-          'label': "Saudi",
-          'value': "260"
-        },
-        {
-          'label': "Canada",
-          'value': "180"
-        },
-        {
-          'label': "Iran",
-          'value': "140"
-        },
-        {
-          'label': "Russia",
-          'value': "115"
-        },
-        {
-          'label': "UAE",
-          'value': "100"
-        },
-        {
-          'label': "US",
-          'value': "30"
-        },
-        {
-          'label': "China",
-          'value': "30"
-        }
-      ],
-    }
+        "data": [
+            {"label": "Venezuela", "value": "290"},
+            {"label": "Saudi", "value": "260"},
+            {"label": "Canada", "value": "180"},
+            {"label": "Iran", "value": "140"},
+            {"label": "Russia", "value": "115"},
+            {"label": "UAE", "value": "100"},
+            {"label": "US", "value": "30"},
+            {"label": "China", "value": "30"},
+        ],
+    },
 }
 
-app.layout = '''
+app.layout = """
     <v-app>
       <v-app-bar app>
         <v-icon v-text="`$menu`" class="mr-4"/> Fusion Charts
@@ -91,15 +67,17 @@ app.layout = '''
         </v-container>
       </v-main>
     </v-app>
-'''
+"""
 
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
 
-@app.trigger('update')
+
+@app.trigger("update")
 def update_chart():
-    print('update chart...')
+    print("update chart...")
+
 
 # -----------------------------------------------------------------------------
 # MAIN

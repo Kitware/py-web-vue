@@ -4,42 +4,40 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
 import pywebvue
 
-app = pywebvue.App('Routing example')
+app = pywebvue.App("Routing example")
 
 app.routes = [
-  {
-    'name': 'home',
-    'path': '/',
-    'component': {
-      'template': '<div>Root path</div>',
+    {
+        "name": "home",
+        "path": "/",
+        "component": {
+            "template": "<div>Root path</div>",
+        },
     },
-  },
-  {
-    'name': 'foo',
-    'path': '/foo',
-    'component': {
-      'template': '<div>Foo path</div>'
+    {
+        "name": "foo",
+        "path": "/foo",
+        "component": {"template": "<div>Foo path</div>"},
     },
-  },
-  {
-    'name': 'bar',
-    'path': '/bar',
-    'component': {
-      'template': '<div>Bar path</div>',
+    {
+        "name": "bar",
+        "path": "/bar",
+        "component": {
+            "template": "<div>Bar path</div>",
+        },
     },
-  },
 ]
 
-app.layout = '''
+app.layout = """
     <v-app>
       <v-app-bar app>
         <v-btn to="/" icon>
@@ -63,9 +61,9 @@ app.layout = '''
         </v-container>
       </v-main>
     </v-app>
-'''
+"""
 
-app.vue_use = ['vuetify', 'router']
+app.vue_use = ["vuetify", "router"]
 
 # -----------------------------------------------------------------------------
 # MAIN

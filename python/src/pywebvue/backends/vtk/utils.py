@@ -13,31 +13,33 @@ except:
 
 # Numpy to JS TypedArray
 to_js_type = {
-    'int8': 'Int8Array',
-    'uint8': 'Uint8Array',
-    'int16': 'Int16Array',
-    'uint16': 'Uint16Array',
-    'int32': 'Int32Array',
-    'uint32': 'Uint32Array',
-    'int64': 'Int32Array',
-    'uint64': 'Uint32Array',
-    'float32': 'Float32Array',
-    'float64': 'Float64Array',
+    "int8": "Int8Array",
+    "uint8": "Uint8Array",
+    "int16": "Int16Array",
+    "uint16": "Uint16Array",
+    "int32": "Int32Array",
+    "uint32": "Uint32Array",
+    "int64": "Int32Array",
+    "uint64": "Uint32Array",
+    "float32": "Float32Array",
+    "float64": "Float64Array",
 }
+
 
 def np_encode(array, np_type=None):
     if np_type:
         n_array = array.astype(np_type).ravel(order="C")
         return {
-            'bvals': base64.b64encode(memoryview(n_array)).decode("utf-8"),
-            'dtype': str(n_array.dtype),
-            'shape': list(array.shape),
+            "bvals": base64.b64encode(memoryview(n_array)).decode("utf-8"),
+            "dtype": str(n_array.dtype),
+            "shape": list(array.shape),
         }
     return {
-        'bvals': base64.b64encode(memoryview(array.ravel(order="C"))).decode("utf-8"),
-        'dtype': str(array.dtype),
-        'shape': list(array.shape),
+        "bvals": base64.b64encode(memoryview(array.ravel(order="C"))).decode("utf-8"),
+        "dtype": str(array.dtype),
+        "shape": list(array.shape),
     }
+
 
 def b64_encode_numpy(obj):
     # Convert 1D numpy arrays with numeric types to memoryviews with
@@ -46,11 +48,11 @@ def b64_encode_numpy(obj):
         return obj.tolist()
 
     dtype = obj.dtype
-    if dtype.kind == 'f':
+    if dtype.kind == "f":
         return np_encode(obj)
-    elif dtype.kind == 'b':
+    elif dtype.kind == "b":
         return np_encode(obj, np.uint8)
-    elif dtype.kind in ['u', 'i']:
+    elif dtype.kind in ["u", "i"]:
         # Try to see if we can downsize the array
         max_value = np.amax(obj)
         min_value = np.amin(obj)
@@ -188,9 +190,7 @@ def mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
             js_types = to_js_type[str(values.dtype)]
             location = "PointData"
 
-    state = {
-        "mesh": {"points": points}
-    }
+    state = {"mesh": {"points": points}}
     if len(verts):
         state["mesh"]["verts"] = verts
     if len(lines):
@@ -259,6 +259,7 @@ def volume(dataset):
         }
 
     return state
+
 
 presets = [
     "KAAMS",

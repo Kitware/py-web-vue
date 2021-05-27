@@ -4,10 +4,10 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
@@ -19,12 +19,12 @@ from paraview import simple
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App('ParaView Remote Rendering', root=__file__, backend='paraview')
-app.layout = './template.html'
+app = App("ParaView Remote Rendering", root=__file__, backend="paraview")
+app.layout = "./template.html"
 app.state = {
-    'resolution': 6,
+    "resolution": 6,
 }
-app.vue_use = ['vuetify', 'vtk']
+app.vue_use = ["vuetify", "vtk"]
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline
@@ -39,10 +39,12 @@ simple.ResetCamera()
 # Callbacks
 # -----------------------------------------------------------------------------
 
-@app.change('resolution')
+
+@app.change("resolution")
 def update_cone():
-    cone.Resolution = app.get('resolution')
-    app.set('scene', app.scene(view))
+    cone.Resolution = app.get("resolution")
+    app.set("scene", app.scene(view))
+
 
 # -----------------------------------------------------------------------------
 # Main

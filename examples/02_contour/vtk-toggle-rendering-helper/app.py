@@ -4,10 +4,10 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
@@ -17,29 +17,37 @@ from pywebvue.helpers import RemoteLocalView
 
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 from vtkmodules.vtkFiltersCore import vtkContourFilter
-from vtkmodules.vtkRenderingCore import vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor, vtkPolyDataMapper, vtkActor
+from vtkmodules.vtkRenderingCore import (
+    vtkRenderer,
+    vtkRenderWindow,
+    vtkRenderWindowInteractor,
+    vtkPolyDataMapper,
+    vtkActor,
+)
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App('VTK contour - Remote/Local rendering', root=__file__, backend='vtk')
-app.layout = './template.html'
+app = App("VTK contour - Remote/Local rendering", root=__file__, backend="vtk")
+app.layout = "./template.html"
 app.state = {
-    'data_range': [0, 1],
-    'contour_value': 0,
-    'demo.mode': 'local',
-    'override': 'auto',
+    "data_range": [0, 1],
+    "contour_value": 0,
+    "demo.mode": "local",
+    "override": "auto",
 }
-app.vue_use = ['vuetify', 'vtk']
+app.vue_use = ["vuetify", "vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
 # -----------------------------------------------------------------------------
 
-data_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
-head_vti = os.path.join(data_directory, 'head.vti')
+data_directory = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data"
+)
+head_vti = os.path.join(data_directory, "head.vti")
 
 reader = vtkXMLImageDataReader()
 reader.SetFileName(head_vti)
@@ -52,12 +60,12 @@ contour.SetComputeScalars(0)
 
 # Extract data range => Update store/state
 data_range = reader.GetOutput().GetPointData().GetScalars().GetRange()
-app.set('data_range', data_range)
-app.set('contour_value', 0.5 * (data_range[0] + data_range[1]))
+app.set("data_range", data_range)
+app.set("contour_value", 0.5 * (data_range[0] + data_range[1]))
 
 # Configure contour with valid values
 contour.SetNumberOfContours(1)
-contour.SetValue(0, app.get('contour_value'))
+contour.SetValue(0, app.get("contour_value"))
 
 # Rendering setup
 renderer = vtkRenderer()
@@ -78,25 +86,27 @@ renderer.ResetCamera()
 renderWindow.Render()
 
 app.active_objects = {
-    'VIEW': renderWindow,
+    "VIEW": renderWindow,
 }
 
 # -----------------------------------------------------------------------------
 # Helper
 # -----------------------------------------------------------------------------
 
-remoteLocalView = RemoteLocalView(app, renderWindow, 'demo')
+remoteLocalView = RemoteLocalView(app, renderWindow, "demo")
 
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
 
-@app.change('contour_value')
+
+@app.change("contour_value")
 def update_contour():
-    contour.SetValue(0, app.get('contour_value'))
+    contour.SetValue(0, app.get("contour_value"))
     # Bug in vtkApp stillRender does not execute in animate
-    renderWindow.Modified() # or the line below
+    renderWindow.Modified()  # or the line below
     # remoteLocalView.push_image()
+
 
 # -----------------------------------------------------------------------------
 # MAIN

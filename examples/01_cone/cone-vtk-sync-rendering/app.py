@@ -4,29 +4,35 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
 from pywebvue import App
 
 from vtkmodules.vtkFiltersSources import vtkConeSource
-from vtkmodules.vtkRenderingCore import vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor, vtkPolyDataMapper, vtkActor
+from vtkmodules.vtkRenderingCore import (
+    vtkRenderer,
+    vtkRenderWindow,
+    vtkRenderWindowInteractor,
+    vtkPolyDataMapper,
+    vtkActor,
+)
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App('VTK Remote Rendering', root=__file__, backend='vtk')
-app.layout = './template.html'
+app = App("VTK Remote Rendering", root=__file__, backend="vtk")
+app.layout = "./template.html"
 app.state = {
-    'resolution': 6,
+    "resolution": 6,
 }
-app.vue_use = ['vuetify', 'vtk']
+app.vue_use = ["vuetify", "vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
@@ -51,17 +57,19 @@ renderer.ResetCamera()
 renderWindow.Render()
 
 app.active_objects = {
-    'VIEW': renderWindow,
+    "VIEW": renderWindow,
 }
 
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
 
-@app.change('resolution')
+
+@app.change("resolution")
 def update_cone():
-    cone_source.SetResolution(app.get('resolution'))
-    app.set('scene', app.scene(renderWindow))
+    cone_source.SetResolution(app.get("resolution"))
+    app.set("scene", app.scene(renderWindow))
+
 
 # -----------------------------------------------------------------------------
 # Main

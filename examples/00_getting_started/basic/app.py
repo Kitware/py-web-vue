@@ -4,10 +4,10 @@ import sys
 # Virtual Environment handling
 # -----------------------------------------------------------------------------
 
-if '--virtual-env' in sys.argv:
-  virtualEnvPath = sys.argv[sys.argv.index('--virtual-env') + 1]
-  virtualEnv = virtualEnvPath + '/bin/activate_this.py'
-  exec(open(virtualEnv).read(), {'__file__': virtualEnv})
+if "--virtual-env" in sys.argv:
+    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
+    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
+    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
 
 # -----------------------------------------------------------------------------
 
@@ -37,30 +37,30 @@ import pywebvue
 #     .trigger(key)                                 # bind server side trigger to client call
 # -----------------------------------------------------------------------------
 
-app = pywebvue.App('Getting started')
+app = pywebvue.App("Getting started")
 
 app.vuetify = {
-    'icons': {
-        'iconfont': 'mdi',
-        'values': {
-          'add': 'mdi-database-plus-outline',
-          'remove': 'mdi-database-minus-outline',
-          'menu': 'mdi-menu',
+    "icons": {
+        "iconfont": "mdi",
+        "values": {
+            "add": "mdi-database-plus-outline",
+            "remove": "mdi-database-minus-outline",
+            "menu": "mdi-menu",
         },
     },
-    'theme': {
-        'themes': {
-          'light': {
-            'primary': '#3f51b5',
-            'secondary': '#b0bec5',
-            'accent': '#8c9eff',
-            'error': '#b71c1c',
-          },
+    "theme": {
+        "themes": {
+            "light": {
+                "primary": "#3f51b5",
+                "secondary": "#b0bec5",
+                "accent": "#8c9eff",
+                "error": "#b71c1c",
+            },
         },
     },
 }
 
-app.layout = '''
+app.layout = """
     <v-app>
       <v-app-bar app>
         <v-icon v-text="`$menu`" class="mr-4"/> {{ Date.now() }}
@@ -86,66 +86,74 @@ app.layout = '''
         </v-container>
       </v-main>
     </v-app>
-'''
+"""
 
 app.state = {
-    'value': 0,
-    'name': 'World',
-    'superlatif': '',
-    'select': 'World',
-    'items': [
-      { 'text': 'Simple', 'value': 'World' },
-      { 'text': 'You', 'value': 'me' },
-      { 'text': 'Anonymous', 'value': '' },
+    "value": 0,
+    "name": "World",
+    "superlatif": "",
+    "select": "World",
+    "items": [
+        {"text": "Simple", "value": "World"},
+        {"text": "You", "value": "me"},
+        {"text": "Anonymous", "value": ""},
     ],
 }
 
-app.vue_use = ['vuetify']
+app.vue_use = ["vuetify"]
 
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
 
-@app.trigger('plus')
+
+@app.trigger("plus")
 def add(value):
-    app.set('value', app.get('value') + value)
+    app.set("value", app.get("value") + value)
+
 
 # -----------------------------------------------------------------------------
 
-@app.trigger('remove')
+
+@app.trigger("remove")
 def remove(value):
-    app.set('value', app.get('value') - value)
+    app.set("value", app.get("value") - value)
+
 
 # -----------------------------------------------------------------------------
 
-@app.change('value')
+
+@app.change("value")
 def update_name():
-    v = app.get('value')
+    v = app.get("value")
 
-    if v**2 < 0.5:
-        new_name = 'epsilon'
+    if v ** 2 < 0.5:
+        new_name = "epsilon"
     else:
-        new_name = 'positive' if v > 0 else 'negative'
+        new_name = "positive" if v > 0 else "negative"
 
-    app.set('name', new_name)
+    app.set("name", new_name)
+
 
 # -----------------------------------------------------------------------------
 
-@app.change('name', 'value')
-def update_superlatif():
-    v = abs(app.get('value'))
-    n = app.get('name')
-    s = app.get('superlatif')
-    new_super_latif = ''
 
-    super_latifs = ['super', 'mega', 'giga']
+@app.change("name", "value")
+def update_superlatif():
+    v = abs(app.get("value"))
+    n = app.get("name")
+    s = app.get("superlatif")
+    new_super_latif = ""
+
+    super_latifs = ["super", "mega", "giga"]
     count = 1
     for ns in super_latifs:
         if v > count:
             new_super_latif = ns
         count *= 5
 
-    app.set('superlatif', new_super_latif)
+    app.set("superlatif", new_super_latif)
+
 
 # -----------------------------------------------------------------------------
 # MAIN

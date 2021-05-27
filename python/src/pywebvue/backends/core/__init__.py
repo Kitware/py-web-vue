@@ -6,7 +6,8 @@ def getReferenceId(ref):
             idStr = str(ref)[-12:-1]
             # print('====> fallback ID %s for %s' % (idStr, ref))
             return idStr
-    return '0x0'
+    return "0x0"
+
 
 class Backend:
     def __init__(self, app, create_protocols=None):
@@ -30,13 +31,17 @@ class Backend:
         raise Exception('The "scene" method is not suppored with the default Backend')
 
     def push_image(self, view_of_backend):
-        raise Exception('The "push_image" method is not suppored with the default Backend')
+        raise Exception(
+            'The "push_image" method is not suppored with the default Backend'
+        )
 
     def camera(self, view_of_backend):
         raise Exception('The "camera" method is not suppored with the default Backend')
 
     def set_camera(self, view_of_backend, **kwargs):
-        raise Exception('The "set_camera" method is not suppored with the default Backend')
+        raise Exception(
+            'The "set_camera" method is not suppored with the default Backend'
+        )
 
     def configure_protocol(self, protocol):
         self._protocol = protocol

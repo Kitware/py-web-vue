@@ -1,15 +1,31 @@
 import os
 import argparse
 from .protocol import CoreServer
-from .utils import ChangeHandler, read_file_as_txt, read_file_as_base64_url, validate, abs_path, monitor
+from .utils import (
+    ChangeHandler,
+    read_file_as_txt,
+    read_file_as_base64_url,
+    validate,
+    abs_path,
+    monitor,
+)
 from .backends import create_backend
 
 from wslink import server
 
-WWW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www')
+WWW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www")
+
 
 class App:
-    def __init__(self, name, root=None, backend=False, debug=False, create_protocols=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        root=None,
+        backend=False,
+        debug=False,
+        create_protocols=None,
+        **kwargs,
+    ):
         self.name = name
         self._root = root
         self._backend = create_backend(self, backend, create_protocols)
@@ -23,12 +39,12 @@ class App:
         self.state = {}
         self.scripts = []
         self.styles = []
-        self.vue_use = ['vuetify', 'router', 'vtk']
+        self.vue_use = ["vuetify", "router", "vtk"]
         self.serve = {}
 
         # properties
         self._favicon = None
-        self._layout = '<div>Ws Vue default</div>'
+        self._layout = "<div>Ws Vue default</div>"
         self._layout_monitor = None
         self._routes = []
 
@@ -56,6 +72,7 @@ class App:
         """
         Use as decorator `@app.change(key1, key2, ...)`
         """
+
         def register_change_callback(func):
             for name in _args:
                 if name not in self._change_callbacks:
@@ -72,6 +89,7 @@ class App:
         """
         Use as decorator `@app.trigger(name)`
         """
+
         def register_trigger(func):
             self._triggers[name] = func
             return func
@@ -111,7 +129,7 @@ class App:
             self.protocol.push_layout(self._layout)
 
         if self._debug:
-            monitor('layout', value, lambda v : setattr(self, 'layout', v), self._root)
+            monitor("layout", value, lambda v: setattr(self, "layout", v), self._root)
 
     # -------------------------------------------------------------------------
 
@@ -228,16 +246,16 @@ class App:
 
     def get_initial_state(self):
         state = {
-            'name': self.name,
-            'vuetify': self.vuetify,
-            'layout': self.layout,
-            'favicon': self.favicon,
-            'routes': self.routes,
-            'state': self.state,
-            'scripts': self.scripts,
-            'use': self.vue_use,
-            'styles': self.styles,
-            'stateListening': list(self._server_keys),
+            "name": self.name,
+            "vuetify": self.vuetify,
+            "layout": self.layout,
+            "favicon": self.favicon,
+            "routes": self.routes,
+            "state": self.state,
+            "scripts": self.scripts,
+            "use": self.vue_use,
+            "styles": self.styles,
+            "stateListening": list(self._server_keys),
         }
         return state
 
@@ -275,8 +293,8 @@ class App:
         if len(self.serve):
             endpoints = []
             for key in self.serve:
-                endpoints.append(f'{key}={abs_path(self.serve[key], self._root)}')
-            args.fsEndpoints = '|'.join(endpoints)
+                endpoints.append(f"{key}={abs_path(self.serve[key], self._root)}")
+            args.fsEndpoints = "|".join(endpoints)
             print(args.fsEndpoints)
 
         CoreServer.configure(args)

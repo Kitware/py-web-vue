@@ -13,7 +13,8 @@
       class="ml-8"
       dense
       hide-details
-      style="max-width: 150px"
+      style="max-width: 140px"
+      :key="`${tts}-field`"
     />
     <v-select
       v-model="colorMap"
@@ -22,6 +23,7 @@
       dense
       hide-details
       style="max-width: 200px"
+      :key="`${tts}-preset`"
     />
     <v-spacer />
     <v-btn icon @click="f1Visible = !f1Visible">

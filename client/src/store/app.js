@@ -29,6 +29,7 @@ export default {
     actions: [],
     routes: [],
     use: [],
+    templateTS: 0,
   },
   getters: {
     APP_GET(state) {
@@ -54,6 +55,9 @@ export default {
     APP_HTML_SCRIPTS(state) {
       return state.htmlScripts;
     },
+    APP_TEMPLATE_TS(state) {
+      return state.templateTS;
+    },
   },
   mutations: {
     APP_TEMPLATE_SET(state, value) {
@@ -61,6 +65,9 @@ export default {
     },
     APP_ACTIONS_SET(state, value) {
       state.actions = value;
+    },
+    APP_TEMPLATE_TS(state) {
+      state.templateTS += 1;
     },
   },
   actions: {
@@ -74,11 +81,18 @@ export default {
       });
       dispatch('WS_LAYOUT_SUBSCRIBE', ([template]) => {
         commit('APP_TEMPLATE_SET', template);
+        // Allow to reprocess elements after the template has updated
+        // using the :key="`abc-${tts}`" technique
+        setTimeout(() => {
+          commit('APP_TEMPLATE_TS');
+        }, 10);
       });
       const options = await dispatch('APP_INIT_SET', serverState);
       return options;
     },
-    async APP_INIT_SET({ state, getters, dispatch }, {
+    async APP_INIT_SET({
+      state, getters, commit, dispatch,
+    }, {
       name,
       vuetify,
       layout,
@@ -153,6 +167,7 @@ export default {
 
       // Last update template
       state.mainPageTemplate = layout;
+      commit('APP_TEMPLATE_TS');
 
       return vueOptions;
     },

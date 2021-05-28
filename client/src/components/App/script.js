@@ -15,6 +15,7 @@ export default {
       wsClient: 'WS_CLIENT',
       actions: 'APP_ACTIONS',
       routes: 'APP_ROUTES',
+      tts: 'APP_TEMPLATE_TS',
     }),
     rootComponent() {
       if (this.contentTemplate.startsWith('#')) {

@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/Kitware/py-web-vue/compare/v1.1.1...v1.1.2) (2021-05-28)
+
+
+### Bug Fixes
+
+* **template:** Add template ts to allow v-select to still work after a template swap ([228d889](https://github.com/Kitware/py-web-vue/commit/228d8896265d27215d481a897eff9de49b90f03c))
+
 ## [1.1.1](https://github.com/Kitware/py-web-vue/compare/v1.1.0...v1.1.1) (2021-05-27)
 
 

@@ -41,6 +41,7 @@ class App:
         self.styles = []
         self.vue_use = ["vuetify", "router", "vtk"]
         self.serve = {}
+        self.launcher = {}
 
         # properties
         self._favicon = None
@@ -106,6 +107,9 @@ class App:
             return self._parser
 
         self._parser = argparse.ArgumentParser(description="PyWebVue server By Kitware")
+        self._parser.add_argument("--launcher",
+            help="Start launcher process rather than single process server",
+            action="store_true")
         CoreServer.add_arguments(self._parser)
 
         return self._parser
@@ -290,12 +294,16 @@ class App:
         if not args.content:
             args.content = WWW_DIR
 
-        if len(self.serve):
-            endpoints = []
-            for key in self.serve:
-                endpoints.append(f"{key}={abs_path(self.serve[key], self._root)}")
-            args.fsEndpoints = "|".join(endpoints)
-            print(args.fsEndpoints)
+        if args.launcher:
+            CoreServer.start_launcher(args)
+            # FIXME we don't support yet self.serve with launcher...
+        else:
+            if len(self.serve):
+                endpoints = []
+                for key in self.serve:
+                    endpoints.append(f"{key}={abs_path(self.serve[key], self._root)}")
+                args.fsEndpoints = "|".join(endpoints)
+                print(args.fsEndpoints)
 
-        CoreServer.configure(args)
-        CoreServer.start_webserver(args)
+            CoreServer.configure(args)
+            CoreServer.start_webserver(args)

@@ -15,6 +15,12 @@ function configDecorator(config) {
   if (userParams.dev) {
     config.sessionURL = `ws://${window.location.hostname}:1234/ws`; // Configured to work on seperate server
   }
+
+  if (config.sessionURL) {
+    config.sessionURL = config.sessionURL.replaceAll('USE_HOSTNAME', window.location.hostname);
+    config.sessionURL = config.sessionURL.replaceAll('USE_HOST', window.location.host);
+  }
+
   // If name is provided we use it as our application and
   // expand any other url params into our config.
   if (userParams.name) {
@@ -61,7 +67,7 @@ export default {
     async WS_CONNECT({
       state, getters, commit, dispatch,
     }) {
-      const client = vtkWSLinkClient.newInstance({ protocols });
+      const client = vtkWSLinkClient.newInstance({ protocols, configDecorator });
 
       client.onBusyChange((count) => {
         state.busy = count;

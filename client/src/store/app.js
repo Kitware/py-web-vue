@@ -19,6 +19,9 @@ async function decorate(value) {
   let result = value;
   /* eslint-disable no-await-in-loop */
   for (let i = 0; i < STATE_DECORATORS.length; i++) {
+    if (result === null || result === undefined) {
+      return result;
+    }
     result = await STATE_DECORATORS[i].decorate(result);
   }
   /* eslint-enable no-await-in-loop */

@@ -19,6 +19,17 @@ app.state = {
 }
 app.vue_use = ["vuetify", "vtk"]
 
+
+# -----------------------------------------------------------------------------
+# For real apache https/wss deployment
+# -----------------------------------------------------------------------------
+
+# app.launcher = {
+#     "configuration": {
+#         "sessionURL" : "wss://USE_HOST/proxy=$sessionId",
+#     },
+# }
+
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
@@ -31,11 +42,16 @@ def load_client_files():
     }
     meshes = []
     files = app.get("files")
+    filesOutput = []
 
-    if files:
+    if files and len(files):
+        if not files[0].get('content'):
+            return
+
         for file in files:
             print(f'Load {file.get("name")}')
             bytes = file.get('content')
+            filesOutput.append({ 'name': file.get("name"), 'size': file.get('size') })
             reader = vtkXMLPolyDataReader()
             reader.ReadFromInputStringOn()
             reader.SetInputString(bytes)
@@ -66,6 +82,7 @@ def load_client_files():
     app.set('field', field)
     app.set('fields', fields)
     app.set('meshes', meshes)
+    app.set('files', filesOutput)
     print(f'show {len(meshes)} meshes')
 
 # -----------------------------------------------------------------------------

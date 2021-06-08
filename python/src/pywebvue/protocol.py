@@ -1,4 +1,8 @@
-from wslink import server
+import os
+import sys
+import socket
+
+from wslink import server, launcher
 from wslink import register as exportRpc
 
 from wslink.websocket import ServerProtocol
@@ -9,6 +13,53 @@ from twisted.internet import reactor
 # Only used for debug
 import json
 
+def current_cmd(skip_launcher=True, skip_port=True, add_on=[]):
+    cmd = ['python']
+    skip_next = False
+    for item in sys.argv:
+        if skip_next:
+            skip_next = False
+            continue
+
+        if skip_port and item == '--port':
+            skip_next = True
+            continue
+
+        if skip_launcher and item == '--launcher':
+            continue
+
+        if len(cmd) == 1:
+            cmd.append(os.path.abspath(item))
+        else:
+            cmd.append(item)
+
+    for item in add_on:
+        cmd.append(item)
+
+    return cmd
+
+DEFAULT_LAUNCHER_CONFIG = {
+    "configuration": {
+        "host" : "0.0.0.0",
+        "port" : 8080,
+        "endpoint": "paraview",
+        "log_dir": "/tmp",
+        "proxy_file": "/tmp/pywebproxy.txt",
+        "sessionURL" : "ws://USE_HOSTNAME:${port}/ws",
+        "timeout": 25,
+        "content": os.path.join(os.path.dirname(os.path.abspath(__file__)), "www"),
+        "sanitize": {},
+        "fields": [],
+    },
+    "resources" : [{ "host" : "localhost", "port_range" : [9001, 9100] }],
+    "properties": {},
+    "apps": {
+        "PyWebVue": {
+            "cmd": current_cmd(add_on=["--port", "$port"]),
+            "ready_line": "Starting factory",
+        },
+    },
+}
 
 class CoreServer(ServerProtocol):
     authentication_token = "wslink-secret"
@@ -30,6 +81,28 @@ class CoreServer(ServerProtocol):
     @staticmethod
     def start_webserver(args):
         server.start_webserver(options=args, protocol=CoreServer)
+
+    @staticmethod
+    def start_launcher(args):
+        config = {}
+        config.update(DEFAULT_LAUNCHER_CONFIG)
+
+        config['configuration']['port'] = args.port
+
+        if 'configuration' in CoreServer.app.launcher:
+            config['configuration'].update(CoreServer.app.launcher['configuration'])
+
+        if 'resources' in CoreServer.app.launcher:
+            config['resources'].update(CoreServer.app.launcher['resources'])
+
+        if 'apps' in CoreServer.app.launcher:
+            config['apps'].update(CoreServer.app.launcher['apps'])
+
+        if CoreServer.DEBUG:
+            print(json.dumps(config, indent=2))
+
+        print('Starting launcher...')
+        launcher.startWebServer(args, config)
 
     # ---------------------------------------------------------------
     # Server

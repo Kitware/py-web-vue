@@ -30,6 +30,17 @@ app.vue_use = ["vuetify", "vtk"]
 #     },
 # }
 
+# --- for test / debug ---
+# app.launcher = {
+#     "resources" : [ { "host" : "localhost", "port_range" : [9001, 9001] } ],
+#     "apps": {
+#         "PyWebVue" : {
+#             "cmd": ["python", "-m", "wrong"],
+#             "ready_line": "ready",
+#         },
+#     },
+# }
+
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------

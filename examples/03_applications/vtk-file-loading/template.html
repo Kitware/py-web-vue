@@ -2,6 +2,14 @@
   <v-app-bar app dense>
     <span class="title">File Loader</span>
     <v-spacer />
+    <v-select
+      v-model="field"
+      :items="Object.values(fields)"
+      hide-details
+      dense
+      style="max-width: 200px"
+      class="mr-4"
+    />
     <v-file-input
       multiple
       show-size
@@ -10,8 +18,11 @@
       v-model="files"
       dense
       hide-details
+      accept=".vtp"
+      style="max-width: 300px"
     />
     <v-progress-linear indeterminate absolute bottom :active="busy" />
+    <vtk-state-update :value="meshes" @change="$refs.view.resetCamera()" />
   </v-app-bar>
   <v-main>
     <v-container fluid fill-height class="pa-0" style="position: relative">
@@ -19,6 +30,8 @@
         <vtk-geometry-representation
           v-for="mesh, idx in meshes"
           :key="idx"
+          :colorDataRange="fields[field] && fields[field].range || [0, 1]"
+          :mapper="{ colorByArrayName: field, scalarMode: fields[field] && fields[field].scalarMode || 3, interpolateScalarsBeforeMapping: true, scalarVisibility: field !== 'solid' }"
         >
           <vtk-mesh :state="mesh" />
         </vtk-geometry-representation>

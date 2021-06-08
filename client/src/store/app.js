@@ -1,8 +1,10 @@
 import { loadScript, loadCSS } from 'vtk.js/Sources/IO/Core/ResourceLoader';
 import Vue from 'vue';
+import { fileHandler, fileListHandler } from '../decorators';
 
-const SHARED_STATE = {};
+const SHARED_STATE = Object.create(null);
 const SHARED_STATE_DIRTY_KEYS = new Set();
+const STATE_DECORATORS = [fileHandler, fileListHandler];
 
 function get(obj, path) {
   let current = obj;
@@ -13,7 +15,21 @@ function get(obj, path) {
   return current;
 }
 
-let COMPUTED_MODELS = {};
+async function decorate(value) {
+  let result = value;
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < STATE_DECORATORS.length; i++) {
+    result = await STATE_DECORATORS[i].decorate(result);
+  }
+  /* eslint-enable no-await-in-loop */
+  return result;
+}
+
+function compareDecorator(a, b) {
+  return a.priority - b.priority;
+}
+
+let COMPUTED_MODELS = Object.create(null);
 
 export function generateModels() {
   return COMPUTED_MODELS;
@@ -182,13 +198,17 @@ export default {
     async APP_TRIGGER({ dispatch }, { name, args, kwargs }) {
       dispatch('WS_TRIGGER', { name, args, kwargs });
     },
-    APP_FLUSH_DIRTY_STATE({ getters, dispatch }) {
+    async APP_FLUSH_DIRTY_STATE({ getters, dispatch }) {
       if (SHARED_STATE_DIRTY_KEYS.size && !getters.WS_BUSY) {
-        const deltaState = [];
+        const waitOn = [];
+        const keys = [];
         SHARED_STATE_DIRTY_KEYS.forEach((keyName) => {
-          deltaState.push({ key: keyName, value: SHARED_STATE[keyName] });
+          waitOn.push(decorate(SHARED_STATE[keyName]));
+          keys.push(keyName);
         });
         SHARED_STATE_DIRTY_KEYS.clear();
+        const values = await Promise.all(waitOn);
+        const deltaState = keys.map((key, i) => ({ key, value: values[i] }));
         dispatch('WS_STATE_UPDATE', deltaState);
       }
     },
@@ -218,6 +238,10 @@ export default {
       computed.busy = () => getters.WS_BUSY;
 
       return computed;
+    },
+    APP_REGISTER_DECORATOR(ctx, decorator) {
+      STATE_DECORATORS.push(decorator);
+      STATE_DECORATORS.sort(compareDecorator);
     },
   },
 };

@@ -1,0 +1,28 @@
+<v-app>
+  <v-app-bar app dense>
+    <span class="title">File Loader</span>
+    <v-spacer />
+    <v-file-input
+      multiple
+      show-size
+      small-chips
+      truncate-length="25"
+      v-model="files"
+      dense
+      hide-details
+    />
+    <v-progress-linear indeterminate absolute bottom :active="busy" />
+  </v-app-bar>
+  <v-main>
+    <v-container fluid fill-height class="pa-0" style="position: relative">
+      <vtk-view ref="view" >
+        <vtk-geometry-representation
+          v-for="mesh, idx in meshes"
+          :key="idx"
+        >
+          <vtk-mesh :state="mesh" />
+        </vtk-geometry-representation>
+      </vtk-view>
+    </v-container>
+  </v-main>
+</v-app>

@@ -51,6 +51,7 @@ export default {
       serverSet: 'APP_SET',
       serverTrigger: 'APP_TRIGGER',
       clearActions: 'APP_ACTIONS_PROCESSED',
+      registerDecorator: 'APP_REGISTER_DECORATOR',
     }),
     set(key, value) {
       this.serverSet({ key, value });
@@ -74,6 +75,7 @@ export default {
       wsClient: this.wsClient,
       isBusy: () => this.busy,
       window: this.window,
+      registerDecorator: (decorator) => this.registerDecorator(decorator),
     };
   },
   mounted() {

@@ -90,7 +90,12 @@ export default {
         commit('APP_TEMPLATE_SET', `<vtk-loading message="${message}"/>`);
       });
 
-      await client.connect(configDecorator(getters.WS_CONFIG));
+      try {
+        await client.connect(configDecorator(getters.WS_CONFIG));
+      } catch (launcherError) {
+        commit('APP_TEMPLATE_SET', `<vtk-loading message="${launcherError.response.error}"/>`);
+        throw launcherError;
+      }
 
       // Capture ws client in the store
       commit('WS_CLIENT_SET', client);
@@ -99,7 +104,7 @@ export default {
       return client;
     },
     // ------------------------------------------------------------------------
-    // GemPy
+    // WS methods
     // ------------------------------------------------------------------------
     async WS_INIT({ state }) {
       return state.client

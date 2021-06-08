@@ -9,12 +9,17 @@ Vue.config.productionTip = false;
 export async function connect(store, done = null) {
   window.Vue = Vue;
 
-  await store.dispatch('WS_CONNECT');
-  const serverState = await store.dispatch('WS_INIT');
-  const options = await store.dispatch('APP_INIT', serverState);
+  try {
+    await store.dispatch('WS_CONNECT');
+    const serverState = await store.dispatch('WS_INIT');
+    const options = await store.dispatch('APP_INIT', serverState);
 
-  if (done) {
-    done(store, options);
+    if (done) {
+      done(store, options);
+    }
+  } catch (error) {
+    done(store);
+    console.error(error);
   }
 
   return store;

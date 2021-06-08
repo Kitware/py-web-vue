@@ -93,7 +93,7 @@ class CoreServer(ServerProtocol):
             config['configuration'].update(CoreServer.app.launcher['configuration'])
 
         if 'resources' in CoreServer.app.launcher:
-            config['resources'].update(CoreServer.app.launcher['resources'])
+            config['resources'] = CoreServer.app.launcher['resources']
 
         if 'apps' in CoreServer.app.launcher:
             config['apps'].update(CoreServer.app.launcher['apps'])

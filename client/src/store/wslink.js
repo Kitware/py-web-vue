@@ -3,6 +3,7 @@ import vtkWSLinkClient from 'vtk.js/Sources/IO/Core/WSLinkClient';
 import vtkURLExtract from 'vtk.js/Sources/Common/Core/URLExtract';
 
 import protocols from '../protocols';
+import { setAddAttachment } from '../decorators';
 
 vtkWSLinkClient.setSmartConnectClass(SmartConnect);
 
@@ -87,6 +88,7 @@ export default {
 
       // Capture ws client in the store
       commit('WS_CLIENT_SET', client);
+      setAddAttachment(client.getConnection().getSession().addAttachment);
 
       return client;
     },

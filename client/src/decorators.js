@@ -1,3 +1,9 @@
+const CTX = {};
+
+export function setAddAttachment(fn) {
+  CTX.addAttachement = fn;
+}
+
 export const fileHandler = {
   priority: 0,
   async decorate(value) {
@@ -6,12 +12,9 @@ export const fileHandler = {
         name, lastModified, size, type,
       } = value;
       const arrayBuffer = await value.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(arrayBuffer)
-          .reduce((data, byte) => data + String.fromCharCode(byte), ''),
-      );
+      const content = CTX.addAttachement(arrayBuffer);
       return {
-        name, lastModified, size, type, base64,
+        name, lastModified, size, type, content,
       };
     }
     return value;

@@ -24,6 +24,9 @@ export const fileHandler = {
 export const fileListHandler = {
   priority: 0,
   async decorate(value) {
+    if (typeof value === 'string') {
+      return value;
+    }
     if ((value.constructor && value.constructor === FileList) || value.length) {
       const results = [];
       /* eslint-disable no-await-in-loop */

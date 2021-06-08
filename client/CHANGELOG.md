@@ -1,3 +1,13 @@
+## [1.1.4](https://github.com/Kitware/py-web-vue/compare/v1.1.3...v1.1.4) (2021-06-08)
+
+
+### Bug Fixes
+
+* **decorator:** skip string processing ([e7d5c87](https://github.com/Kitware/py-web-vue/commit/e7d5c87d868dbb8e32413711706151936754fa3d))
+* **fileUpload:** Use attachement ([5a9fa60](https://github.com/Kitware/py-web-vue/commit/5a9fa60738fce32aaf5e61f34d46c61207acd02e))
+* **launcher:** Add support for --launcher argument ([466d41e](https://github.com/Kitware/py-web-vue/commit/466d41e8a0ded5195de2179686810849617e4521))
+* **launcher:** report launcher error ([61be313](https://github.com/Kitware/py-web-vue/commit/61be31325e02b513f8e842fc407099ba1f9a6cd0))
+
 ## [1.1.3](https://github.com/Kitware/py-web-vue/compare/v1.1.2...v1.1.3) (2021-06-08)
 
 

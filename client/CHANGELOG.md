@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/Kitware/py-web-vue/compare/v1.1.2...v1.1.3) (2021-06-08)
+
+
+### Bug Fixes
+
+* **decorator:** Add naive file upload ([903ff94](https://github.com/Kitware/py-web-vue/commit/903ff9417730ce450caea7264960a109b0923e14))
+
 ## [1.1.2](https://github.com/Kitware/py-web-vue/compare/v1.1.1...v1.1.2) (2021-05-28)
 
 

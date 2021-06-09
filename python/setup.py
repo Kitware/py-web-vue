@@ -15,7 +15,7 @@ setup(
     url=f'https://github.com/kitware/py-web-vue',
     license='BSD-3-Clause',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',

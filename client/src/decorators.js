@@ -19,6 +19,7 @@ export const fileHandler = {
         size,
         type,
         content,
+        // used by server to prevent sending those fields back to JS
         _filter: ['content'],
       };
     }

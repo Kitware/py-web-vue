@@ -1,0 +1,98 @@
+<v-app>
+  <v-app-bar app>
+    <v-btn icon @click="trigger('reset')">
+      <v-icon>mdi-rotate-3d</v-icon>
+    </v-btn>
+    <span class="title">FEA Mesh viewer</span>
+    <v-spacer />
+    <v-range-slider
+      thumb-size="16"
+      thumb-label
+      label="Threshold"
+      v-if="threshold"
+      v-model="thresholdRange"
+      :max="fullRange[1]"
+      :min="fullRange[0]"
+      dense
+      hide-details
+      style="max-width: 400px"
+    />
+    <v-file-input
+      v-show="!mesh"
+      small-chips
+      :clearable="false"
+      prepend-icon="mdi-dots-triangle"
+      v-model="fileNode"
+      dense
+      hide-details
+      accept=".txt"
+      style="max-width: 200px"
+      class="mx-2"
+      placeholder="Nodes"
+    />
+    <v-file-input
+      v-show="!mesh"
+      small-chips
+      :clearable="false"
+      prepend-icon="mdi-vector-triangle"
+      v-model="fileEdge"
+      dense
+      hide-details
+      accept=".txt"
+      style="max-width: 200px"
+      class="mx-2"
+      placeholder="Elements"
+    />
+    <v-file-input
+      v-show="!threshold"
+      small-chips
+      :clearable="false"
+      prepend-icon="mdi-gradient"
+      v-model="fileField"
+      dense
+      hide-details
+      accept=".txt"
+      style="max-width: 200px"
+      class="mx-2"
+      placeholder="Field"
+    />
+    <v-btn v-if="mesh" icon @click="$refs.view.resetCamera()">
+      <v-icon>mdi-crop-free</v-icon>
+    </v-btn>
+    <v-progress-linear indeterminate absolute bottom :active="busy" />
+    <vtk-state-update :value="mesh" @change="$refs.view.resetCamera()" />
+  </v-app-bar>
+  <v-main>
+    <v-container fluid fill-height class="pa-0" style="position: relative">
+      <v-card :style="tooltipStyle" elevation="2" outlined>
+        <v-card-text>
+          <pre>{{ tooltip }}</pre>
+        </v-card-text>
+      </v-card>
+      <vtk-view
+        ref="view"
+        :background="[0.8, 0.8, 0.8]"
+        @hover="set('pickData', $event)"
+        :pickingModes="pickingModes"
+        :interactorSettings="interactorSettings"
+      >
+        <vtk-geometry-representation
+          v-if="mesh"
+          :property="{
+            representation: threshold ? 1 : 2,
+            color: threshold ? [0.3, 0.3, 0.3] : [1, 1, 1],
+            opacity: threshold ? 0.2 : 1
+          }"
+        >
+          <vtk-mesh :state="mesh" />
+        </vtk-geometry-representation>
+        <vtk-geometry-representation
+          v-if="threshold"
+          :colorDataRange="fullRange"
+        >
+          <vtk-mesh :state="threshold" />
+        </vtk-geometry-representation>
+      </vtk-view>
+    </v-container>
+  </v-main>
+</v-app>

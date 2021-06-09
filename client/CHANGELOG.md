@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/Kitware/py-web-vue/compare/v1.1.4...v1.2.0) (2021-06-09)
+
+
+### Bug Fixes
+
+* **reload:** fix state init issue ([fcf958c](https://github.com/Kitware/py-web-vue/commit/fcf958cbf2a650abbb237f631e96820ff257e05c))
+
+
+### Features
+
+* **state:** Better handling of decorated states ([cf47d4f](https://github.com/Kitware/py-web-vue/commit/cf47d4f10c4517081a5e8526565c47fcfc0182da))
+
 ## [1.1.4](https://github.com/Kitware/py-web-vue/compare/v1.1.3...v1.1.4) (2021-06-08)
 
 

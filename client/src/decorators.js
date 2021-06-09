@@ -14,7 +14,12 @@ export const fileHandler = {
       const arrayBuffer = await value.arrayBuffer();
       const content = CTX.addAttachement(arrayBuffer);
       return {
-        name, lastModified, size, type, content,
+        name,
+        lastModified,
+        size,
+        type,
+        content,
+        _filter: ['content'],
       };
     }
     return value;

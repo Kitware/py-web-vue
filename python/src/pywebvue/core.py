@@ -8,6 +8,7 @@ from .utils import (
     validate,
     abs_path,
     monitor,
+    clean_state,
 )
 from .backends import create_backend
 
@@ -255,7 +256,7 @@ class App:
             "layout": self.layout,
             "favicon": self.favicon,
             "routes": self.routes,
-            "state": self.state,
+            "state": clean_state(self.state),
             "scripts": self.scripts,
             "use": self.vue_use,
             "styles": self.styles,

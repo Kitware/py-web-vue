@@ -153,7 +153,10 @@ class CoreServer(ServerProtocol):
     # ---------------------------------------------------------------
 
     def push_layout(self, layout):
-        self.publish("topic.ws.vue.layout", layout)
+        # publish might not be bind if no client is connected
+        # in debug layout will be pushed when changed automatically
+        if hasattr(self, 'publish'):
+            self.publish("topic.ws.vue.layout", layout)
 
     # ---------------------------------------------------------------
 

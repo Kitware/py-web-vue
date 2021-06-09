@@ -90,6 +90,26 @@ def stop_all_monitors():
         MONITORS[key]["running"] = False
         MONITORS[key]["thread"].join()
 
+def clean_state(state):
+    cleaned = {}
+    for key in state:
+        cleaned[key] = clean_value(state[key])
+
+    return cleaned
+
+def clean_value(value):
+    if isinstance(value, dict) and '_filter' in value.keys():
+        subset = {}
+        subset.update(value)
+        keys_to_filter = value.get('_filter')
+        for key in keys_to_filter:
+            subset.pop(key, None)
+        return subset
+
+    if isinstance(value, list):
+        return list(map(clean_value, value))
+
+    return value
 
 # =============================================================================
 # Internal classes
@@ -183,7 +203,7 @@ class ChangeHandler:
                 ):
                     pass
                 else:
-                    modified_state[key] = self._app.state[key]
+                    modified_state[key] = clean_value(self._app.state[key])
             self._protocol.push_state_change(modified_state)
 
             if len(self._actions):

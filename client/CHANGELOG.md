@@ -1,3 +1,12 @@
+## [1.2.1](https://github.com/Kitware/py-web-vue/compare/v1.2.0...v1.2.1) (2021-06-10)
+
+
+### Bug Fixes
+
+* **__file__:** Make usage of root transparent ([2f63ad9](https://github.com/Kitware/py-web-vue/commit/2f63ad9a49c4c30b4f87100252efb79dff352ac9))
+* **deploy:** Add support for deploy argument ([2525a7e](https://github.com/Kitware/py-web-vue/commit/2525a7e83d011cd43062310d3324ec984c6453d0))
+* **favIcon:** Use better icon ([dd70772](https://github.com/Kitware/py-web-vue/commit/dd707724aca5ccdbda8b96e5a19445d9af791a8a))
+
 # [1.2.0](https://github.com/Kitware/py-web-vue/compare/v1.1.4...v1.2.0) (2021-06-09)
 
 

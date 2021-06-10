@@ -13,7 +13,7 @@ if "--virtual-env" in sys.argv:
 
 import pywebvue
 
-app = pywebvue.App("External chart library - CDN", root=__file__)
+app = pywebvue.App("External chart library - CDN")
 app.serve = {
     "static": "./static",
 }

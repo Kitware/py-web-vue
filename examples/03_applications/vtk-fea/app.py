@@ -28,7 +28,7 @@ VIEW_INTERACT = [
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("FEA - Mesh viewer", backend="vtk", root=__file__)
+app = App("FEA - Mesh viewer", backend="vtk")
 app.layout = "./template.html"
 app.state = {
     # files

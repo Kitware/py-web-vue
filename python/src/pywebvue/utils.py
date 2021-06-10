@@ -3,11 +3,19 @@ import base64
 import mimetypes
 import time
 import threading
+import inspect
 
 mimetypes.init()
 
 MONITORS = {}
+​
 
+def base_directory():
+    frame = inspect.stack()[2]
+    module = inspect.getmodule(frame[0])
+    if module is None:
+        return os.getcwd()
+    return os.path.abspath(os.path.dirname(module.__file__))
 
 def abs_path(file_path, root=None):
     basepath = os.getcwd()

@@ -42,7 +42,7 @@ INTERACTIVE_SLIDER = True
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK contour - Synch rendering", root=__file__, debug=DEBUG, backend="vtk")
+app = App("VTK contour - Synch rendering", debug=DEBUG, backend="vtk")
 app.layout = "./template-input.html" if INTERACTIVE_SLIDER else "./template-change.html"
 app.state = {
     "data_range": [0, 1],

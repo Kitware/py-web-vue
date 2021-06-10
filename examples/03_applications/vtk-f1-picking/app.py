@@ -29,7 +29,7 @@ VIEW_SELECT = [{"button": 1, "action": "Select"}]
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("F1 Probing", root=__file__, backend="vtk", debug=False)
+app = App("F1 Probing", backend="vtk", debug=False)
 app.layout = "./template.html"
 app.state = {
     # Fields available

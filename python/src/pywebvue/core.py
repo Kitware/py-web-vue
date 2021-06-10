@@ -9,6 +9,7 @@ from .utils import (
     abs_path,
     monitor,
     clean_state,
+    base_directory,
 )
 from .backends import create_backend
 
@@ -28,7 +29,7 @@ class App:
         **kwargs,
     ):
         self.name = name
-        self._root = root
+        self._root = base_directory()
         self._backend = create_backend(self, backend, create_protocols)
         self._debug = debug
 
@@ -110,15 +111,19 @@ class App:
         self._parser = argparse.ArgumentParser(description="PyWebVue server By Kitware")
 
         # Launcher / multi-users
-        self._parser.add_argument("--launcher",
+        self._parser.add_argument(
+            "--launcher",
             help="Start launcher process rather than single process server",
-            action="store_true")
+            action="store_true",
+        )
 
         # Deploy helper
-        self._parser.add_argument("--deploy",
-            help="Prepare a deployable directory")
-        self._parser.add_argument("--name", default='pywebvue',
-            help="Name to use for that application in the deploy tree")
+        self._parser.add_argument("--deploy", help="Prepare a deployable directory")
+        self._parser.add_argument(
+            "--name",
+            default="pywebvue",
+            help="Name to use for that application in the deploy tree",
+        )
 
         CoreServer.add_arguments(self._parser)
 

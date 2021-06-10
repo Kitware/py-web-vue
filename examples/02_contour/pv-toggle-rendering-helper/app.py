@@ -21,7 +21,7 @@ from paraview import simple
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("ParaView contour - Synch rendering", root=__file__, backend="paraview")
+app = App("ParaView contour - Synch rendering", backend="paraview")
 app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],

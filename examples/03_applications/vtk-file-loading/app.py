@@ -9,7 +9,7 @@ from vtkmodules.vtkIOXML import vtkXMLPolyDataReader
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("File loading", root=__file__, backend="vtk", debug=False)
+app = App("File loading", backend="vtk")
 app.layout = "./template.html"
 app.state = {
     "files": None,

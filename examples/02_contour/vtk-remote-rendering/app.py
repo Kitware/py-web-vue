@@ -42,7 +42,7 @@ INTERACTIVE_SLIDER = True
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK contour - Remote rendering", backend="vtk", root=__file__, debug=DEBUG)
+app = App("VTK contour - Remote rendering", backend="vtk", debug=DEBUG)
 app.layout = "./template-input.html" if INTERACTIVE_SLIDER else "./template-change.html"
 app.state = {
     "data_range": [0, 1],

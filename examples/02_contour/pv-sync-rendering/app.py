@@ -27,7 +27,7 @@ DEBUG = False
 # -----------------------------------------------------------------------------
 
 app = App(
-    "ParaView contour - Synch rendering", root=__file__, debug=DEBUG, backend="paraview"
+    "ParaView contour - Synch rendering", debug=DEBUG, backend="paraview"
 )
 app.layout = "./template.html"
 app.state = {

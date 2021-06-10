@@ -19,7 +19,7 @@ from vtkmodules.vtkFiltersSources import vtkConeSource
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK processing with local Rendering", root=__file__, backend="vtk")
+app = App("VTK processing with local Rendering", backend="vtk")
 app.layout = "./template.html"
 app.state = {
     "resolution": 6,

@@ -27,7 +27,7 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK Remote Rendering", root=__file__, backend="vtk")
+app = App("VTK Remote Rendering", backend="vtk")
 app.layout = "./template.html"
 app.state = {
     "resolution": 6,

@@ -32,7 +32,7 @@ import vtkmodules.vtkRenderingOpenGL2
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK contour - Remote/Local rendering", root=__file__, backend="vtk")
+app = App("VTK contour - Remote/Local rendering", backend="vtk")
 app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],

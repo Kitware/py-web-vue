@@ -17,8 +17,8 @@ from pywebvue import App
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK Rendering", root=__file__)
-app.favicon = "./favicon-196x196.png"
+app = App("VTK Rendering")
+app.favicon = "./favicon.png"
 app.layout = "./template.html"
 app.state = {
     "logo": app.url("./logo.svg"),

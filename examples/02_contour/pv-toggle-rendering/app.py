@@ -20,7 +20,7 @@ from paraview import simple
 # -----------------------------------------------------------------------------
 
 app = App(
-    "ParaView contour - Remote/Local rendering", root=__file__, backend="paraview"
+    "ParaView contour - Remote/Local rendering", backend="paraview"
 )
 app.layout = "./template.html"
 app.state = {

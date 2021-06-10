@@ -19,7 +19,7 @@ from paraview import simple
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("ParaView Remote Rendering", root=__file__, backend="paraview")
+app = App("ParaView Remote Rendering", backend="paraview")
 app.layout = "./template.html"
 app.state = {
     "resolution": 6,

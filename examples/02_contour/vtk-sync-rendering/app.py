@@ -25,6 +25,9 @@ from vtkmodules.vtkRenderingCore import (
 )
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 
+# No need since no rendering is happening on the server
+# import vtkmodules.vtkRenderingOpenGL2
+
 # -----------------------------------------------------------------------------
 # User Settings
 # -----------------------------------------------------------------------------

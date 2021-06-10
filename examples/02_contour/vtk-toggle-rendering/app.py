@@ -25,6 +25,9 @@ from vtkmodules.vtkRenderingCore import (
 )
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 
+# Grab implementation
+import vtkmodules.vtkRenderingOpenGL2
+
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------

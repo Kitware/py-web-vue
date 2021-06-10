@@ -26,6 +26,9 @@ from vtkmodules.vtkRenderingCore import (
 )
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 
+# Grab implementation
+import vtkmodules.vtkRenderingOpenGL2
+
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
@@ -70,6 +73,8 @@ contour.SetValue(0, app.get("contour_value"))
 # Rendering setup
 renderer = vtkRenderer()
 renderWindow = vtkRenderWindow()
+renderWindow.SetSize(300, 300)
+renderWindow.SetWindowName("rendering")
 renderWindow.AddRenderer(renderer)
 
 renderWindowInteractor = vtkRenderWindowInteractor()

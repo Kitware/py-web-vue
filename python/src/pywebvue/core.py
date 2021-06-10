@@ -22,7 +22,6 @@ class App:
     def __init__(
         self,
         name,
-        root=None,
         backend=False,
         debug=False,
         create_protocols=None,

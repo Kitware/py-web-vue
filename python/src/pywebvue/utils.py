@@ -8,7 +8,7 @@ import inspect
 mimetypes.init()
 
 MONITORS = {}
-​
+
 
 def base_directory():
     frame = inspect.stack()[2]
@@ -16,6 +16,7 @@ def base_directory():
     if module is None:
         return os.getcwd()
     return os.path.abspath(os.path.dirname(module.__file__))
+
 
 def abs_path(file_path, root=None):
     basepath = os.getcwd()
@@ -98,6 +99,7 @@ def stop_all_monitors():
         MONITORS[key]["running"] = False
         MONITORS[key]["thread"].join()
 
+
 def clean_state(state):
     cleaned = {}
     for key in state:
@@ -105,11 +107,12 @@ def clean_state(state):
 
     return cleaned
 
+
 def clean_value(value):
-    if isinstance(value, dict) and '_filter' in value.keys():
+    if isinstance(value, dict) and "_filter" in value.keys():
         subset = {}
         subset.update(value)
-        keys_to_filter = value.get('_filter')
+        keys_to_filter = value.get("_filter")
         for key in keys_to_filter:
             subset.pop(key, None)
         return subset
@@ -118,6 +121,7 @@ def clean_value(value):
         return list(map(clean_value, value))
 
     return value
+
 
 # =============================================================================
 # Internal classes

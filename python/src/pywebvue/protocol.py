@@ -136,7 +136,6 @@ class CoreServer(ServerProtocol):
         app_name = args.name
         app_dst_dir = os.path.join(work_dir, "apps", app_name)
         app_src_dir = abs_path("./", CoreServer.app._root)
-        print(app_src_dir)
         shutil.copytree(app_src_dir, app_dst_dir, dirs_exist_ok=True)
 
         # copy www

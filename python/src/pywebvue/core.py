@@ -108,9 +108,18 @@ class App:
             return self._parser
 
         self._parser = argparse.ArgumentParser(description="PyWebVue server By Kitware")
+
+        # Launcher / multi-users
         self._parser.add_argument("--launcher",
             help="Start launcher process rather than single process server",
             action="store_true")
+
+        # Deploy helper
+        self._parser.add_argument("--deploy",
+            help="Prepare a deployable directory")
+        self._parser.add_argument("--name", default='pywebvue',
+            help="Name to use for that application in the deploy tree")
+
         CoreServer.add_arguments(self._parser)
 
         return self._parser
@@ -298,6 +307,8 @@ class App:
         if args.launcher:
             CoreServer.start_launcher(args)
             # FIXME we don't support yet self.serve with launcher...
+        elif args.deploy:
+            CoreServer.deploy_setup(args)
         else:
             if len(self.serve):
                 endpoints = []

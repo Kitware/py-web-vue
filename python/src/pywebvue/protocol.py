@@ -1,6 +1,9 @@
 import os
 import sys
-import socket
+import shutil
+import json
+
+from pywebvue.utils import abs_path
 
 from wslink import server, launcher
 from wslink import register as exportRpc
@@ -13,7 +16,9 @@ from twisted.internet import reactor
 # Only used for debug
 import json
 
-def current_cmd(skip_launcher=True, skip_port=True, add_on=[]):
+WWW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www")
+
+def current_cmd(skip_launcher=True, skip_port=True, add_on=[], default_skip=['--name', '--deploy']):
     cmd = ['python']
     skip_next = False
     for item in sys.argv:
@@ -22,6 +27,10 @@ def current_cmd(skip_launcher=True, skip_port=True, add_on=[]):
             continue
 
         if skip_port and item == '--port':
+            skip_next = True
+            continue
+
+        if item in default_skip:
             skip_next = True
             continue
 
@@ -47,7 +56,7 @@ DEFAULT_LAUNCHER_CONFIG = {
         "proxy_file": "/tmp/pywebproxy.txt",
         "sessionURL" : "ws://USE_HOSTNAME:${port}/ws",
         "timeout": 25,
-        "content": os.path.join(os.path.dirname(os.path.abspath(__file__)), "www"),
+        "content": WWW_DIR,
         "sanitize": {},
         "fields": [],
     },
@@ -83,7 +92,7 @@ class CoreServer(ServerProtocol):
         server.start_webserver(options=args, protocol=CoreServer)
 
     @staticmethod
-    def start_launcher(args):
+    def get_launcher_config(args):
         config = {}
         config.update(DEFAULT_LAUNCHER_CONFIG)
 
@@ -98,11 +107,79 @@ class CoreServer(ServerProtocol):
         if 'apps' in CoreServer.app.launcher:
             config['apps'].update(CoreServer.app.launcher['apps'])
 
+        return config
+
+    @staticmethod
+    def start_launcher(args):
+        config = CoreServer.get_launcher_config(args)
+
         if CoreServer.DEBUG:
             print(json.dumps(config, indent=2))
 
         print('Starting launcher...')
         launcher.startWebServer(args, config)
+
+    @staticmethod
+    def deploy_setup(args):
+        work_dir = os.path.abspath(args.deploy)
+        out_www = os.path.join(work_dir, 'www')
+        os.makedirs(work_dir, exist_ok=True)
+        for directory in ['www', 'apps', 'launcher', 'logs']:
+            os.makedirs(os.path.join(work_dir, directory), exist_ok=True)
+
+        # copy app
+        app_name = args.name
+        app_dst_dir = os.path.join(work_dir, 'apps', app_name)
+        app_src_dir = abs_path('./', CoreServer.app._root)
+        print(app_src_dir)
+        shutil.copytree(app_src_dir, app_dst_dir, dirs_exist_ok=True)
+
+        # copy www
+        shutil.copytree(WWW_DIR, out_www, dirs_exist_ok=True)
+        for sub_dir in CoreServer.app.serve:
+            src_dir = abs_path(CoreServer.app.serve[sub_dir], CoreServer.app._root)
+            dst_dir = os.path.join(out_www, sub_dir)
+            shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+
+        # update launcher config
+        launcher_conf = os.path.join(work_dir, 'launcher', 'config.json')
+        config = CoreServer.get_launcher_config(args)
+        config['configuration']['log_dir'] = '${work_dir}/logs'
+        config['configuration']['proxy_file'] = '${work_dir}/launcher/proxy.txt'
+        config['configuration']['sessionURL'] = "ws://USE_HOSTNAME:${port}/ws"
+        config['configuration']['content'] = '${work_dir}/www'
+        config['properties']['work_dir'] = work_dir
+
+        try:
+            if os.path.exists(launcher_conf):
+                with open(launcher_conf) as f:
+                    conf = json.load(f)
+                    apps = conf.get('apps', {})
+                    for name in apps:
+                        config['apps'][name] = apps[name]
+        except:
+            pass
+
+        # Override our app
+        config['apps'][app_name] = {
+            "cmd": current_cmd(add_on=["--port", "$port"]),
+            "ready_line": "Starting factory",
+        }
+        config['apps'][app_name]['cmd'][1] = config['apps'][app_name]['cmd'][1].replace(app_src_dir, '${work_dir}/' + app_name)
+
+        # Remove any invalid app
+        apps = config.get('apps', {})
+        to_delete = []
+        for name in apps:
+            app_path = apps[name]['cmd'][1]
+            if not app_path.startswith('${work_dir}'):
+                to_delete.append(name)
+
+        for name in to_delete:
+            apps.pop(name)
+
+        with open(launcher_conf, 'w') as json_file:
+            json.dump(config, json_file, indent=2)
 
     # ---------------------------------------------------------------
     # Server

@@ -269,18 +269,13 @@ app.favicon = './favicon-196x196.png'
 
 ## Development tools
 
-How to develop your HTML content fast and easily.
-
-TODO
-  - [ ] Live Web App server
-    - [ ] Load/Save/Select state from a test suite
-    - [ ] Render template.html live
-    - [ ] Handle routes live
-    - [ ] set/get state support / trigger sink
+How to develop your HTML content fast and easily. Add `debug=True` when building your app instance. That will make your `./template.html` automatically update when changed on the file system.
 
 ## Running an example from repo
 
 ### Build client
+
+Only needed in case you are using the `# <-- for developing py-web-vue` path below.
 
 ```
 cd client
@@ -293,7 +288,8 @@ npm run build
 ```
 python3 -m venv py-env
 source ./py-env/bin/activate
-pip install -e ./python/
+pip install pywebvue # <-- using release rather than local version
+# pip install -e ./python/ # <-- for developing py-web-vue
 ```
 
 ### Run demo

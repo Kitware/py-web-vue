@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/Kitware/py-web-vue/compare/v1.2.1...v1.2.2) (2021-06-17)
+
+
+### Bug Fixes
+
+* **app.set:** Allow force update ([6c18426](https://github.com/Kitware/py-web-vue/commit/6c184269619ae7048c90478539a27536fb01c670))
+
 ## [1.2.1](https://github.com/Kitware/py-web-vue/compare/v1.2.0...v1.2.1) (2021-06-10)
 
 

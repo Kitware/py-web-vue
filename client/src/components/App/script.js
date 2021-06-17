@@ -52,6 +52,7 @@ export default {
       serverTrigger: 'APP_TRIGGER',
       clearActions: 'APP_ACTIONS_PROCESSED',
       registerDecorator: 'APP_REGISTER_DECORATOR',
+      dirty: 'APP_DIRTY',
     }),
     set(key, value) {
       this.serverSet({ key, value });
@@ -72,6 +73,7 @@ export default {
       get: (key) => this.get(key),
       set: (key, value) => this.set(key, value),
       trigger: (name, args, kwargs) => this.trigger(name, args, kwargs),
+      dirty: (key) => this.dirty(key),
       wsClient: this.wsClient,
       isBusy: () => this.busy,
       window: this.window,

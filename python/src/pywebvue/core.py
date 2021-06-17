@@ -180,8 +180,8 @@ class App:
 
     # -------------------------------------------------------------------------
 
-    def set(self, key, value):
-        if key not in self.state or self.state[key] != value:
+    def set(self, key, value, force=False):
+        if key not in self.state or self.state[key] != value or force:
             self.state[key] = value
             for change_handler in self._change_handlers:
                 change_handler.modified(key, value)

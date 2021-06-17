@@ -198,6 +198,18 @@ export default {
       }
       state.stateTS++;
     },
+    APP_DIRTY({ state, dispatch }, key) {
+      if (Array.isArray(key)) {
+        for (let i = 0; i < key.length; i++) {
+          SHARED_STATE_DIRTY_KEYS.add(key[i]);
+        }
+      } else {
+        SHARED_STATE_DIRTY_KEYS.add(key);
+      }
+
+      dispatch('APP_FLUSH_DIRTY_STATE');
+      state.stateTS++;
+    },
     async APP_TRIGGER({ dispatch }, { name, args, kwargs }) {
       dispatch('WS_TRIGGER', { name, args, kwargs });
     },

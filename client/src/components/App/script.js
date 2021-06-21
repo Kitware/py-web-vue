@@ -67,6 +67,17 @@ export default {
       }
       return root.$children[0].$refs[ref];
     },
+    download(filename, content, type = 'application/octet-stream') {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.setAttribute('href', url);
+      anchor.setAttribute('download', filename);
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    },
   },
   provide() {
     return {
@@ -78,6 +89,7 @@ export default {
       isBusy: () => this.busy,
       window: this.window,
       registerDecorator: (decorator) => this.registerDecorator(decorator),
+      download: (filename, content, type) => this.download(filename, content, type),
     };
   },
   mounted() {

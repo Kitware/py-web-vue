@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/Kitware/py-web-vue/compare/v1.2.2...v1.2.3) (2021-06-21)
+
+
+### Bug Fixes
+
+* **download:** add download function helper ([2e45f50](https://github.com/Kitware/py-web-vue/commit/2e45f50b97b1bf438ba1ed6138b380ff024466ce))
+
 ## [1.2.2](https://github.com/Kitware/py-web-vue/compare/v1.2.1...v1.2.2) (2021-06-17)
 
 

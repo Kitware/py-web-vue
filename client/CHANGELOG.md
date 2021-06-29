@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/Kitware/py-web-vue/compare/v1.2.3...v1.2.4) (2021-06-29)
+
+
+### Bug Fixes
+
+* **setAll:** Add new helper for setting many keys at once from html ([d075bd2](https://github.com/Kitware/py-web-vue/commit/d075bd297e68c1044f98b31eb4bc81e5a89d3621))
+
 ## [1.2.3](https://github.com/Kitware/py-web-vue/compare/v1.2.2...v1.2.3) (2021-06-21)
 
 

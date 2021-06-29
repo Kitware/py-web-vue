@@ -49,6 +49,7 @@ export default {
   methods: {
     ...mapActions({
       serverSet: 'APP_SET',
+      setAll: 'APP_SET_ALL',
       serverTrigger: 'APP_TRIGGER',
       clearActions: 'APP_ACTIONS_PROCESSED',
       registerDecorator: 'APP_REGISTER_DECORATOR',
@@ -83,6 +84,7 @@ export default {
     return {
       get: (key) => this.get(key),
       set: (key, value) => this.set(key, value),
+      setAll: (changeSet) => this.setAll(changeSet),
       trigger: (name, args, kwargs) => this.trigger(name, args, kwargs),
       dirty: (key) => this.dirty(key),
       wsClient: this.wsClient,

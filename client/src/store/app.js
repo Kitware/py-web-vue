@@ -198,6 +198,25 @@ export default {
       }
       state.stateTS++;
     },
+    APP_SET_ALL({ state, dispatch}, changeSet) {
+      let dirtyCount = 0;
+      const keys = Object.keys(changeSet);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const value = changeSet[key];
+        SHARED_STATE[key] = value;
+        if (state.serverStateKeys.indexOf(key) !== -1) {
+          SHARED_STATE_DIRTY_KEYS.add(key);
+          dirtyCount++;
+        }
+      }
+
+      if (dirtyCount) {
+        dispatch('APP_FLUSH_DIRTY_STATE');
+      }
+
+      state.stateTS++;
+    },
     APP_DIRTY({ state, dispatch }, key) {
       if (Array.isArray(key)) {
         for (let i = 0; i < key.length; i++) {

@@ -79,26 +79,26 @@ from pywebvue import App
 app = App('State synchronization')
 
 app.state = {
-    'magic.number': 3.14159,
-    'server.message': 'Let start with Pi',
+    'magicNumber': 3.14159,
+    'serverMessage': 'Let start with Pi',
 }
 
-@app.change('magic.number')
+@app.change('magicNumber')
 def update_message():
-    value = app.get('magic.number')
+    value = app.get('magicNumber')
 
     if value > 1:
-        app.set('server.message', 'What a nice positive number')
+        app.set('serverMessage', 'What a nice positive number')
 
     if value < 1:
-        app.set('server.message', 'What a nice negative number')
+        app.set('serverMessage', 'What a nice negative number')
 
     if value ** 2 < 1:
-        app.set('server.message', 'Oh that is a small number')
+        app.set('serverMessage', 'Oh that is a small number')
 
     if value > 20:
-        app.set('magic.number', 3.14159)
-        app.set('server.message', 'Sorry I did not like your number, I prefer Pi')
+        app.set('magicNumber', 3.14159)
+        app.set('serverMessage', 'Sorry I did not like your number, I prefer Pi')
 
 
 app.layout = '''
@@ -110,8 +110,8 @@ app.layout = '''
         </v-app-bar>
         <v-main>
             <v-container fluid>
-                {{ get('magic.number') }} - {{ get('server.message') }}
-                <v-btn @click="set('magic.number', 100 * (Math.random() - 0.5))">Random</v-btn>
+                {{ magicNumber }} - {{ serverMessage }}
+                <v-btn @click="set('magicNumber', 100 * (Math.random() - 0.5))">Random</v-btn>
             </v-container>
         </v-main>
     </v-app>
@@ -266,6 +266,38 @@ You can provide your own favicon by pointing to an image file like below.
 ```
 app.favicon = './favicon-196x196.png'
 ```
+
+### Methods available in HTML
+
+Inside your template it might be convinient to call some helper function. The list below show what is available to you inside your HTML code.
+
+  - `key` read/write variable matching the available state value.
+  - `get(key)` will return the current state value for that key. The `key` can also be used as a read/write variable.
+  - `set(key, value)` will set the new value for that key in the state. You can also write it like `key=value`.
+  - `setAll(changeSet)` allow you to update several keys at once like in the following example `setAll({a:1, b:2})`
+  - `trigger(name, args, kwargs)` allow the JavaScript to call Python methods.
+  - `dirty(key)` allow the client to force push a local state key onto the server. You can provide a single key or provide an Array of keys to send many at once. This is especially useful when mutating sub-section of a value of the state that prevent automatic change detection.
+  - `wsClient` give you access to the communication channel in case a compnent would require to make direct connection to the server.
+  - `isBusy()` will return true/false depending if we have pending server request/update
+  - `window` provide the window namespace.
+  - `registerDecorator(decorator)` allow to dynamically configure decorator to properly handle serializer/deserializer for custom data (i.e: TypedArray/Numpy, File, ...)
+  - `download(filename, content, type)` make the client available to create downloadable file on the client side.
+
+### Methods available in Python
+
+The `app` object let you read or mutate the state using the `get/set` methods. When you want to execute a method when a piece of the state change, you will decorate your function with `@app.change('key1', 'key2')` and inside that function you can `get` the various piece of state you want but also check if a given key was updated before that execution call `dirty(*args)` or `dirty_all(*args)` in case you only want to do something if a given value has changed or not.
+
+On top of the state management helper functions we have other utility functions with specific implementation based on the activated backend.
+
+  - `url(file_path)` return a base64 encoded url string of that given file
+  - `text(file_path)` return the text content of the given file where the relative path is rooted at the app.py file
+  - `id(obj)` return a unique string to identify a given object
+  - `object(id)` return the object based on the string id returned by `id(obj)`. It is a convinient way to reference objects easily across the network.
+  - `mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None)` return a serializable version of a mesh for doing local rendering via a state variable.
+  - `scene(render_window/pv_view)` return a serializable version of a full RenderWindow so it can be mirrored on the client side while still using the state variable.
+  - `push_image(render_window/pv_view)` force image push to client for our remote-rendering component.
+  - `camera(render_window/pv_view)` return a serializable version of our camera
+  - `set_camera(render_window/pv_view, **kwargs)` update our view camera to match the provided arguments
 
 ## Development tools
 

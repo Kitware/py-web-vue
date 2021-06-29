@@ -198,7 +198,7 @@ export default {
       }
       state.stateTS++;
     },
-    APP_SET_ALL({ state, dispatch}, changeSet) {
+    APP_SET_ALL({ state, dispatch }, changeSet) {
       let dirtyCount = 0;
       const keys = Object.keys(changeSet);
       for (let i = 0; i < keys.length; i++) {

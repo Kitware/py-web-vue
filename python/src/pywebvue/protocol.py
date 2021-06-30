@@ -195,6 +195,9 @@ class CoreServer(ServerProtocol):
         self.rpcMethods = {}
         self.app = CoreServer.app
         self.app._backend.configure_protocol(self)
+        for protocol in self.app._protocols_to_register:
+            self.registerLinkProtocol(protocol)
+
         self.updateSecret(CoreServer.authentication_token)
 
         if self.app.on_ready:

@@ -62,6 +62,9 @@ class App:
         # CLI argument handling
         self._parser = None
 
+        # protocols to register
+        self._protocols_to_register = []
+
         # Watch template if debug=True
         if self._debug:
             pass
@@ -181,7 +184,7 @@ class App:
     # -------------------------------------------------------------------------
 
     def set(self, key, value, force=False):
-        if key not in self.state or self.state[key] != value or force:
+        if key not in self.state or self.state[key] != value or force or key not in self._server_keys:
             self.state[key] = value
             for change_handler in self._change_handlers:
                 change_handler.modified(key, value)
@@ -278,6 +281,9 @@ class App:
         return state
 
     # -------------------------------------------------------------------------
+
+    def add_protocol(self, protocol):
+        self._protocols_to_register.append(protocol)
 
     @property
     def protocol(self):

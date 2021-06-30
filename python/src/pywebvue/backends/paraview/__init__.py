@@ -32,7 +32,9 @@ class Backend:
         self._create_protocols = create_protocols
 
     def id(self, pv_proxy):
-        return pv_proxy.GetGlobalIDAsString()
+        if pv_proxy:
+            return pv_proxy.GetGlobalIDAsString()
+        return ''
 
     def object(self, pv_id):
         try:

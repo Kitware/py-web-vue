@@ -14,6 +14,8 @@ class Backend:
         self._app_helper.SetImageEncoding(0)
 
     def id(self, vtk_obj):
+        if not vtk_obj:
+            return ''
         return str(self._app_helper.GetObjectIdMap().GetGlobalId(vtk_obj))
 
     def object(self, vtk_id):

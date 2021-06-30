@@ -1,3 +1,11 @@
+## [1.2.5](https://github.com/Kitware/py-web-vue/compare/v1.2.4...v1.2.5) (2021-06-30)
+
+
+### Bug Fixes
+
+* **id:** Allow the object to be None => '' ([5ef868d](https://github.com/Kitware/py-web-vue/commit/5ef868dc7ddd4046bdb2e9d1942c09f34de17faa))
+* **protocol:** Allow user to register its own protocols ([523f1ff](https://github.com/Kitware/py-web-vue/commit/523f1ff173bf50b0a316a6f553d8edacc78f7664))
+
 ## [1.2.4](https://github.com/Kitware/py-web-vue/compare/v1.2.3...v1.2.4) (2021-06-29)
 
 

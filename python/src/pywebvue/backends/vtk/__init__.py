@@ -15,7 +15,7 @@ class Backend:
 
     def id(self, vtk_obj):
         if not vtk_obj:
-            return ''
+            return ""
         return str(self._app_helper.GetObjectIdMap().GetGlobalId(vtk_obj))
 
     def object(self, vtk_id):
@@ -81,6 +81,7 @@ class Backend:
             vtkWebPublishImageDelivery,
             vtkWebLocalRendering,
         )
+        from .addon_serializer import registerAddOnSerializers
 
         # Initialize vtk application helper
         self._protocol.setSharedObject("app", self._app_helper)
@@ -92,6 +93,8 @@ class Backend:
 
         # Remote rendering - geometry delivery
         self._protocol.registerLinkProtocol(vtkWebLocalRendering())
+        # Add custom serializer ahead of proper vtk integration
+        registerAddOnSerializers()
 
         # Register custom protocols
         if self._create_protocols:

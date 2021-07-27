@@ -184,7 +184,12 @@ class App:
     # -------------------------------------------------------------------------
 
     def set(self, key, value, force=False):
-        if key not in self.state or self.state[key] != value or force or key not in self._server_keys:
+        if (
+            key not in self.state
+            or self.state[key] != value
+            or force
+            or key not in self._server_keys
+        ):
             self.state[key] = value
             for change_handler in self._change_handlers:
                 change_handler.modified(key, value)

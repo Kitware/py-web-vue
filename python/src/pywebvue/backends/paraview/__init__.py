@@ -34,7 +34,7 @@ class Backend:
     def id(self, pv_proxy):
         if pv_proxy:
             return pv_proxy.GetGlobalIDAsString()
-        return ''
+        return ""
 
     def object(self, pv_id):
         try:
@@ -119,6 +119,7 @@ class Backend:
             ParaViewWebLocalRendering,
         )
         from paraview.modules.vtkPVClientWeb import vtkPVWebApplication
+        from ..vtk.addon_serializer import registerAddOnSerializers
 
         # Initialize vtk application helper
         protocol_app = vtkPVWebApplication()
@@ -134,6 +135,9 @@ class Backend:
 
         # Remote rendering - geometry delivery
         self._protocol.registerLinkProtocol(ParaViewWebLocalRendering())
+
+        # Add custom serializer ahead of proper vtk integration
+        registerAddOnSerializers()
 
         # Register custom protocols
         if self._create_protocols:

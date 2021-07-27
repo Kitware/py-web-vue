@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/Kitware/py-web-vue/compare/v1.2.5...v1.2.6) (2021-07-27)
+
+
+### Bug Fixes
+
+* **SynchView:** Add support for CubeAxesActor and ScalarBarActor ([19c0ac5](https://github.com/Kitware/py-web-vue/commit/19c0ac50ed105c36ce03a01c8023adda189fbe38))
+
 ## [1.2.5](https://github.com/Kitware/py-web-vue/compare/v1.2.4...v1.2.5) (2021-06-30)
 
 

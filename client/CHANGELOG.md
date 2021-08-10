@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Kitware/py-web-vue/compare/v1.2.6...v1.3.0) (2021-08-10)
+
+
+### Features
+
+* **wslink:** update to wslink>=1.0.2 ([7fc4ce3](https://github.com/Kitware/py-web-vue/commit/7fc4ce319cd0b86e72844325c9d4cd371e7cf753))
+
 ## [1.2.6](https://github.com/Kitware/py-web-vue/compare/v1.2.5...v1.2.6) (2021-07-27)
 
 

@@ -11,8 +11,6 @@ from wslink import register as exportRpc
 from wslink.websocket import ServerProtocol
 from wslink.websocket import LinkProtocol
 
-from twisted.internet import reactor
-
 # Only used for debug
 import json
 

@@ -324,9 +324,59 @@ pip install pywebvue # <-- using release rather than local version
 # pip install -e ./python/ # <-- for developing py-web-vue
 ```
 
+__If you are using VTK backend__
+
+```
+# Only VTK nightly work with PyWebVue until VTK>=9.1 which will be the first compatible release
+# PyWebVue>=1.3 require a VTK version newer than 2021-08-11 (Not yet available at the time of writting)
+# PyWebVue<1.3 can use the any nightly one like the one below
+pip install vtk==9.0.20210717.dev0
+```
+
+__If you are using ParaView backend__
+
+Only ParaView nightly or 5.10+ support PyWebVue. You can download a nightly binary of ParaView [here](https://www.paraview.org/download/?version=nightly).
+
+ParaView 5.10 will embed PyWebVue and would not require any additional python package in a virtual environment. This should also be true with nightly after 2021-08-23.
+But until then, you will need a virtual-environment with `pywebvue==1.2.6`.
+
+```
+pip install pywebvue==1.2.6
+```
+
+
 ### Run demo
 
 ```
 source ./py-env/bin/activate
 python ./examples/.../app.py
 ```
+
+## Command lines arguments
+
+A default PyWebVue application support the following set of command line paramenters.
+
+```
+PyWebVue server By Kitware
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --launcher            Start launcher process rather than single process server
+  --deploy DEPLOY       Prepare a deployable directory
+  --name NAME           Name to use for that application in the deploy tree
+  -d, --debug           log debugging messages to stdout
+  -s, --nosignalhandlers
+                        Prevent Twisted to install the signal handlers so it can be started inside a thread.
+  -i HOST, --host HOST  the interface for the web-server to listen on (default: localhost)
+  -p PORT, --port PORT  port number for the web-server to listen on (default: 8080)
+  -t TIMEOUT, --timeout TIMEOUT
+                        timeout for reaping process on idle in seconds (default: 300s)
+  -a AUTHKEY, --authKey AUTHKEY
+                        Authentication key for clients to connect to the WebSocket.
+```
+
+In local setup 1-process/1-client, we usually only use `--port 8080` and sometime `--host 0.0.0.0` when the default `localhost` value is not enough to allow external connection to connect to the process.
+
+For basic usage of local multi-clients, you can use the `--launcher` argument that will automatically start a new process per connection while dynamically binding more port on the host.
+
+For real deployment, you can build a directory structure for your app that can be used by our ParaViewWeb docker image using the `--deploy` and `--name` paramters. The generated directory will get you 90% setup and a little tune-up might be required to properly support such deploymement.

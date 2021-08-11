@@ -9,7 +9,7 @@ For this example you need to use regular `python` with the current Python librar
 ```
 virtualenv py-lib
 source ./py-lib/bin/activate
-pip install -e ./python
+pip install pywebvue
 ```
 
 ### Run application

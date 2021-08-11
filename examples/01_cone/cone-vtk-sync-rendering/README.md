@@ -3,17 +3,9 @@
 For this example you need to use `pvpython` or `vtkpython` that comes with ParaView or VTK
 along with a virtual environment with the current Python library.
 
-## Setup
-
-### Create virtual environment
-
-```
-virtualenv py-lib
-source ./py-lib/bin/activate
-pip install -e ./python
-```
-
 ### Run application
+
+Follow [that setup section](https://github.com/kitware/py-web-vue#install-python-package-in-venv) for running a PyWebVue application.
 
 ```
 export DISPLAY=:1

@@ -305,16 +305,6 @@ How to develop your HTML content fast and easily. Add `debug=True` when building
 
 ## Running an example from repo
 
-### Build client
-
-Only needed in case you are using the `# <-- for developing py-web-vue` path below.
-
-```
-cd client
-npm i
-npm run build
-```
-
 ### Install Python package in venv
 
 ```
@@ -343,7 +333,6 @@ But until then, you will need a virtual-environment with `pywebvue==1.2.6`.
 ```
 pip install pywebvue==1.2.6
 ```
-
 
 ### Run demo
 

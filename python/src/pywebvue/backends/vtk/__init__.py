@@ -22,6 +22,9 @@ class Backend:
         return self._app_helper().GetObjectIdMap().GetVTKObject(int(vtk_id))
 
     def mesh(self, dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
+        if dataset.IsA('vtkAlgorithm'):
+            dataset.Update()
+            dataset = dataset.GetOutput()
         return mesh(
             dataset,
             field_to_keep=field_to_keep,

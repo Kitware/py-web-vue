@@ -48,6 +48,7 @@ class Backend:
         )
 
     def mesh(self, proxy, field_to_keep=None, point_arrays=None, cell_arrays=None):
+        proxy.UpdatePipeline()
         source = proxy.GetClientSideObject()
         dataset = source.GetOutput()
         return mesh(

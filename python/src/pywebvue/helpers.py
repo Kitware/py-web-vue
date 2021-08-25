@@ -22,15 +22,15 @@ class RemoteLocalView:
 
         # init keys
         self.ref_key = namespace if namespace else ref
-        self.mode_key = f"{namespace}.mode" if namespace else "mode"
-        self.scene_key = f"{namespace}.scene" if namespace else "scene"
-        self.camera_key = f"{namespace}.camera" if namespace else "camera"
-        self.animation_key = f"{namespace}.animate" if namespace else "animate"
+        self.mode_key = f"{namespace}Mode" if namespace else "mode"
+        self.scene_key = f"{namespace}Scene" if namespace else "scene"
+        self.camera_key = f"{namespace}Camera" if namespace else "camera"
+        self.animation_key = f"{namespace}Animate" if namespace else "animate"
 
         # Attach annotations
         app.trigger(self.camera_key)(self.update_camera)
-        app.trigger(f"{self.animation_key}.start")(self.start_animation)
-        app.trigger(f"{self.animation_key}.stop")(self.stop_animation)
+        app.trigger(f"{self.animation_key}Start")(self.start_animation)
+        app.trigger(f"{self.animation_key}Stop")(self.stop_animation)
 
     def start_animation(self):
         self._app.set(self.mode_key, "remote")

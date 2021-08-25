@@ -74,14 +74,14 @@ class App:
     # -------------------------------------------------------------------------
 
     def add_state_dependencies(self, *_args):
-        '''
+        """
         This method needs to be call explicitly if the server expect to use
         a state variable that can be updated by the client but that is not
         listed inside any @app.change(). This allow the server to properly
         describe to the client its dependencies at initialization time.
         This usually happen when app.get() is called inside methods and
         does not need to leverage the @app.change() callback on itself.
-        '''
+        """
         for name in _args:
             self._server_keys.add(name)
 

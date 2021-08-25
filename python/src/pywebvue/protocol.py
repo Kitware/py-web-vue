@@ -260,7 +260,10 @@ class CoreServer(ServerProtocol):
     @exportRpc("ws.vue.trigger")
     def trigger(self, name, args, kwargs):
         with self.app.capture_changes():
-            self.app._triggers[name](*args, **kwargs)
+            if name in self.app._triggers:
+                self.app._triggers[name](*args, **kwargs)
+            else:
+                print(f'Tigger {name} seems to be missing')
 
     # ---------------------------------------------------------------
 

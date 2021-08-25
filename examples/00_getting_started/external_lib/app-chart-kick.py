@@ -1,28 +1,10 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import pywebvue
 
 app = pywebvue.App("External chart library - CDN")
-app.serve = {
-    "static": "./static",
-}
 app.scripts = [
     "https://unpkg.com/vue-chartkick@0.6.1",
-    "https://unpkg.com/chart.js",
-    "/static/my_chart_kick.js",
+    "https://unpkg.com/chart.js@2.9.3",
 ]
-app.vue_use = ["vuetify", "charts_use"]
 
 app.state = {
     "line": {"2017-01-01": 11, "2017-01-02": 6},
@@ -36,7 +18,7 @@ app.state = {
 app.layout = """
     <v-app>
       <v-app-bar app>
-        <v-icon v-text="`$menu`" class="mr-4"/> Fusion Charts
+        <v-icon v-text="`$menu`" class="mr-4"/> Chart Kick example
         <v-spacer />
       </v-app-bar>
       <v-main>
@@ -46,18 +28,18 @@ app.layout = """
 
             </v-col>
             <v-col cols="6">
-                <scatter-chart :data="get('scatter')" xtitle="Size" ytitle="Population" />
+                <scatter-chart :data="scatter" xtitle="Size" ytitle="Population" />
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="4">
-                <pie-chart :data="get('pieData')" />
+                <pie-chart :data="pieData" />
             </v-col>
             <v-col cols="4">
-                <column-chart :data="get('columnData')" />
+                <column-chart :data="columnData" />
             </v-col>
             <v-col cols="4">
-                <bar-chart :data="get('bar')" />
+                <bar-chart :data="bar" />
             </v-col>
           </v-row>
         </v-container>

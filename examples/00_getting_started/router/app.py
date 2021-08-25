@@ -1,19 +1,7 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import pywebvue
 
 app = pywebvue.App("Routing example")
+app.vue_use += ["router"]
 
 app.routes = [
     {
@@ -62,8 +50,6 @@ app.layout = """
       </v-main>
     </v-app>
 """
-
-app.vue_use = ["vuetify", "router"]
 
 # -----------------------------------------------------------------------------
 # MAIN

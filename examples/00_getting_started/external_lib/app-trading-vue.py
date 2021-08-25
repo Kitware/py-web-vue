@@ -1,23 +1,10 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import pywebvue
 
 app = pywebvue.App("External chart library - CDN")
 app.scripts = [
     "https://unpkg.com/trading-vue-js",
 ]
-app.vue_use = ["vuetify", "TradingVueJs.TradingVue"]
+app.vue_use += ["TradingVueJs.TradingVue"]
 
 app.state = {
     "chartData": {
@@ -34,14 +21,14 @@ app.state = {
 app.layout = """
     <v-app>
       <v-app-bar app>
-        <v-icon v-text="`$menu`" class="mr-4"/> Fusion Charts
+        <v-icon v-text="`$menu`" class="mr-4"/> Trading Vue Charts
         <v-spacer />
       </v-app-bar>
       <v-main>
         <v-container fluid>
           <trading-vue
             titleTxt="Simple external dependency example"
-            :data="get('chartData')"
+            :data="chartData"
             :width="window.innerWidth - 40"
             :height="window.innerHeight - 40 - 64"
           />

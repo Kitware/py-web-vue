@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import pywebvue
 import random
 
@@ -37,7 +24,7 @@ def generate_content():
         <v-btn icon @click="trigger('updateLayout')" class="mr-2">
             <v-icon>mdi-dice-{idx + 1}</v-icon>
         </v-btn> Random Quote Generator
-        {{{{ get('idx') + 1 }}}}
+        {{{{ idx + 1 }}}}
       </v-app-bar>
       <v-main>
         <v-container fluid>
@@ -52,7 +39,7 @@ def generate_content():
             <v-col cols="6">
               <v-card elevation="2" outlined shaped>
                 <v-card-text>
-                  {{{{ get('quote') }}}}
+                  {{{{ quote }}}}
                 </v-card-text>
               </v-card>
             </v-col>
@@ -69,8 +56,6 @@ app.state = {
     "idx": 0,
     "quote": "nothing...",
 }
-
-app.vue_use = ["vuetify"]
 
 # -----------------------------------------------------------------------------
 # Callbacks

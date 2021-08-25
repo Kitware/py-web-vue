@@ -49,7 +49,7 @@ app.state = {
     "interactorSettings": VIEW_INTERACT,
     "pickingModes": [],
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

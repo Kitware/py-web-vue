@@ -63,7 +63,7 @@ app.state = {
     # View interactions
     "interactorSettings": VIEW_INTERACT,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
@@ -97,7 +97,7 @@ extract.SetInputConnection(reader.GetOutputPort())
 
 threshold = vtkThreshold()
 threshold.SetInputConnection(extract.GetOutputPort())
-threshold.ThresholdByUpper(0)
+threshold.SetLowerThreshold(0)
 threshold.SetInputArrayToProcess(0, 0, 0, 1, "vtkInsidedness")  # 1 => cell
 
 # -----------------------------------------------------------------------------

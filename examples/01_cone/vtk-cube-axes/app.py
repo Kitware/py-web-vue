@@ -1,5 +1,3 @@
-import sys
-
 import os
 from pywebvue import App
 
@@ -34,7 +32,7 @@ app.layout = "./template.html"
 app.state = {
     "resolution": 6,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
@@ -80,18 +78,15 @@ renderer.AddActor(scalar_bar)
 renderer.ResetCamera()
 renderWindow.Render()
 
-app.active_objects = {
-    "VIEW": renderWindow,
-}
-
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
 
 @app.change("resolution")
 def update_cone():
-    cone_source.SetResolution(app.get("resolution"))
-    cone_source.SetHeight(app.get("resolution") / 6.0)
+    resolution = app.get("resolution")
+    cone_source.SetResolution(resolution)
+    cone_source.SetHeight(resolution / 6.0)
     cone_source.Update()
     bounds = cone_source.GetOutput().GetBounds()
     cube_axes.SetBounds(bounds)

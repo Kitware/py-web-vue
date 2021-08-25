@@ -24,7 +24,7 @@ app.layout = "./template.html"
 app.state = {
     "resolution": 6,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

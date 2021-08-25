@@ -10,8 +10,7 @@
     <v-spacer />
     <v-slider
       hide-details
-      :value="get('resolution')"
-      @input="set('resolution', $event)"
+      v-model="resolution"
       :max="60"
       :min="3"
       :step="1"
@@ -24,7 +23,7 @@
   </v-app-bar>
   <v-main>
     <v-container fluid fill-height class="pa-0">
-      <vtk-sync-view ref="view" :wsClient="wsClient" :viewState="get('scene')" />
+      <vtk-sync-view ref="view" :wsClient="wsClient" :viewState="scene" />
     </v-container>
   </v-main>
 </v-app>

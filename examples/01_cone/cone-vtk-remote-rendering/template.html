@@ -10,8 +10,7 @@
     <v-spacer />
     <v-slider
       hide-details
-      :value="get('resolution')"
-      @input="set('resolution', $event)"
+      v-model="resolution"
       :max="60"
       :min="3"
       :step="1"

@@ -13,6 +13,7 @@ if "--virtual-env" in sys.argv:
 
 from pywebvue import App
 
+# Need ParaView 5.10+ if you don't want to use a virtual-environment
 from paraview import simple
 
 # -----------------------------------------------------------------------------
@@ -24,7 +25,7 @@ app.layout = "./template.html"
 app.state = {
     "resolution": 6,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline
@@ -40,7 +41,6 @@ cone = simple.Cone()
 @app.change("resolution")
 def update_cone():
     cone.Resolution = app.get("resolution")
-    cone.UpdatePipeline()
     app.set("cone", app.mesh(cone))
 
 

@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 from pywebvue import App
 
 # -----------------------------------------------------------------------------
@@ -24,7 +11,7 @@ app.state = {
     "logo": app.url("./logo.svg"),
     "resolution": 6,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # MAIN

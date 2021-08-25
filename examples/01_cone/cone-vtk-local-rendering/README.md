@@ -1,6 +1,6 @@
 ## Getting started
 
-For this example you need to use regular `python` with the current Python library.
+For this example you need VTK inside your `python`.
 
 ### Run application
 

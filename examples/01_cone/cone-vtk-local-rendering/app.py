@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 from pywebvue import App
 
 from vtkmodules.vtkFiltersSources import vtkConeSource
@@ -24,7 +11,7 @@ app.layout = "./template.html"
 app.state = {
     "resolution": 6,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
@@ -40,8 +27,7 @@ cone_generator = vtkConeSource()
 @app.change("resolution")
 def update_cone():
     cone_generator.SetResolution(app.get("resolution"))
-    cone_generator.Update()
-    app.set("cone", app.mesh(cone_generator.GetOutput()))
+    app.set("cone", app.mesh(cone_generator))
 
 
 # -----------------------------------------------------------------------------

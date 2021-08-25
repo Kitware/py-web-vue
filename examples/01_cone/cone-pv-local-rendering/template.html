@@ -10,8 +10,7 @@
     <v-spacer />
     <v-slider
       hide-details
-      :value="get('resolution')"
-      @input="set('resolution', $event)"
+      v-model="resolution"
       :max="60"
       :min="3"
       :step="1"
@@ -25,8 +24,8 @@
   <v-main>
     <v-container fluid fill-height class="pa-0">
       <vtk-view ref="view">
-        <vtk-geometry-representation v-if="get('cone')">
-          <vtk-polydata v-bind="get('cone').mesh" />
+        <vtk-geometry-representation v-if="cone">
+          <vtk-polydata v-bind="cone.mesh" />
         </vtk-geometry-representation>
       </vtk-view>
     </v-container>

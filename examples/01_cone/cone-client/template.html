@@ -1,7 +1,7 @@
 <v-app>
   <v-app-bar app>
     <img
-      :src="get('logo')"
+      :src="logo"
       @click="$refs.view.resetCamera()"
       style="height: 35px"
       class="pr-4"
@@ -10,8 +10,7 @@
     <v-spacer />
     <v-slider
       hide-details
-      :value="get('resolution')"
-      @input="set('resolution', $event)"
+      v-model="resolution"
       :max="60"
       :min="3"
       :step="1"
@@ -28,7 +27,7 @@
         <vtk-geometry-representation>
           <vtk-algorithm
             vtkClass="vtkConeSource"
-            :state="{ resolution: get('resolution') }"
+            :state="{ resolution }"
           />
         </vtk-geometry-representation>
       </vtk-view>

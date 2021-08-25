@@ -29,5 +29,5 @@ setup(
     packages=find_packages("src", exclude=("tests.*", "tests")),
     package_dir={"": "src"},
     package_data={"pywebvue": ["www/*", "www/*/*"]},
-    install_requires=["wslink>=1.0.2"],
+    install_requires=["wslink>=1.0.7"],
 )

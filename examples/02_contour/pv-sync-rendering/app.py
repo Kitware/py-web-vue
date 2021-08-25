@@ -34,7 +34,7 @@ app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

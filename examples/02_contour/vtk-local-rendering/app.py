@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import os
 from pywebvue import App
 
@@ -24,20 +11,18 @@ from vtkmodules.vtkFiltersCore import vtkContourFilter
 # Print state size when pushed to client
 DEBUG = False
 
-# Ask for new contour while dragging
-INTERACTIVE_SLIDER = False
-
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
 
 app = App("VTK contour - Local rendering", backend="vtk", debug=DEBUG)
-app.layout = "./template-input.html" if INTERACTIVE_SLIDER else "./template-change.html"
+
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
+    "interactive": False,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
@@ -73,8 +58,14 @@ contour.Update()
 @app.change("contour_value")
 def update_contour():
     contour.SetValue(0, app.get("contour_value"))
-    contour.Update()
-    app.set("contour", app.mesh(contour.GetOutput()))
+    app.set("contour", app.mesh(contour))
+
+
+@app.change("interactive")
+def update_template():
+    app.layout = (
+        "./template-input.html" if app.get("interactive") else "./template-change.html"
+    )
 
 
 # -----------------------------------------------------------------------------
@@ -83,5 +74,6 @@ def update_contour():
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    update_template()
     app.on_ready = update_contour
     app.run_server()

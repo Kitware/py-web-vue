@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import os
 from pywebvue import App
 from pywebvue.helpers import RemoteLocalView
@@ -38,10 +25,10 @@ app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
-    "demo.mode": "local",
+    "demoMode": "local",
     "override": "auto",
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

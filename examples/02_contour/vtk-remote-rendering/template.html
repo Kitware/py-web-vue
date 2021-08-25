@@ -8,12 +8,13 @@
     </v-icon>
     <span class="title">Contour Application - Remote rendering</span>
     <v-spacer />
+    <v-switch hide-details v-model="interactive" label="Update while dragging" />
     <v-slider
       hide-details
-      :value="get('contour_value')"
-      @change="set('contour_value', $event)"
-      :max="get('data_range')[1]"
-      :min="get('data_range')[0]"
+      v-model="contour_value"
+      @change="trigger('commit_changes')"
+      :max="data_range[1]"
+      :min="data_range[0]"
       :step="1"
       style="max-width: 300px"
     />

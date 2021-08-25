@@ -10,11 +10,10 @@
     <v-spacer />
     <v-slider
       hide-details
-      :value="get('contour_value')"
-      @input="set('contour_value', $event)"
+      v-model="contour_value"
       @change="trigger('compute_normals')"
-      :max="get('data_range')[1]"
-      :min="get('data_range')[0]"
+      :max="data_range[1]"
+      :min="data_range[0]"
       :step="1"
       style="max-width: 300px"
     />
@@ -26,7 +25,7 @@
   </v-app-bar>
   <v-main>
     <v-container fluid fill-height class="pa-0">
-      <vtk-sync-view ref="view" :wsClient="wsClient" :viewState="get('scene')" />
+      <vtk-sync-view ref="view" :wsClient="wsClient" :viewState="scene" />
     </v-container>
   </v-main>
 </v-app>

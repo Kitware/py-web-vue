@@ -8,12 +8,12 @@
     </v-icon>
     <span class="title">Contour Application</span>
     <v-spacer />
+    <v-switch hide-details v-model="interactive" label="Update while dragging" />
     <v-slider
       hide-details
-      :value="get('contour_value')"
-      @input="set('contour_value', $event)"
-      :max="get('data_range')[1]"
-      :min="get('data_range')[0]"
+      v-model="contour_value"
+      :max="data_range[1]"
+      :min="data_range[0]"
       :step="1"
       style="max-width: 300px"
     />
@@ -26,8 +26,8 @@
   <v-main>
     <v-container fluid fill-height class="pa-0">
       <vtk-view ref="view">
-        <vtk-geometry-representation v-if="get('contour')">
-          <vtk-polydata v-bind="get('contour').mesh" />
+        <vtk-geometry-representation v-if="contour">
+          <vtk-polydata v-bind="contour.mesh" />
         </vtk-geometry-representation>
       </vtk-view>
     </v-container>

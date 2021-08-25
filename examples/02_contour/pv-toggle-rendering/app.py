@@ -26,7 +26,7 @@ app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
-    "view.mode": "local",
+    "viewMode": "local",
     "override": "auto",
 }
 app.vue_use = ["vuetify", "vtk"]
@@ -87,7 +87,7 @@ def push_geometry():
 
 @app.trigger("start")
 def start_animation():
-    app.set("view.mode", "remote")
+    app.set("viewMode", "remote")
     app.protocol_call("viewport.image.push.quality", "-1", 80)
     app.protocol_call("viewport.image.animation.start", "-1")
 
@@ -99,7 +99,7 @@ def start_animation():
 def stop_animation():
     app.protocol_call("viewport.image.animation.stop", "-1")
     app.protocol_call("viewport.image.push.quality", "-1", 100)
-    app.set("view.mode", "local")
+    app.set("viewMode", "local")
     push_geometry()
 
 

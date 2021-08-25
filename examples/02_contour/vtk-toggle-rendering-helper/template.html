@@ -10,7 +10,7 @@
 
     <v-spacer />
 
-    <v-btn-toggle :value="get('override')" @change="set('override', $event)" dense mandatory>
+    <v-btn-toggle v-model="override" dense mandatory>
       <v-btn value="auto">
         <v-icon>mdi-autorenew</v-icon>
       </v-btn>
@@ -26,14 +26,13 @@
     <v-spacer />
     <v-slider
       hide-details
-      :value="get('contour_value')"
-      @input="set('contour_value', $event)"
-      :max="get('data_range')[1]"
-      :min="get('data_range')[0]"
+      v-model="contour_value"
+      :max="data_range[1]"
+      :min="data_range[0]"
       :step="1"
       style="max-width: 300px"
-      @start="trigger('demo.animate.start')"
-      @end="trigger('demo.animate.stop')"
+      @start="trigger('demoAnimateStart')"
+      @end="trigger('demoAnimateStop')"
     />
     <v-switch hide-details v-model="$vuetify.theme.dark" />
     <v-btn icon @click="$refs.demo.resetCamera()">
@@ -46,7 +45,7 @@
       <vtk-remote-local-view
         ref="demo"
         namespace="demo"
-        :mode="get('override') === 'auto' ? get('demo.mode') : get('override')"
+        :mode="override === 'auto' ? demoMode : override"
 
         id="-1"
         :wsClient="wsClient"

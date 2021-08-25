@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import os
 from pywebvue import App
 
@@ -37,10 +24,10 @@ app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
-    "view.mode": "local",
+    "viewMode": "local",
     "override": "auto",
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline
@@ -106,7 +93,7 @@ def update_contour():
 
 
 def push_geometry():
-    app.set("view.scene", app.scene(renderWindow))
+    app.set("viewScene", app.scene(renderWindow))
 
 
 # -----------------------------------------------------------------------------
@@ -115,7 +102,7 @@ def push_geometry():
 @app.trigger("start")
 def start_animation():
     view_id = app.id(renderWindow)
-    app.set("view.mode", "remote")
+    app.set("viewMode", "remote")
     app.protocol_call("viewport.image.push.quality", view_id, 80)
     app.protocol_call("viewport.image.animation.start", view_id)
 
@@ -128,14 +115,14 @@ def stop_animation():
     view_id = app.id(renderWindow)
     app.protocol_call("viewport.image.animation.stop", view_id)
     app.protocol_call("viewport.image.push.quality", view_id, 100)
-    app.set("view.mode", "local")
+    app.set("viewMode", "local")
     push_geometry()
 
 
 # -----------------------------------------------------------------------------
 
 
-@app.trigger("view.camera")
+@app.trigger("viewCamera")
 def update_camera(camera=None):
     if camera:
         app.set_camera(renderWindow, **camera)

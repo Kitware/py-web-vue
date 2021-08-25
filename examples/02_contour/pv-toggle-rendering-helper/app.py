@@ -26,10 +26,10 @@ app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
-    "demo.mode": "local",
+    "demoMode": "local",
     "override": "auto",
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

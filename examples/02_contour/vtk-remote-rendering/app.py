@@ -1,16 +1,3 @@
-import sys
-
-# -----------------------------------------------------------------------------
-# Virtual Environment handling
-# -----------------------------------------------------------------------------
-
-if "--virtual-env" in sys.argv:
-    virtualEnvPath = sys.argv[sys.argv.index("--virtual-env") + 1]
-    virtualEnv = virtualEnvPath + "/bin/activate_this.py"
-    exec(open(virtualEnv).read(), {"__file__": virtualEnv})
-
-# -----------------------------------------------------------------------------
-
 import os
 from pywebvue import App
 
@@ -35,20 +22,18 @@ import vtkmodules.vtkRenderingOpenGL2
 # Print state size when pushed to client
 DEBUG = False
 
-# Ask for new contour while dragging
-INTERACTIVE_SLIDER = True
-
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
 
 app = App("VTK contour - Remote rendering", backend="vtk", debug=DEBUG)
-app.layout = "./template-input.html" if INTERACTIVE_SLIDER else "./template-change.html"
+app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
+    "interactive": False,
 }
-app.vue_use = ["vuetify", "vtk"]
+app.vue_use += ["vtk"]
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
@@ -103,12 +88,16 @@ app.active_objects = {
 # Callbacks
 # -----------------------------------------------------------------------------
 
+@app.change("contour_value", "interactive")
+def update_contour(force=False):
+    if app.get("interactive") or force:
+        contour.SetValue(0, app.get("contour_value"))
+        app.push_image(renderWindow)
 
-@app.change("contour_value")
-def update_contour():
-    contour.SetValue(0, app.get("contour_value"))
-    app.push_image(renderWindow)
 
+@app.trigger("commit_changes")
+def commit_changes():
+    update_contour(True)
 
 # -----------------------------------------------------------------------------
 # MAIN
@@ -116,5 +105,7 @@ def update_contour():
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.on_ready = update_contour
+    # Useful if 'interactive' was not listed in a @change()
+    # app.add_state_dependencies('interactive')
+    app.on_ready = commit_changes
     app.run_server()

@@ -1,3 +1,19 @@
+# [1.4.0](https://github.com/Kitware/py-web-vue/compare/v1.3.0...v1.4.0) (2021-08-25)
+
+
+### Bug Fixes
+
+* **client:** Update vtk to use the camel namespace ([c62f2ee](https://github.com/Kitware/py-web-vue/commit/c62f2ee3c1eb6ba8c3dfa4909c42bfb90ec4b36b))
+* **mesh:** make mesh() more user friendly ([7586b7a](https://github.com/Kitware/py-web-vue/commit/7586b7a2c5279a19bf085b78153c388e13a5ed7c))
+* **server:** Update vtk to use the camel namespace ([d75f50f](https://github.com/Kitware/py-web-vue/commit/d75f50fea96b0deaf301563de0ae63b6df7b0d74))
+* **trigger:** Warn user when a trigger is missing ([b224017](https://github.com/Kitware/py-web-vue/commit/b22401706a59934d56160c1ff946744a03eb9b3d))
+* **wslink:** depend on 1.0.7 to fix a serve issue ([9e7ae40](https://github.com/Kitware/py-web-vue/commit/9e7ae40df0c63c7f66fb645db098de25e37598f8))
+
+
+### Features
+
+* **add_state_dependencies:** Add new method on app ([5f4eadc](https://github.com/Kitware/py-web-vue/commit/5f4eadcef0110c9be8230d8b93b39d4ca76f5b6a))
+
 # [1.3.0](https://github.com/Kitware/py-web-vue/compare/v1.2.6...v1.3.0) (2021-08-10)
 
 

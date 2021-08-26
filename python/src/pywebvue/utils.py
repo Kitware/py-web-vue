@@ -4,6 +4,7 @@ import mimetypes
 import time
 import threading
 import inspect
+import asyncio
 
 mimetypes.init()
 
@@ -65,6 +66,7 @@ def validate(txt, method, root):
 
 def monitor(key, txt, method, root):
     global MONITORS
+    loop = asyncio.get_event_loop()
     full_path = abs_path(txt, root)
     if os.path.isfile(full_path):
         if key in MONITORS:
@@ -78,16 +80,16 @@ def monitor(key, txt, method, root):
             "running": True,
         }
 
-        def update():
+        def update(loop):
             last_ts = os.stat(full_path).st_mtime
             while MONITORS[key]["running"]:
                 time.sleep(1)
                 ts = os.stat(full_path).st_mtime
                 if ts != last_ts:
                     last_ts = ts
-                    method(read_file_as_txt(full_path))
+                    loop.call_soon_threadsafe(method, read_file_as_txt(full_path))
 
-        thread = threading.Thread(target=update, args=())
+        thread = threading.Thread(target=update, args=(loop,))
         thread.daemon = True
         thread.start()
         MONITORS[key]["thread"] = thread

@@ -9,6 +9,7 @@ from .utils import (
     abs_path,
     monitor,
     clean_state,
+    clean_value,
     base_directory,
 )
 from .backends import create_backend
@@ -70,10 +71,10 @@ class App:
             pass
 
     # -------------------------------------------------------------------------
-    # Annotations
+    # State management helpers
     # -------------------------------------------------------------------------
 
-    def add_state_dependencies(self, *_args):
+    def listen(self, *_args):
         """
         This method needs to be call explicitly if the server expect to use
         a state variable that can be updated by the client but that is not
@@ -84,6 +85,28 @@ class App:
         """
         for name in _args:
             self._server_keys.add(name)
+
+    def flush_state(self, *_args):
+        state_to_flush = {}
+        if len(_args):
+            for key in _args:
+                state_to_flush[key] = clean_value(self.state[key])
+        else:
+            # flush any pending ChangeHandler
+            for change_handler in self._change_handlers:
+                state_to_flush.update(change_handler.modified_state)
+
+        if self.protocol:
+            self.protocol.push_state_change(state_to_flush)
+
+    def flush_actions(self):
+        actions_to_flush = []
+        for change_handler in self._change_handlers:
+            actions_to_flush.extend(change_handler.actions)
+            change_handler.clear_actions()
+
+        if self.protocol and len(actions_to_flush):
+            self.protocol.push_actions(actions_to_flush)
 
     # -------------------------------------------------------------------------
     # Annotations

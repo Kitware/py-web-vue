@@ -181,6 +181,27 @@ class ChangeHandler:
 
         self._actions.append(action)
 
+    def clear_actions(self):
+        self._actions.clear()
+
+    @property
+    def modified_state(self):
+        modified_state = {}
+        for key in self._all_modified_keys:
+            if (
+                key in self._known_state
+                and self._known_state[key] == self._app.state[key]
+            ):
+                pass
+            else:
+                modified_state[key] = clean_value(self._app.state[key])
+
+        return modified_state
+
+    @property
+    def actions(self):
+        return self._actions
+
     def __enter__(self):
         self._app._dirty_set = self._known_state
         if self not in self._app._change_handlers:
@@ -207,16 +228,7 @@ class ChangeHandler:
         self._app._dirty_set = None
 
         if self._protocol:
-            modified_state = {}
-            for key in self._all_modified_keys:
-                if (
-                    key in self._known_state
-                    and self._known_state[key] == self._app.state[key]
-                ):
-                    pass
-                else:
-                    modified_state[key] = clean_value(self._app.state[key])
-            self._protocol.push_state_change(modified_state)
+            self._protocol.push_state_change(self.modified_state)
 
             if len(self._actions):
                 self._protocol.push_actions(self._actions)

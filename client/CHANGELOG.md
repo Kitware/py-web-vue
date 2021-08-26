@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/Kitware/py-web-vue/compare/v1.4.1...v1.5.0) (2021-08-26)
+
+
+### Bug Fixes
+
+* **debug:** Allow layout update when using async ([724b26d](https://github.com/Kitware/py-web-vue/commit/724b26d766995ae801373a1f990e0b34162d246d))
+* **trigger:** Allow triggers function to be async ([305fd23](https://github.com/Kitware/py-web-vue/commit/305fd2336c34f6a479b64c2c5d9549933dd90fcc))
+
+
+### Features
+
+* **modules:** Add infrastructure to enable/disable modules ([b25fbc1](https://github.com/Kitware/py-web-vue/commit/b25fbc182076c09293f6f35f9d1ea7f0496a65ae))
+
 ## [1.4.1](https://github.com/Kitware/py-web-vue/compare/v1.4.0...v1.4.1) (2021-08-26)
 
 

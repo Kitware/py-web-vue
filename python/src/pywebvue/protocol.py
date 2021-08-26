@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import json
+import asyncio
 
 from pywebvue.utils import abs_path
 
@@ -258,10 +259,10 @@ class CoreServer(ServerProtocol):
     # ---------------------------------------------------------------
 
     @exportRpc("ws.vue.trigger")
-    def trigger(self, name, args, kwargs):
+    async def trigger(self, name, args, kwargs):
         with self.app.capture_changes():
             if name in self.app._triggers:
-                self.app._triggers[name](*args, **kwargs)
+                await asyncio.coroutine(self.app._triggers[name])(*args, **kwargs)
             else:
                 print(f"Tigger {name} seems to be missing")
 

@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/Kitware/py-web-vue/compare/v1.4.0...v1.4.1) (2021-08-26)
+
+
+### Bug Fixes
+
+* **python:** Update API for State management ([1f4a18d](https://github.com/Kitware/py-web-vue/commit/1f4a18d1281e6d11bbef2882cafcb289b76d2564))
+
 # [1.4.0](https://github.com/Kitware/py-web-vue/compare/v1.3.0...v1.4.0) (2021-08-25)
 
 

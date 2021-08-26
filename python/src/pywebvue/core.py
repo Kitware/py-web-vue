@@ -66,9 +66,12 @@ class App:
         # protocols to register
         self._protocols_to_register = []
 
-        # Watch template if debug=True
-        if self._debug:
-            pass
+        # Use ./template.html if available
+        if os.path.exists(abs_path("./template.html", self._root)):
+            self.layout = "./template.html"
+
+    def __getitem__(self, item):
+        return getattr(self, item)
 
     # -------------------------------------------------------------------------
     # State management helpers
@@ -107,6 +110,30 @@ class App:
 
         if self.protocol and len(actions_to_flush):
             self.protocol.push_actions(actions_to_flush)
+
+    # -------------------------------------------------------------------------
+    # Initialization helper
+    # -------------------------------------------------------------------------
+
+    def enableModule(self, module):
+        for key in ["scripts", "styles", "vue_use"]:
+            if key in module.__dict__:
+                setattr(self, key, self[key] + module.__dict__[key])
+
+        for key in ["state", "serve", "vuetify"]:
+            if key in module.__dict__:
+                self[key].update(module.__dict__[key])
+
+    def disableModule(self, module):
+        for key in ["scripts", "styles", "vue_use"]:
+            if key in module.__dict__:
+                for item in module.__dict__[key]:
+                    self[key].remove(item)
+
+        for key in ["state", "serve", "vuetify"]:
+            if key in module.__dict__:
+                for entry in module.__dict__[key]:
+                    del self[key][entry]
 
     # -------------------------------------------------------------------------
     # Annotations

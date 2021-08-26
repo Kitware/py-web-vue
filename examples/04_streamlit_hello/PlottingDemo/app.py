@@ -60,5 +60,4 @@ async def fill_data():
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # app.on_ready = fill_data
     app.run_server()

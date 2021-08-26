@@ -54,9 +54,9 @@ cube_axes.SetXLabelFormat("%6.1f")
 cube_axes.SetYLabelFormat("%6.1f")
 cube_axes.SetZLabelFormat("%6.1f")
 cube_axes.SetFlyModeToOuterEdges()
-cube_axes.SetXTitle('Longitude')
-cube_axes.SetYTitle('Latitude')
-cube_axes.SetZTitle('Depth')
+cube_axes.SetXTitle("Longitude")
+cube_axes.SetYTitle("Latitude")
+cube_axes.SetZTitle("Depth")
 # cube_axes.YAxisLabelVisibilityOff()
 
 lut = vtkLookupTable()
@@ -81,6 +81,7 @@ renderWindow.Render()
 # -----------------------------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------------------------
+
 
 @app.change("resolution")
 def update_cone():

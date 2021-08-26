@@ -26,9 +26,7 @@ DEBUG = False
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App(
-    "ParaView contour - Synch rendering", debug=DEBUG, backend="paraview"
-)
+app = App("ParaView contour - Synch rendering", debug=DEBUG, backend="paraview")
 app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],

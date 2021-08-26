@@ -19,9 +19,7 @@ from paraview import simple
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App(
-    "ParaView contour - Remote/Local rendering", backend="paraview"
-)
+app = App("ParaView contour - Remote/Local rendering", backend="paraview")
 app.layout = "./template.html"
 app.state = {
     "data_range": [0, 1],

@@ -98,6 +98,7 @@ def update_contour(force=False):
 def commit_changes():
     update_contour(True)
 
+
 # -----------------------------------------------------------------------------
 # MAIN
 #   /opt/paraview/bin/pvpython ./examples/.../app.py --port 1234 --virtual-env ~/Documents/code/Web/vue-py/py-lib
@@ -105,6 +106,6 @@ def commit_changes():
 
 if __name__ == "__main__":
     # Useful if 'interactive' was not listed in a @change()
-    # app.add_state_dependencies('interactive')
+    # app.listen('interactive')
     app.on_ready = commit_changes
     app.run_server()

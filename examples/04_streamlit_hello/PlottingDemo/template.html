@@ -1,0 +1,39 @@
+<v-app>
+  <v-main>
+    <v-container fluid class="">
+      <div class="text-h3">Plotting Demo</div>
+      <div class="text-body-1">
+        This demo illustrates a combination of plotting and animation with
+        PyWebVue. We're generating a bunch of random numbers in a loop for
+        around 5 seconds. Enjoy!
+      </div>
+      <v-row class="align-center py-4" style="height: 80px">
+        <v-col cols="2" align-self>
+          <v-btn block outlined @click="trigger('reset')">Restart</v-btn>
+        </v-col>
+        <v-col cols="10">
+          <v-progress-linear
+            v-show="progress < 100"
+            color="light-blue"
+            height="35"
+            v-model="progress"
+            striped
+          >
+            <template v-slot:default="{ value }">
+              <strong>{{ Math.ceil(value) }}% Progress</strong>
+            </template>
+          </v-progress-linear>
+        </v-col>
+      </v-row>
+      <vega-lite
+        class="text-center mt-6"
+        style="flex: 0"
+        mark="line"
+        padding="0"
+        :encoding="encoding"
+        :data="values"
+        :width="window.innerWidth - 100"
+      />
+    </v-container>
+  </v-main>
+</v-app>

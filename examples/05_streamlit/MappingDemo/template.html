@@ -1,0 +1,14 @@
+<v-app>
+    <v-main>
+        <Deck :jsonInput="deck" :mapboxApiKey="mapboxApiKey" style="width: 100vw; height: 100vh;"/>
+        <v-select
+            style="position: absolute; top: 10px; left: 25px; width: 600px;"
+            :items="layerNames"
+            v-model="activeLayers"
+            dense
+            hide-details
+            multiple
+            chips
+        />
+    </v-main>
+</v-app>

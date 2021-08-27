@@ -1,0 +1,19 @@
+<v-app>
+  <v-app-bar app dense>
+    <v-icon class="mr-2">mdi-chart-donut-variant</v-icon>
+    <div class="title">Altair Chart examples</div>
+    <v-spacer />
+    <v-select
+      v-model="active"
+      :items="examples"
+      dense
+      hide-details
+      style="max-width: 240px"
+    />
+  </v-app-bar>
+  <v-main>
+    <v-container class="text-center">
+      <VegaEmbed :spec="spec" />
+    </v-container>
+  </v-main>
+</v-app>

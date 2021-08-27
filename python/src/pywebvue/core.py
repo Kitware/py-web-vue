@@ -115,7 +115,10 @@ class App:
     # Initialization helper
     # -------------------------------------------------------------------------
 
-    def enableModule(self, module):
+    def enableModule(self, module, **kwargs):
+        if "setup" in module.__dict__:
+            module.setup(**kwargs)
+
         for key in ["scripts", "styles", "vue_use"]:
             if key in module.__dict__:
                 setattr(self, key, self[key] + module.__dict__[key])

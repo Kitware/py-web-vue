@@ -6,3 +6,4 @@ py-lib
 dist
 python/build
 vtk-env*
+.DS_Store

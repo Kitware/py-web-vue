@@ -25,7 +25,7 @@ from pywebvue.modules import Deck
 # App Setup
 # -----------------------------------------------------------------------------
 
-app = App("NYC Uber Ridesharing Data")
+app = App("Deck + Mapbox Demo")
 app.state = {
     "layerNames": [
         "Bike Rentals",

@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/Kitware/py-web-vue/compare/v1.5.0...v1.5.1) (2021-08-28)
+
+
+### Bug Fixes
+
+* **Deck:** Add module to support Deck.gl ([90d4d3a](https://github.com/Kitware/py-web-vue/commit/90d4d3a88a880403e1564e151764b88098197132))
+* **VueVegaEmbed:** Add VegaEmbed module ([6249349](https://github.com/Kitware/py-web-vue/commit/62493491af4d08d988d447f769f5996c11efbe61))
+
 # [1.5.0](https://github.com/Kitware/py-web-vue/compare/v1.4.1...v1.5.0) (2021-08-26)
 
 

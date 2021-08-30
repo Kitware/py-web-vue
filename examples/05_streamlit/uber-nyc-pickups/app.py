@@ -7,7 +7,7 @@ import altair as alt
 import pydeck as pdk
 
 from pywebvue import App
-from pywebvue.modules import VueVegaEmbed, Deck
+from pywebvue.modules import VegaEmbed, Deck
 
 # -----------------------------------------------------------------------------
 # App Setup
@@ -23,7 +23,7 @@ app.state = {
     ],  # <-- Expect MAPBOX_API_KEY environment variable
 }
 
-app.enableModule(VueVegaEmbed)
+app.enableModule(VegaEmbed)
 app.enableModule(Deck)
 
 # -----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ def updateData():
     # LAYING OUT THE HISTOGRAM SECTION
     app.set(
         "hourBreackDown",
-        VueVegaEmbed.altair_to_spec(
+        VegaEmbed.altair_to_spec(
             alt.Chart(chart_data)
             .mark_area(
                 interpolate="step-after",

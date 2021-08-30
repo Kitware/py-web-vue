@@ -6,7 +6,7 @@ from pywebvue import App
 import altair as alt
 from vega_datasets import data
 
-from pywebvue.modules import VueVegaEmbed
+from pywebvue.modules import VegaEmbed
 
 # -----------------------------------------------------------------------------
 # App initialization
@@ -36,7 +36,7 @@ def update_chart():
 # Enable specific module for charts rendering
 # -----------------------------------------------------------------------------
 
-app.enableModule(VueVegaEmbed)
+app.enableModule(VegaEmbed)
 
 # -----------------------------------------------------------------------------
 # Chart examples
@@ -64,7 +64,7 @@ def ScatterMatrix():
     )
 
     # Push chart to client
-    app.set("spec", VueVegaEmbed.altair_to_spec(chart))
+    app.set("spec", VegaEmbed.altair_to_spec(chart))
 
 
 # -----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ def USIncomeByState():
     )
 
     # Push chart to client
-    app.set("spec", VueVegaEmbed.altair_to_spec(chart))
+    app.set("spec", VegaEmbed.altair_to_spec(chart))
 
 
 # -----------------------------------------------------------------------------

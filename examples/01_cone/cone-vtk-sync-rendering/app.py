@@ -1,4 +1,5 @@
 from pywebvue import App
+from pywebvue.modules import VTK
 
 from vtkmodules.vtkFiltersSources import vtkConeSource
 from vtkmodules.vtkRenderingCore import (
@@ -14,12 +15,9 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK Remote Rendering", backend="vtk")
-app.layout = "./template.html"
-app.state = {
-    "resolution": 6,
-}
-app.vue_use += ["vtk"]
+app = App("VTK Remote Rendering")
+app.state = { "resolution": 6 }
+app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

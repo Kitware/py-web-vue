@@ -2,10 +2,10 @@
 # More examples available at https://altair-viz.github.io/gallery/
 # -----------------------------------------------------------------------------
 
-from pywebvue import App
 import altair as alt
 from vega_datasets import data
 
+from pywebvue import App
 from pywebvue.modules import VegaEmbed
 
 # -----------------------------------------------------------------------------
@@ -22,6 +22,7 @@ app.state = {
         {"text": "Stacked Density Estimates", "value": "StackedDensityEstimates"},
     ],
 }
+app.enableModule(VegaEmbed)
 
 # -----------------------------------------------------------------------------
 
@@ -31,12 +32,6 @@ def update_chart():
     chart_name = app.get("active")
     globals()[chart_name]()
 
-
-# -----------------------------------------------------------------------------
-# Enable specific module for charts rendering
-# -----------------------------------------------------------------------------
-
-app.enableModule(VegaEmbed)
 
 # -----------------------------------------------------------------------------
 # Chart examples

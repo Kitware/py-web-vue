@@ -1,5 +1,6 @@
 import os
 from pywebvue import App
+from pywebvue.modules import VTK
 
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 from vtkmodules.vtkFiltersCore import vtkContourFilter
@@ -19,15 +20,14 @@ import vtkmodules.vtkRenderingOpenGL2
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK contour - Remote/Local rendering", backend="vtk")
-app.layout = "./template.html"
+app = App("VTK contour - Remote/Local rendering")
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
     "viewMode": "local",
     "override": "auto",
 }
-app.vue_use += ["vtk"]
+app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

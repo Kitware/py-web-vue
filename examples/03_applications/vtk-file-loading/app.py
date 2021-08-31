@@ -1,7 +1,5 @@
-import os
-import base64
-
 from pywebvue import App
+from pywebvue.modules import VTK
 
 from vtkmodules.vtkIOXML import vtkXMLPolyDataReader
 
@@ -9,15 +7,14 @@ from vtkmodules.vtkIOXML import vtkXMLPolyDataReader
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("File loading", backend="vtk")
-app.layout = "./template.html"
+app = App("File loading")
 app.state = {
     "files": None,
     "meshes": [],
     "field": "solid",
     "fields": [],
 }
-app.vue_use += ["vtk"]
+app.enableModule(VTK)
 
 
 # -----------------------------------------------------------------------------

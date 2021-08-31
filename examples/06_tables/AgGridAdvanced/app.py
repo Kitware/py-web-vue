@@ -10,7 +10,7 @@ from pywebvue.modules import AGGrid, VegaEmbed
 # App Setup
 # -----------------------------------------------------------------------------
 
-app = App("Grid Demo", debug=True)
+app = App("Grid Demo")
 app.state = {
     # UI
     "showMenu": True,
@@ -27,17 +27,12 @@ app.state = {
     "userSelection": None,
 }
 
-# -----------------------------------------------------------------------------
-
 app.enableModule(AGGrid)
 app.enableModule(VegaEmbed)
 
 # -----------------------------------------------------------------------------
 
-# from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
-
 np.random.seed(42)
-
 DATA_FRAME = None
 
 

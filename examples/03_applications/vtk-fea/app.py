@@ -1,4 +1,3 @@
-import os
 import io
 import numpy as np
 import pandas as pd
@@ -10,6 +9,7 @@ from vtkmodules.numpy_interface.dataset_adapter import numpyTovtkDataArray as np
 from vtkmodules.util import vtkConstants
 
 from pywebvue import App
+from pywebvue.modules import VTK
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -28,8 +28,7 @@ VIEW_INTERACT = [
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("FEA - Mesh viewer", backend="vtk")
-app.layout = "./template.html"
+app = App("FEA - Mesh viewer")
 app.state = {
     # files
     "fileNode": None,
@@ -49,7 +48,7 @@ app.state = {
     "interactorSettings": VIEW_INTERACT,
     "pickingModes": [],
 }
-app.vue_use += ["vtk"]
+app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

@@ -6,7 +6,6 @@ from pywebvue import App
 
 app = App("VTK Rendering")
 app.favicon = "./favicon.png"
-app.layout = "./template.html"
 app.state = {
     "logo": app.url("./logo.svg"),
     "resolution": 6,

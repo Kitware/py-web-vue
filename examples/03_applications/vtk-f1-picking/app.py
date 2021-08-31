@@ -1,6 +1,7 @@
 import os
 
 from pywebvue import App
+from pywebvue.modules import VTK
 
 from vtkmodules.vtkIOXML import vtkXMLPolyDataReader
 from vtkmodules.vtkFiltersGeneral import vtkExtractSelectedFrustum
@@ -29,8 +30,7 @@ VIEW_SELECT = [{"button": 1, "action": "Select"}]
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("F1 Probing", backend="vtk", debug=False)
-app.layout = "./template.html"
+app = App("F1 Probing")
 app.state = {
     # Fields available
     "field": "solid",
@@ -63,7 +63,7 @@ app.state = {
     # View interactions
     "interactorSettings": VIEW_INTERACT,
 }
-app.vue_use += ["vtk"]
+app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

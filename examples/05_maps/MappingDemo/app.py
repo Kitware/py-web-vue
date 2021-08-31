@@ -2,8 +2,6 @@ import os
 import pandas as pd
 import pydeck as pdk
 
-from urllib.error import URLError
-
 from pywebvue import App
 from pywebvue.modules import Deck
 
@@ -41,13 +39,9 @@ app.state = {
     ],
     "deck": None,
     "error": None,
-    "mapboxApiKey": os.environ[
-        "MAPBOX_API_KEY"
-    ],  # <-- Expect MAPBOX_API_KEY environment variable
+    # Expect MAPBOX_API_KEY environment variable
+    "mapboxApiKey": os.environ["MAPBOX_API_KEY"],
 }
-
-# -----------------------------------------------------------------------------
-
 app.enableModule(Deck)
 
 # -----------------------------------------------------------------------------

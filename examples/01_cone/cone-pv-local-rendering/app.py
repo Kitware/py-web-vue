@@ -12,6 +12,7 @@ if "--virtual-env" in sys.argv:
 # -----------------------------------------------------------------------------
 
 from pywebvue import App
+from pywebvue.modules import ParaView
 
 # Need ParaView 5.10+ if you don't want to use a virtual-environment
 from paraview import simple
@@ -20,12 +21,9 @@ from paraview import simple
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("ParaView processing with local Rendering", backend="paraview")
-app.layout = "./template.html"
-app.state = {
-    "resolution": 6,
-}
-app.vue_use += ["vtk"]
+app = App("ParaView processing with local Rendering")
+app.state = { "resolution": 6 }
+app.enableModule(ParaView)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

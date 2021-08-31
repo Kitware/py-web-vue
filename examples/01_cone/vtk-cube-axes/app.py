@@ -1,5 +1,5 @@
-import os
 from pywebvue import App
+from pywebvue.modules import VTK
 
 from vtkmodules.vtkFiltersSources import vtkConeSource
 
@@ -27,17 +27,13 @@ import vtkmodules.vtkRenderingOpenGL2
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK axesGrid", backend="vtk")
-app.layout = "./template.html"
-app.state = {
-    "resolution": 6,
-}
-app.vue_use += ["vtk"]
+app = App("VTK axesGrid")
+app.state = { "resolution": 6 }
+app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline
 # -----------------------------------------------------------------------------
-
 
 renderer = vtkRenderer()
 renderWindow = vtkRenderWindow()

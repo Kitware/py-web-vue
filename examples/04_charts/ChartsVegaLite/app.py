@@ -1,13 +1,9 @@
-from pywebvue import App
-import numpy as np
 import asyncio
+import numpy as np
 
-# -----------------------------------------------------------------------------
-# Module: VegaLite "Local serving" vs "CDN"
-# -----------------------------------------------------------------------------
-
-# from pywebvue.modules import CDNVegaLite as VegaLite
+from pywebvue import App
 from pywebvue.modules import VegaLite
+# from pywebvue.modules import CDNVegaLite as VegaLite
 
 # -----------------------------------------------------------------------------
 # App initialization
@@ -22,10 +18,6 @@ app.state = {
         "y": {"field": "value", "type": "quantitative"},
     },
 }
-# -----------------------------------------------------------------------------
-# Enable specific module for charts
-# -----------------------------------------------------------------------------
-
 app.enableModule(VegaLite)
 
 # -----------------------------------------------------------------------------

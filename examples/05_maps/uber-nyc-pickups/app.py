@@ -13,7 +13,7 @@ from pywebvue.modules import VegaEmbed, Deck
 # App Setup
 # -----------------------------------------------------------------------------
 
-app = App("NYC Uber Ridesharing Data", debug=True)
+app = App("NYC Uber Ridesharing Data")
 app.state = {
     "hourBreackDown": None,
     "pickupHour": 0,
@@ -150,11 +150,10 @@ def updateData():
     )
 
 
-updateData()
-
 # -----------------------------------------------------------------------------
 # Start server
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    updateData()
     app.run_server()

@@ -12,27 +12,22 @@ if "--virtual-env" in sys.argv:
 # -----------------------------------------------------------------------------
 
 import os
+
 from pywebvue import App
+from pywebvue.modules import ParaView
+
 from paraview import simple
-
-# -----------------------------------------------------------------------------
-# User Settings
-# -----------------------------------------------------------------------------
-
-# Print state size when pushed to client
-DEBUG = False
 
 # -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("ParaView contour - Synch rendering", debug=DEBUG, backend="paraview")
-app.layout = "./template.html"
+app = App("ParaView contour - Synch rendering")
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
 }
-app.vue_use += ["vtk"]
+app.enableModule(ParaView)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

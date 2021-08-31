@@ -1,5 +1,7 @@
 import os
+
 from pywebvue import App
+from pywebvue.modules import VTK
 
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 from vtkmodules.vtkFiltersCore import vtkContourFilter
@@ -16,24 +18,16 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 import vtkmodules.vtkRenderingOpenGL2
 
 # -----------------------------------------------------------------------------
-# User Settings
-# -----------------------------------------------------------------------------
-
-# Print state size when pushed to client
-DEBUG = False
-
-# -----------------------------------------------------------------------------
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("VTK contour - Remote rendering", backend="vtk", debug=DEBUG)
-app.layout = "./template.html"
+app = App("VTK contour - Remote rendering")
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
     "interactive": False,
 }
-app.vue_use += ["vtk"]
+app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

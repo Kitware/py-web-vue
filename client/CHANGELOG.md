@@ -1,3 +1,13 @@
+## [1.5.2](https://github.com/Kitware/py-web-vue/compare/v1.5.1...v1.5.2) (2021-08-31)
+
+
+### Bug Fixes
+
+* **aggrid:** Add AgGrid module to handle tables ([aa2e571](https://github.com/Kitware/py-web-vue/commit/aa2e571fe4e19d9e14babb62827c99ee37f0cbba))
+* **module:** Add VTK and ParaView modules ([3063fcf](https://github.com/Kitware/py-web-vue/commit/3063fcfdbcbb6d7c3701a9b110c5d3ad24bb8ef7))
+* **Trigger:** Add <py-trigger /> template helper ([80926e4](https://github.com/Kitware/py-web-vue/commit/80926e4692b98c58f59c641f16d658b94ca91b5c))
+* **VegaEmbed:** Rename VueVegaEmbed to VegaEmbed ([ce5f042](https://github.com/Kitware/py-web-vue/commit/ce5f042a0b7ce75c784deadd04ab464af6d13b13))
+
 ## [1.5.1](https://github.com/Kitware/py-web-vue/compare/v1.5.0...v1.5.1) (2021-08-28)
 
 

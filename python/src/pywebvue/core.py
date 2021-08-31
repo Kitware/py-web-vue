@@ -117,7 +117,7 @@ class App:
 
     def enableModule(self, module, **kwargs):
         if "setup" in module.__dict__:
-            module.setup(**kwargs)
+            module.setup(self, **kwargs)
 
         for key in ["scripts", "styles", "vue_use"]:
             if key in module.__dict__:

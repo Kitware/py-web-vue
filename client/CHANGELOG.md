@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/Kitware/py-web-vue/compare/v1.5.2...v1.5.3) (2021-08-31)
+
+
+### Bug Fixes
+
+* **meta:** Add meta tags to web client ([e7973bf](https://github.com/Kitware/py-web-vue/commit/e7973bf458a43a4c346d81c773d4d48c20336ead))
+
 ## [1.5.2](https://github.com/Kitware/py-web-vue/compare/v1.5.1...v1.5.2) (2021-08-31)
 
 

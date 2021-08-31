@@ -3,6 +3,7 @@ import numpy as np
 
 from pywebvue import App
 from pywebvue.modules import VegaLite
+
 # from pywebvue.modules import CDNVegaLite as VegaLite
 
 # -----------------------------------------------------------------------------

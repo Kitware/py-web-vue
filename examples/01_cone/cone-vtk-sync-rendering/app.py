@@ -16,7 +16,7 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch
 # -----------------------------------------------------------------------------
 
 app = App("VTK Remote Rendering")
-app.state = { "resolution": 6 }
+app.state = {"resolution": 6}
 app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------

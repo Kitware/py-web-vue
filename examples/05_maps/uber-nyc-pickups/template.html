@@ -31,38 +31,40 @@
             style="height: 50vh"
           />
         </v-col>
-        <v-col cols="3">
-          <div class="text-h5">{{jfkTitle}}</div>
-          <Deck
-            class="elevation-5"
-            :jsonInput="jfk"
-            :mapboxApiKey="mapboxApiKey"
-            style="height: 50vh"
-          />
-        </v-col>
-
-        <v-col cols="3">
-          <div class="text-h5">{{lgaTitle}}</div>
-          <Deck
-            class="elevation-5"
-            :jsonInput="lga"
-            :mapboxApiKey="mapboxApiKey"
-            style="height: 50vh"
-          />
-        </v-col>
-
-        <v-col cols="2">
-          <div class="text-h5">{{nwkTitle}}</div>
-          <Deck
-            class="elevation-5"
-            :jsonInput="nwk"
-            :mapboxApiKey="mapboxApiKey"
-            style="height: 50vh"
-          />
+        <v-col cols="8">
+          <v-row>
+            <v-col cols="4">
+              <div class="text-h5">{{jfkTitle}}</div>
+              <Deck
+                class="elevation-5"
+                :jsonInput="jfk"
+                :mapboxApiKey="mapboxApiKey"
+                style="height: 50vh"
+              />
+            </v-col>
+            <v-col cols="4">
+              <div class="text-h5">{{lgaTitle}}</div>
+              <Deck
+                class="elevation-5"
+                :jsonInput="lga"
+                :mapboxApiKey="mapboxApiKey"
+                style="height: 50vh"
+              />
+            </v-col>
+            <v-col cols="4">
+              <div class="text-h5">{{nwkTitle}}</div>
+              <Deck
+                class="elevation-5"
+                :jsonInput="nwk"
+                :mapboxApiKey="mapboxApiKey"
+                style="height: 50vh"
+              />
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
       <div class="text-center mt-6">
-        <VegaEmbed :spec="hourBreackDown" />
+        <VegaEmbed :spec="hourBreackDown" style="width: 100%" />
       </div>
     </v-container>
   </v-main>

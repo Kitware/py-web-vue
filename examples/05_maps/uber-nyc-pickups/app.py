@@ -139,7 +139,7 @@ def updateData():
             .mark_area(
                 interpolate="step-after",
             )
-            .properties(width=600, height=150)
+            .properties(width="container", height=150)
             .encode(
                 x=alt.X("minute:Q", scale=alt.Scale(nice=False)),
                 y=alt.Y("pickups:Q"),

@@ -1,0 +1,126 @@
+<v-app>
+  <v-navigation-drawer app clipped stateless v-model="showMenu" width="350">
+    <v-container fluid>
+      <div class="text-h6">Grid options</div>
+      <v-divider />
+      <v-slider
+        v-model="sample_size"
+        label="Sample Size"
+        min="10"
+        max="20"
+        step="1"
+        thumb-label
+        dense
+        hide-details
+      />
+      <v-slider
+        v-model="grid_height"
+        label="Grid height"
+        min="200"
+        max="800"
+        dense
+        hide-details
+      />
+      <div class="text-h6 mt-3">Selection options</div>
+      <v-divider />
+      <v-select
+        :items="['No Selection', 'single','multiple']"
+        v-model="selection_mode"
+        label="Selection Mode"
+        :key="tts"
+      />
+      <div class="text-h6 mt-3">Columns options</div>
+      <v-divider />
+      <v-row class="mt-2">
+        <v-col>
+          <v-switch
+            class="mt-0"
+            dense
+            hide-details
+            label="Check box"
+            v-model="use_checkbox"
+          />
+        </v-col>
+        <v-col>
+          <v-switch
+            class="mt-0"
+            dense
+            hide-details
+            label="Sortable"
+            v-model="use_sort"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-switch
+            class="mt-0"
+            dense
+            hide-details
+            label="Filter"
+            v-model="use_filter"
+          />
+        </v-col>
+        <v-col>
+          <v-switch
+            class="mt-0"
+            dense
+            hide-details
+            label="Resizable"
+            v-model="use_resizable"
+          />
+        </v-col>
+      </v-row>
+      <v-divider class="my-6"/>
+      <v-row class="px-4">
+        <v-btn @click="$refs.agrid.api.selectAll()">Select All</v-btn>
+        <v-spacer />
+        <v-btn @click="$refs.agrid.api.deselectAll()">Deselect All</v-btn>
+      </v-row>
+      <v-divider class="my-6"/>
+    </v-container>
+  </v-navigation-drawer>
+
+  <v-app-bar app dense clipped-left>
+    <v-btn icon @click="showMenu = !showMenu">
+      <v-icon>mdi-table-large</v-icon>
+    </v-btn>
+    <div class="ml-2 title">AgGrid example</div>
+    <v-spacer />
+  </v-app-bar>
+
+  <v-main>
+    <v-container fluid>
+      <div class="text-body-1">
+        AgGrid can handle many types of columns and will try to render the most
+        human readable way. On editions, grid will fallback to string
+        representation of data, DateTime and TimeDeltas are converted to ISO
+        format. Custom display formating may be applied to numeric fields, but
+        returned data will still be numeric.
+      </div>
+      <!-- More help available: https://www.ag-grid.com/vue-data-grid/ -->
+      <AgGrid
+        ref="agrid"
+        :style="{ height: `${grid_height}px`}"
+        class="ag-theme-alpine"
+        :columnDefs="grid.columnDefs"
+        :rowData="grid.rowData"
+        :modules="AgGridCommunityModules"
+        :rowSelection="selection_mode"
+        @grid-ready="$refs.agrid.api = $event.api"
+        @selectionChanged="userSelection = $refs.agrid.api.getSelectedNodes().map((item) => item.data)"
+      />
+      <py-trigger
+        ref="trigger"
+        @refreshCells="$refs.agrid.api.refreshCells()"
+      />
+      <div class="text-h6 mt-6">Component Outputs - Example chart</div>
+      <div class="text-body-1">
+        This chart is built with data returned from the grid. rows that are
+        selected are also identified. Experiment selecting rows, group and
+        filtering and check how the chart updates to match.
+      </div>
+      <VegaEmbed :spec="chartSpec" style="width: 100%" />
+    </v-container>
+  </v-main>
+</v-app>

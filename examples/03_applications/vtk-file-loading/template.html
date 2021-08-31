@@ -22,7 +22,7 @@
       style="max-width: 300px"
     />
     <v-progress-linear indeterminate absolute bottom :active="busy" />
-    <vtk-state-update :value="meshes" @change="$refs.view.resetCamera()" />
+    <py-state-update :value="meshes" @change="$refs.view.resetCamera()" />
   </v-app-bar>
   <v-main>
     <v-container fluid fill-height class="pa-0" style="position: relative">

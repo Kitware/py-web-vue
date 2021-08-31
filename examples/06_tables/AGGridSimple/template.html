@@ -1,0 +1,18 @@
+<v-app>
+  <v-app-bar app dense>
+    <v-icon class="mr-2">mdi-table-large</v-icon>
+    <div class="title">AgGrid examples</div>
+    <v-spacer />
+  </v-app-bar>
+  <v-main>
+    <v-container fluid>
+      <AgGrid
+        style="height: calc(100vh - 74px)"
+        class="ag-theme-alpine"
+        :columnDefs="columnDefs"
+        :rowData="rowData"
+        :modules="AgGridCommunityModules"
+      />
+    </v-container>
+  </v-main>
+</v-app>

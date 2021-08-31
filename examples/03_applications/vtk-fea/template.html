@@ -60,7 +60,7 @@
       <v-icon>mdi-crop-free</v-icon>
     </v-btn>
     <v-progress-linear indeterminate absolute bottom :active="busy" />
-    <vtk-state-update :value="mesh" @change="$refs.view.resetCamera()" />
+    <py-state-update :value="mesh" @change="$refs.view.resetCamera()" />
   </v-app-bar>
   <v-main>
     <v-container fluid fill-height class="pa-0" style="position: relative">

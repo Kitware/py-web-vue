@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Loading from './components/Loading';
 import StateUpdate from './components/StateUpdate';
+import Trigger from './components/Trigger';
 
 // ----------------------------------------------------------------------------
 Vue.config.productionTip = false;
@@ -29,7 +30,8 @@ export async function connect(store, done = null) {
 
 export async function createVueApp(store, options = {}) {
   Vue.component('vtk-loading', Loading);
-  Vue.component('vtk-state-update', StateUpdate);
+  Vue.component('py-state-update', StateUpdate);
+  Vue.component('py-trigger', Trigger);
 
   const finalOptions = options || {};
 

@@ -1,3 +1,20 @@
+# [2.0.0](https://github.com/Kitware/py-web-vue/compare/v1.5.3...v2.0.0) (2021-09-01)
+
+
+### Bug Fixes
+
+* **Web:** Update package meta keys ([3c4cc92](https://github.com/Kitware/py-web-vue/commit/3c4cc926494e83392fdf4ec11f211c615a024be8))
+
+
+### Features
+
+* **backend:** remove backends ([8345412](https://github.com/Kitware/py-web-vue/commit/83454126faf2d68db4b3bcdce0b598d915f7705c))
+
+
+### BREAKING CHANGES
+
+* **backend:** Backends have been removed and replaced by VTK and ParaView modules
+
 ## [1.5.3](https://github.com/Kitware/py-web-vue/compare/v1.5.2...v1.5.3) (2021-08-31)
 
 

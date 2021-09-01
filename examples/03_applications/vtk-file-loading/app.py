@@ -99,7 +99,7 @@ def load_client_files():
                 cell_arrays.append(name)
 
             meshes.append(
-                app.mesh(ds, point_arrays=point_arrays, cell_arrays=cell_arrays)
+                VTK.mesh(ds, point_arrays=point_arrays, cell_arrays=cell_arrays)
             )
 
     app.set("field", field)

@@ -84,7 +84,7 @@ app.active_objects = {
 def update_contour(force=False):
     if app.get("interactive") or force:
         contour.SetValue(0, app.get("contour_value"))
-        app.set("scene", app.scene(renderWindow))
+        app.set("scene", VTK.scene(renderWindow))
 
 
 @app.trigger("commit_changes")

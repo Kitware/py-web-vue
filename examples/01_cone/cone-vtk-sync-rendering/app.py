@@ -49,7 +49,7 @@ renderWindow.Render()
 @app.change("resolution")
 def update_cone():
     cone_source.SetResolution(app.get("resolution"))
-    app.set("scene", app.scene(renderWindow))
+    app.set("scene", VTK.scene(renderWindow))
 
 
 # -----------------------------------------------------------------------------

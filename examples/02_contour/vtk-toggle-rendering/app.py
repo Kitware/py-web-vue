@@ -24,13 +24,12 @@ app = App("VTK contour - Remote/Local rendering")
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
-    "viewMode": "local",
     "override": "auto",
 }
 app.enableModule(VTK)
 
 # -----------------------------------------------------------------------------
-# ParaView pipeline
+# VTK pipeline
 # -----------------------------------------------------------------------------
 
 data_directory = os.path.join(
@@ -59,6 +58,8 @@ contour.SetValue(0, app.get("contour_value"))
 # Rendering setup
 renderer = vtkRenderer()
 renderWindow = vtkRenderWindow()
+renderWindow.SetSize(300, 300)
+renderWindow.SetWindowName("rendering")
 renderWindow.AddRenderer(renderer)
 
 renderWindowInteractor = vtkRenderWindowInteractor()
@@ -74,9 +75,8 @@ renderer.AddActor(actor)
 renderer.ResetCamera()
 renderWindow.Render()
 
-app.active_objects = {
-    "VIEW": renderWindow,
-}
+# Start with "local" rendering rather than "remote"
+view = VTK.view(renderWindow, "demo", mode="local")
 
 # -----------------------------------------------------------------------------
 # Callbacks
@@ -86,50 +86,7 @@ app.active_objects = {
 @app.change("contour_value")
 def update_contour():
     contour.SetValue(0, app.get("contour_value"))
-    app.push_image(renderWindow)
-
-
-# -----------------------------------------------------------------------------
-
-
-def push_geometry():
-    app.set("viewScene", app.scene(renderWindow))
-
-
-# -----------------------------------------------------------------------------
-
-
-@app.trigger("start")
-def start_animation():
-    view_id = app.id(renderWindow)
-    app.set("viewMode", "remote")
-    app.protocol_call("viewport.image.push.quality", view_id, 80)
-    app.protocol_call("viewport.image.animation.start", view_id)
-
-
-# -----------------------------------------------------------------------------
-
-
-@app.trigger("end")
-def stop_animation():
-    view_id = app.id(renderWindow)
-    app.protocol_call("viewport.image.animation.stop", view_id)
-    app.protocol_call("viewport.image.push.quality", view_id, 100)
-    app.set("viewMode", "local")
-    push_geometry()
-
-
-# -----------------------------------------------------------------------------
-
-
-@app.trigger("viewCamera")
-def update_camera(camera=None):
-    if camera:
-        app.set_camera(renderWindow, **camera)
-        app.push_image(renderWindow)
-    else:
-        # Need to update local camera
-        app.update(ref="view", method="setCamera", args=[app.camera(renderWindow)])
+    view.push_image()
 
 
 # -----------------------------------------------------------------------------
@@ -138,5 +95,5 @@ def update_camera(camera=None):
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.on_ready = push_geometry
+    app.on_ready = view.push_geometry
     app.run_server()

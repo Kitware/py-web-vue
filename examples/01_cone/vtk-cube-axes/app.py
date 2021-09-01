@@ -87,7 +87,7 @@ def update_cone():
     cone_source.Update()
     bounds = cone_source.GetOutput().GetBounds()
     cube_axes.SetBounds(bounds)
-    app.set("scene", app.scene(renderWindow))
+    app.set("scene", VTK.scene(renderWindow))
 
 
 # -----------------------------------------------------------------------------

@@ -78,7 +78,7 @@ reader = vtkXMLPolyDataReader()
 reader.SetFileName(f1_vtp)
 reader.Update()
 f1_mesh = reader.GetOutput()
-app.set("f1", app.mesh(f1_mesh, point_arrays=["p", "U"]))
+app.set("f1", VTK.mesh(f1_mesh, point_arrays=["p", "U"]))
 
 # Extract fieldsInformations
 fieldsInformations = {"solid": {"range": [0, 1]}}
@@ -138,11 +138,11 @@ def update_selection():
     extract.ShowBoundsOn()
     extract.PreserveTopologyOff()
     extract.Update()
-    app.set("frustrum", app.mesh(extract.GetOutput()))
+    app.set("frustrum", VTK.mesh(extract.GetOutput()))
     extract.ShowBoundsOff()
     extract.PreserveTopologyOn()
     threshold.Update()
-    app.set("selection", app.mesh(threshold.GetOutput()))
+    app.set("selection", VTK.mesh(threshold.GetOutput()))
 
     app.set("selectData", None)
     app.set("pickingModes", None)

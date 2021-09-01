@@ -1,7 +1,7 @@
 <v-app>
   <v-app-bar app>
     <v-icon
-      @click="$refs.view.resetCamera()"
+      @click="$refs.demo.resetCamera()"
       class="pr-4"
     >
     mdi-menu
@@ -9,6 +9,7 @@
     <span class="title">Contour Application - Remote rendering</span>
 
     <v-spacer />
+
     <v-btn-toggle v-model="override" dense mandatory>
       <v-btn value="auto">
         <v-icon>mdi-autorenew</v-icon>
@@ -23,7 +24,6 @@
       </v-btn>
     </v-btn-toggle>
     <v-spacer />
-
     <v-slider
       hide-details
       v-model="contour_value"
@@ -31,11 +31,11 @@
       :min="data_range[0]"
       :step="1"
       style="max-width: 300px"
-      @start="trigger('start')"
-      @end="trigger('end')"
+      @start="trigger('demoAnimateStart')"
+      @end="trigger('demoAnimateStop')"
     />
     <v-switch hide-details v-model="$vuetify.theme.dark" />
-    <v-btn icon @click="$refs.view.resetCamera()">
+    <v-btn icon @click="$refs.demo.resetCamera()">
       <v-icon>mdi-crop-free</v-icon>
     </v-btn>
     <v-progress-linear indeterminate absolute bottom :active="busy" />
@@ -43,12 +43,10 @@
   <v-main>
     <v-container fluid fill-height class="pa-0">
       <vtk-remote-local-view
-        ref="view"
-        namespace="view"
-        :mode="viewMode"
-        :mode="override === 'auto' ? viewMode : override"
-
-        id="-1"
+        ref="demo"
+        namespace="demo"
+        :id="demoId"
+        :mode="override === 'auto' ? demoMode : override"
         :wsClient="wsClient"
       />
     </v-container>

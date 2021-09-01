@@ -56,7 +56,7 @@ app.active_objects = {
 @app.change("resolution")
 def update_cone():
     cone_source.SetResolution(app.get("resolution"))
-    app.push_image(renderWindow)
+    VTK.push_image(renderWindow)
 
 
 # -----------------------------------------------------------------------------

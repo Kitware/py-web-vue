@@ -22,11 +22,10 @@ from paraview import simple
 # Web App setup
 # -----------------------------------------------------------------------------
 
-app = App("ParaView contour - Remote/Local rendering")
+app = App("ParaView contour - Synch rendering")
 app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
-    "viewMode": "local",
     "override": "auto",
 }
 app.enableModule(ParaView)
@@ -62,8 +61,13 @@ contour.ComputeScalars = 0
 view = simple.GetRenderView()
 view.OrientationAxesVisibility = 0
 representation = simple.Show(contour, view)
+view = simple.Render()
 simple.ResetCamera()
 view.CenterOfRotation = view.CameraFocalPoint
+
+
+# Start with "local" rendering rather than "remote"
+viewHelper = ParaView.view(view, "demo", mode="local")
 
 # -----------------------------------------------------------------------------
 # Callbacks
@@ -76,51 +80,10 @@ def update_contour():
 
 
 # -----------------------------------------------------------------------------
-
-
-def push_geometry():
-    app.set("view.scene", app.scene(view))
-
-
-# -----------------------------------------------------------------------------
-
-
-@app.trigger("start")
-def start_animation():
-    app.set("viewMode", "remote")
-    app.protocol_call("viewport.image.push.quality", "-1", 80)
-    app.protocol_call("viewport.image.animation.start", "-1")
-
-
-# -----------------------------------------------------------------------------
-
-
-@app.trigger("end")
-def stop_animation():
-    app.protocol_call("viewport.image.animation.stop", "-1")
-    app.protocol_call("viewport.image.push.quality", "-1", 100)
-    app.set("viewMode", "local")
-    push_geometry()
-
-
-# -----------------------------------------------------------------------------
-
-
-@app.trigger("view.camera")
-def update_camera(camera=None):
-    if camera:
-        app.set_camera(view, **camera)
-        app.push_image(view)
-    else:
-        # Need to update local camera
-        app.update(ref="view", method="setCamera", args=[app.camera(view)])
-
-
-# -----------------------------------------------------------------------------
 # MAIN
 #   /opt/paraview/bin/pvpython ./examples/.../app.py --port 1234 --virtual-env ~/Documents/code/Web/vue-py/py-lib
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.on_ready = push_geometry
+    app.on_ready = viewHelper.push_geometry
     app.run_server()

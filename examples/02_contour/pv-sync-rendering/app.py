@@ -70,14 +70,14 @@ view.CenterOfRotation = view.CameraFocalPoint
 @app.change("contour_value")
 def update_contour():
     contour.Isosurfaces = [app.get("contour_value")]
-    app.set("scene", app.scene(view))
+    app.set("scene", ParaView.scene(view))
     contour.ComputeNormals = 0
 
 
 @app.trigger("compute_normals")
 def compute_normals():
     contour.ComputeNormals = 1
-    app.set("scene", app.scene(view))
+    app.set("scene", ParaView.scene(view))
 
 
 # -----------------------------------------------------------------------------

@@ -40,7 +40,7 @@ view = simple.Render()
 @app.change("resolution")
 def update_cone():
     cone.Resolution = app.get("resolution")
-    app.push_image(view)
+    ParaView.push_image(view)
 
 
 # -----------------------------------------------------------------------------

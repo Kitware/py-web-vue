@@ -54,7 +54,7 @@ contour.Update()
 @app.change("contour_value")
 def update_contour():
     contour.SetValue(0, app.get("contour_value"))
-    app.set("contour", app.mesh(contour))
+    app.set("contour", VTK.mesh(contour))
 
 
 @app.change("interactive")

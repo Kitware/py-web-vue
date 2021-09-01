@@ -39,7 +39,7 @@ cone = simple.Cone()
 @app.change("resolution")
 def update_cone():
     cone.Resolution = app.get("resolution")
-    app.set("cone", app.mesh(cone))
+    app.set("cone", ParaView.mesh(cone))
 
 
 # -----------------------------------------------------------------------------

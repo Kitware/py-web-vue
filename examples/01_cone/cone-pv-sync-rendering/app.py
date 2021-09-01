@@ -41,7 +41,7 @@ simple.ResetCamera()
 @app.change("resolution")
 def update_cone():
     cone.Resolution = app.get("resolution")
-    app.set("scene", app.scene(view))
+    app.set("scene", ParaView.scene(view))
 
 
 # -----------------------------------------------------------------------------

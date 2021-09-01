@@ -182,7 +182,7 @@ def update_grid():
         app.set("thresholdRange", vtk_array.GetRange())
         app.set("pickingModes", ["hover"])
 
-    app.set("mesh", app.mesh(vtk_grid))
+    app.set("mesh", VTK.mesh(vtk_grid))
 
 
 @app.change("thresholdRange")
@@ -191,7 +191,7 @@ def update_filter():
     vtk_filter.ThresholdBetween(data_range[0], data_range[1])
     vtk_filter.Update()
     ds = vtk_filter.GetOutput()
-    app.set("threshold", app.mesh(vtk_filter.GetOutput(), field_to_keep=field_to_keep))
+    app.set("threshold", VTK.mesh(vtk_filter.GetOutput(), field_to_keep=field_to_keep))
 
 
 @app.trigger("reset")

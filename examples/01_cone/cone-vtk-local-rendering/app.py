@@ -25,7 +25,7 @@ cone_generator = vtkConeSource()
 @app.change("resolution")
 def update_cone():
     cone_generator.SetResolution(app.get("resolution"))
-    app.set("cone", app.mesh(cone_generator))
+    app.set("cone", VTK.mesh(cone_generator))
 
 
 # -----------------------------------------------------------------------------

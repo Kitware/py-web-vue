@@ -36,7 +36,10 @@ app.enableModule(ParaView)
 simple.LoadDistributedPlugin("AcceleratedAlgorithms", remote=False, ns=globals())
 
 data_directory = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data"
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    ),
+    "data",
 )
 head_vti = os.path.join(data_directory, "head.vti")
 

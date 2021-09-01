@@ -70,7 +70,10 @@ app.enableModule(VTK)
 # -----------------------------------------------------------------------------
 
 data_directory = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data"
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    ),
+    "data",
 )
 f1_vtp = os.path.join(data_directory, "f1.vtp")
 

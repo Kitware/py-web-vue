@@ -2,6 +2,15 @@
   "name": "py-web-vue",
   "version": "0.0.1",
   "description": "Generic client application to work with a PyWebVue server",
+  "keywords": ["Kitware", "Python Server", "VTK", "ParaView"],
+  "bugs": {
+    "url": "https://github.com/Kitware/py-web-vue/issues"
+  },
+  "license" : "BSD-3-Clause",
+  "funding": {
+    "type" : "Kitware Support",
+    "url" : "https://www.kitware.com/what-we-offer/#support"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

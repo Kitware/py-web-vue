@@ -12,7 +12,6 @@ from .utils import (
     clean_value,
     base_directory,
 )
-from .backends import create_backend
 
 from wslink import server
 
@@ -23,14 +22,11 @@ class App:
     def __init__(
         self,
         name,
-        backend=False,
         debug=False,
-        create_protocols=None,
         **kwargs,
     ):
         self.name = name
         self._root = base_directory()
-        self._backend = create_backend(self, backend, create_protocols)
         self._debug = debug
 
         self.on_ready = None
@@ -64,7 +60,8 @@ class App:
         self._parser = None
 
         # protocols to register
-        self._protocols_to_register = []
+        self._protocols_to_configure = []
+        self._root_protocol = None
 
         # Use ./template.html if available
         if os.path.exists(abs_path("./template.html", self._root)):
@@ -302,39 +299,6 @@ class App:
 
     # -------------------------------------------------------------------------
 
-    def id(self, obj):
-        return self._backend.id(obj)
-
-    # -------------------------------------------------------------------------
-
-    def object(self, obj_id):
-        return self._backend.object(obj_id)
-
-    # -------------------------------------------------------------------------
-
-    def mesh(self, mesh_obj, field_to_keep=None, point_arrays=None, cell_arrays=None):
-        return self._backend.mesh(mesh_obj, field_to_keep, point_arrays, cell_arrays)
-
-    # -------------------------------------------------------------------------
-
-    def scene(self, view_obj):
-        return self._backend.scene(view_obj)
-
-    # -------------------------------------------------------------------------
-
-    def push_image(self, view_obj):
-        return self._backend.push_image(view_obj)
-
-    # -------------------------------------------------------------------------
-
-    def camera(self, view_obj):
-        return self._backend.camera(view_obj)
-
-    # -------------------------------------------------------------------------
-
-    def set_camera(self, view_obj, **kwargs):
-        return self._backend.set_camera(view_obj, **kwargs)
-
     # -------------------------------------------------------------------------
     # common
     # -------------------------------------------------------------------------
@@ -356,12 +320,12 @@ class App:
 
     # -------------------------------------------------------------------------
 
-    def add_protocol(self, protocol):
-        self._protocols_to_register.append(protocol)
+    def add_protocol_to_configure(self, configure_protocol_fn):
+        self._protocols_to_configure.append(configure_protocol_fn)
 
     @property
     def protocol(self):
-        return self._backend._protocol
+        return self._root_protocol
 
     # -------------------------------------------------------------------------
 

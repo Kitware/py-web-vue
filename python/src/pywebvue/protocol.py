@@ -193,9 +193,10 @@ class CoreServer(ServerProtocol):
     def initialize(self):  # Called by wslink
         self.rpcMethods = {}
         self.app = CoreServer.app
-        self.app._backend.configure_protocol(self)
-        for protocol in self.app._protocols_to_register:
-            self.registerLinkProtocol(protocol)
+        self.app._root_protocol = self
+
+        for configure in self.app._protocols_to_configure:
+            configure(self)
 
         self.updateSecret(CoreServer.authentication_token)
 

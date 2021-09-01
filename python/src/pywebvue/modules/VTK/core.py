@@ -1,18 +1,19 @@
-class RemoteLocalView:
+class HybridView:
     def __init__(
         self,
-        app,
+        helper,
         view,
-        namespace="",
+        namespace="view",
+        mode="local",
         interactive_ratio=1,
         interactive_quality=60,
         still_ratio=1,
         still_quality=98,
-        ref="view",
     ):
-        self._app = app
+        self._helper = helper
+        self._app = helper._app
         self._view = view
-        self._view_id = app.id(view)
+        self._view_id = self._helper.id(view)
 
         # Image setup
         self.i_ratio = interactive_ratio
@@ -21,16 +22,19 @@ class RemoteLocalView:
         self.s_quality = still_quality
 
         # init keys
-        self.ref_key = namespace if namespace else ref
+        self.ref_key = namespace
         self.mode_key = f"{namespace}Mode" if namespace else "mode"
         self.scene_key = f"{namespace}Scene" if namespace else "scene"
         self.camera_key = f"{namespace}Camera" if namespace else "camera"
         self.animation_key = f"{namespace}Animate" if namespace else "animate"
+        self.id_key = f"{namespace}Id" if namespace else "id"
 
         # Attach annotations
-        app.trigger(self.camera_key)(self.update_camera)
-        app.trigger(f"{self.animation_key}Start")(self.start_animation)
-        app.trigger(f"{self.animation_key}Stop")(self.stop_animation)
+        self._app.set(self.id_key, self._view_id)
+        self._app.set(self.mode_key, mode)
+        self._app.trigger(self.camera_key)(self.update_camera)
+        self._app.trigger(f"{self.animation_key}Start")(self.start_animation)
+        self._app.trigger(f"{self.animation_key}Stop")(self.stop_animation)
 
     def start_animation(self):
         self._app.set(self.mode_key, "remote")
@@ -48,16 +52,16 @@ class RemoteLocalView:
         self._app.set(self.mode_key, "local")
 
     def push_geometry(self):
-        self._app.set(self.scene_key, self._app.scene(self._view))
+        self._app.set(self.scene_key, self._helper.scene(self._view))
 
     def push_image(self):
-        self._app.push_image(self._view)
+        self._helper.push_image(self._view)
 
     def update_camera(self, camera=None):
         if camera:
-            self._app.set_camera(self._view, **camera)
+            self._helper.set_camera(self._view, **camera)
             self.push_image()
         else:
             # Need to update local camera
-            camera = self._app.camera(self._view)
+            camera = self._helper.camera(self._view)
             self._app.update(ref=self.ref_key, method="setCamera", args=[camera])

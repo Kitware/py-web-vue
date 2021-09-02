@@ -310,8 +310,19 @@ How to develop your HTML content fast and easily. Add `debug=True` when building
 ```
 python3 -m venv py-env
 source ./py-env/bin/activate
-pip install pywebvue # <-- using release rather than local version
-# pip install -e ./python/ # <-- for developing py-web-vue
+pip install pywebvue
+```
+
+For development you can install the local code
+
+```
+python3 -m venv py-env-dev
+source ./py-env-dev/bin/activate
+pip install -e ./python/
+
+cd client
+npm i
+npm run build
 ```
 
 __If you are using VTK backend__

@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/Kitware/py-web-vue/compare/v2.0.0...v2.0.1) (2021-09-03)
+
+
+### Bug Fixes
+
+* **Markdown:** Add markdown module ([435c7b2](https://github.com/Kitware/py-web-vue/commit/435c7b29e394a4099a8f4a04a9983db6ce353646))
+
 # [2.0.0](https://github.com/Kitware/py-web-vue/compare/v1.5.3...v2.0.0) (2021-09-01)
 
 

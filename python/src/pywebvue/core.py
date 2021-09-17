@@ -23,11 +23,13 @@ class App:
         self,
         name,
         debug=False,
+        eager_state_listening=True,
         **kwargs,
     ):
         self.name = name
         self._root = base_directory()
         self._debug = debug
+        self._eager_state_listening = eager_state_listening
 
         self.on_ready = None
         self.active_objects = {}
@@ -52,6 +54,7 @@ class App:
         self._change_callbacks = {}
         self._change_handlers = []
         self._server_keys = set()
+        self._client_keys = set()
 
         # @trigger
         self._triggers = {}
@@ -85,6 +88,10 @@ class App:
         """
         for name in _args:
             self._server_keys.add(name)
+
+    def client_only(self, *_args):
+        for name in _args:
+            self._client_keys.add(name)
 
     def flush_state(self, *_args):
         state_to_flush = {}
@@ -314,7 +321,7 @@ class App:
             "scripts": self.scripts,
             "use": self.vue_use,
             "styles": self.styles,
-            "stateListening": list(self._server_keys),
+            "stateListening": list(self._server_keys - self._client_keys),
         }
         return state
 
@@ -341,6 +348,10 @@ class App:
     # -------------------------------------------------------------------------
 
     def run_server(self, port=None):
+        # Prevent faulty state synchronization with naive usage
+        if self._eager_state_listening:
+            self.listen(*list(self.state.keys()))
+
         CoreServer.app = self
         CoreServer.DEBUG = self._debug
 

@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/Kitware/py-web-vue/compare/v2.0.1...v2.0.2) (2021-09-17)
+
+
+### Bug Fixes
+
+* **state:** Update default behavior to be more bug proof ([28b6695](https://github.com/Kitware/py-web-vue/commit/28b6695481fd74210517b5a4dc7d5469a0daacba))
+
 ## [2.0.1](https://github.com/Kitware/py-web-vue/compare/v2.0.0...v2.0.1) (2021-09-03)
 
 

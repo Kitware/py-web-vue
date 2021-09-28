@@ -1,3 +1,15 @@
+# [2.1.0](https://github.com/Kitware/py-web-vue/compare/v2.0.2...v2.1.0) (2021-09-28)
+
+
+### Bug Fixes
+
+* **client:** Update dependencies ([7decdab](https://github.com/Kitware/py-web-vue/commit/7decdabff7bac51b38e6d94f749fa17836a0509e))
+
+
+### Features
+
+* [@change](https://github.com/change) provide state as **kwargs when expected ([409d98b](https://github.com/Kitware/py-web-vue/commit/409d98b8f104846322062746f818a7c14fb260c9))
+
 ## [2.0.2](https://github.com/Kitware/py-web-vue/compare/v2.0.1...v2.0.2) (2021-09-17)
 
 

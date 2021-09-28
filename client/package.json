@@ -2,14 +2,19 @@
   "name": "py-web-vue",
   "version": "0.0.1",
   "description": "Generic client application to work with a PyWebVue server",
-  "keywords": ["Kitware", "Python Server", "VTK", "ParaView"],
+  "keywords": [
+    "Kitware",
+    "Python Server",
+    "VTK",
+    "ParaView"
+  ],
   "bugs": {
     "url": "https://github.com/Kitware/py-web-vue/issues"
   },
-  "license" : "BSD-3-Clause",
+  "license": "BSD-3-Clause",
   "funding": {
-    "type" : "Kitware Support",
-    "url" : "https://www.kitware.com/what-we-offer/#support"
+    "type": "Kitware Support",
+    "url": "https://www.kitware.com/what-we-offer/#support"
   },
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -19,37 +24,37 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@mdi/font": "^5.9.55",
-    "core-js": "^3.6.5",
+    "@mdi/font": "6.1.95",
+    "core-js": "^3.18.1",
     "lodash": "^4.17.21",
-    "semantic-release-pypi": "^2.0.3",
+    "semantic-release-pypi": "^2.3.0",
     "typeface-roboto": "^1.1.13",
     "v-runtime-template": "^1.10.0",
-    "vtk.js": "19.0.2",
-    "vue": "^2.6.11",
-    "vue-router": "^3.5.1",
-    "vue-vtk-js": "1.1.5",
-    "vuetify": "2.5.0",
+    "vtk.js": "19.4.1",
+    "vue": "^2.6.14",
+    "vue-router": "^3.5.2",
+    "vue-vtk-js": "1.1.6",
+    "vuetify": "2.5.8",
     "vuex": "^3.4.0",
-    "wslink": "^0.1.15"
+    "wslink": "1.0.7"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/git": "^9.0.0",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-plugin-vuex": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
+    "@semantic-release/git": "^9.0.1",
+    "@vue/cli-plugin-babel": "~4.5.13",
+    "@vue/cli-plugin-eslint": "~4.5.13",
+    "@vue/cli-plugin-vuex": "~4.5.13",
+    "@vue/cli-service": "~4.5.13",
     "@vue/eslint-config-airbnb": "^5.0.2",
     "babel-eslint": "^10.1.0",
-    "commitizen": "4.2.3",
-    "eslint": "^6.7.2",
-    "eslint-plugin-import": "^2.20.2",
+    "commitizen": "4.2.4",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-vue": "^6.2.2",
-    "prettier": "2.2.1",
+    "prettier": "2.4.1",
     "semantic-release": "17.4.2",
     "shader-loader": "1.3.1",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.14"
   },
   "config": {
     "commitizen": {

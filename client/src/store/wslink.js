@@ -67,7 +67,11 @@ export default {
     async WS_CONNECT({
       state, getters, commit, dispatch,
     }) {
-      const client = vtkWSLinkClient.newInstance({ protocols, configDecorator });
+      const notBusyList = [
+        'subscribeToStateUpdate', 'subscribeToActions', 'subscribeToLayout', 'subscribeToRoutes', 'unsubscribe',
+        'subscribeToViewChange',
+      ];
+      const client = vtkWSLinkClient.newInstance({ protocols, configDecorator, notBusyList });
 
       client.onBusyChange((count) => {
         state.busy = count;
@@ -128,29 +132,33 @@ export default {
       await dispatch('WS_STATE_UNSUBSCRIBE');
       SUBSCRIPTIONS.state = state.client
         .getRemote()
-        .PyWebVue.subscribeToStateUpdate(callback)
-        .catch(console.error);
+        .PyWebVue.subscribeToStateUpdate(callback);
+
+      SUBSCRIPTIONS.state.promise.catch(console.error);
     },
     async WS_ACTIONS_SUBSCRIBE({ state, dispatch }, callback) {
       await dispatch('WS_ACTIONS_UNSUBSCRIBE');
       SUBSCRIPTIONS.actions = state.client
         .getRemote()
-        .PyWebVue.subscribeToActions(callback)
-        .catch(console.error);
+        .PyWebVue.subscribeToActions(callback);
+
+      SUBSCRIPTIONS.actions.promise.catch(console.error);
     },
     async WS_LAYOUT_SUBSCRIBE({ state, dispatch }, callback) {
       await dispatch('WS_LAYOUT_UNSUBSCRIBE');
       SUBSCRIPTIONS.layout = state.client
         .getRemote()
-        .PyWebVue.subscribeToLayout(callback)
-        .catch(console.error);
+        .PyWebVue.subscribeToLayout(callback);
+
+      SUBSCRIPTIONS.layout.promise.catch(console.error);
     },
     async WS_ROUTES_SUBSCRIBE({ state, dispatch }, callback) {
       await dispatch('WS_ROUTES_UNSUBSCRIBE');
       SUBSCRIPTIONS.routes = state.client
         .getRemote()
-        .PyWebVue.subscribeToRoutes(callback)
-        .catch(console.error);
+        .PyWebVue.subscribeToRoutes(callback);
+
+      SUBSCRIPTIONS.routes.promise.catch(console.error);
     },
     async WS_UNSUBSCRIBE({ state }, key) {
       if (SUBSCRIPTIONS[key]) {

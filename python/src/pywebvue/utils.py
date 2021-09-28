@@ -223,7 +223,12 @@ class ChangeHandler:
 
             # Process callbacks
             for fn in callbacks:
-                fn()
+                try:
+                    # Pass state as **kwargs
+                    fn(**self._app.state)
+                except TypeError:
+                    fn()
+
             callbacks.clear()
 
         self._app._change_handlers.remove(self)

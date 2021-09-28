@@ -109,8 +109,8 @@ threshold.SetInputArrayToProcess(0, 0, 0, 1, "vtkInsidedness")  # 1 => cell
 
 
 @app.change("pickingModes")
-def update_picking_mode():
-    mode = app.get("pickingModes")
+def update_picking_mode(pickingModes, **kwargs):
+    mode = pickingModes
     if mode is None:
         app.set("tooltip", "")
         app.set("tooltipStyle", {"display": "none"})
@@ -126,12 +126,11 @@ def update_picking_mode():
 
 
 @app.change("selectData")
-def update_selection():
-    selection = app.get("selectData")
-    if selection is None:
+def update_selection(selectData, **kwargs):
+    if selectData is None:
         return
 
-    frustrum = selection.get("frustrum")
+    frustrum = selectData.get("frustrum")
     vtk_frustrum = []
     for xyz in frustrum:
         vtk_frustrum += xyz
@@ -152,11 +151,11 @@ def update_selection():
 
 
 @app.change("pickData")
-def update_tooltip():
+def update_tooltip(pickData, **kwargs):
     app.set("tooltip", "")
     app.set("tooltipStyle", {"display": "none"})
     app.set("coneVisibility", False)
-    data = app.get("pickData")
+    data = pickData
 
     if app.dirty("pickData") and data and data["representationId"] == "f1":
         xyx = data["worldPosition"]

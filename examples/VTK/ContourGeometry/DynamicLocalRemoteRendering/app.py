@@ -87,8 +87,8 @@ view = VTK.view(renderWindow, "demo", mode="local")
 
 
 @app.change("contour_value")
-def update_contour():
-    contour.SetValue(0, app.get("contour_value"))
+def update_contour(contour_value, **kwargs):
+    contour.SetValue(0, contour_value)
     view.push_image()
 
 

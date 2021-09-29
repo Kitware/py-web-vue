@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/Kitware/py-web-vue/compare/v2.1.0...v2.1.1) (2021-09-29)
+
+
+### Bug Fixes
+
+* **modules:** Prevent loading module twice ([0718410](https://github.com/Kitware/py-web-vue/commit/0718410d769660d31432db7b9d6884bbc322c9ba))
+
 # [2.1.0](https://github.com/Kitware/py-web-vue/compare/v2.0.2...v2.1.0) (2021-09-28)
 
 

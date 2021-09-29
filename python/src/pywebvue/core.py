@@ -62,6 +62,9 @@ class App:
         # CLI argument handling
         self._parser = None
 
+        # modules
+        self._loaded_modules = set()
+
         # protocols to register
         self._protocols_to_configure = []
         self._root_protocol = None
@@ -120,6 +123,9 @@ class App:
     # -------------------------------------------------------------------------
 
     def enableModule(self, module, **kwargs):
+        if module in self._loaded_modules:
+            return
+
         if "setup" in module.__dict__:
             module.setup(self, **kwargs)
 
@@ -130,6 +136,8 @@ class App:
         for key in ["state", "serve", "vuetify"]:
             if key in module.__dict__:
                 self[key].update(module.__dict__[key])
+
+        self._loaded_modules.add(module)
 
     def disableModule(self, module):
         for key in ["scripts", "styles", "vue_use"]:

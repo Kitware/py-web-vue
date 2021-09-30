@@ -1,0 +1,2 @@
+graft src/pywebvue/modules/*/serve
+graft src/pywebvue/www

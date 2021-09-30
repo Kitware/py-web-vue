@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/Kitware/py-web-vue/compare/v2.1.2...v2.1.3) (2021-09-30)
+
+
+### Bug Fixes
+
+* **assets:** Properly adding modules add-on files ([ccb40d8](https://github.com/Kitware/py-web-vue/commit/ccb40d8e5f33e393dcd476837328a24b9c489af8))
+
 ## [2.1.2](https://github.com/Kitware/py-web-vue/compare/v2.1.1...v2.1.2) (2021-09-30)
 
 

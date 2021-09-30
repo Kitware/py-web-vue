@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/Kitware/py-web-vue/compare/v2.1.1...v2.1.2) (2021-09-30)
+
+
+### Bug Fixes
+
+* **Python:** Add missing assets for modules ([db45e64](https://github.com/Kitware/py-web-vue/commit/db45e6417150ac540e7bd709ef90ab39c2a4beb9))
+
 ## [2.1.1](https://github.com/Kitware/py-web-vue/compare/v2.1.0...v2.1.1) (2021-09-29)
 
 

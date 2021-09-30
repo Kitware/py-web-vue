@@ -1,3 +1,10 @@
+## [2.1.4](https://github.com/Kitware/py-web-vue/compare/v2.1.3...v2.1.4) (2021-09-30)
+
+
+### Bug Fixes
+
+* **python:** Add missing asset files ([ccb616d](https://github.com/Kitware/py-web-vue/commit/ccb616d09e09f58b8323b3010527f4bafea98afe))
+
 ## [2.1.3](https://github.com/Kitware/py-web-vue/compare/v2.1.2...v2.1.3) (2021-09-30)
 
 

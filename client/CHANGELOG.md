@@ -1,3 +1,10 @@
+## [2.1.5](https://github.com/Kitware/py-web-vue/compare/v2.1.4...v2.1.5) (2021-10-05)
+
+
+### Bug Fixes
+
+* **on_ready:** try calling with state ([a0976e9](https://github.com/Kitware/py-web-vue/commit/a0976e9e396a9d548708c8d05fc43403708a3ae1))
+
 ## [2.1.4](https://github.com/Kitware/py-web-vue/compare/v2.1.3...v2.1.4) (2021-09-30)
 
 

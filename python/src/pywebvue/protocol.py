@@ -201,7 +201,10 @@ class CoreServer(ServerProtocol):
         self.updateSecret(CoreServer.authentication_token)
 
         if self.app.on_ready:
-            self.app.on_ready()
+            try:
+                self.app.on_ready(**self.app.state)
+            except TypeError:
+                self.app.on_ready()
 
     # ---------------------------------------------------------------
 

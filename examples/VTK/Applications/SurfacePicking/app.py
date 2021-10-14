@@ -157,7 +157,7 @@ def update_tooltip(pickData, **kwargs):
     app.set("coneVisibility", False)
     data = pickData
 
-    if app.dirty("pickData") and data and data["representationId"] == "f1":
+    if app.is_dirty("pickData") and data and data["representationId"] == "f1":
         xyx = data["worldPosition"]
         idx = f1_mesh.FindPoint(xyx)
         if idx > -1:

@@ -109,20 +109,23 @@ export default {
       const options = await dispatch('APP_INIT_SET', serverState);
       return options;
     },
-    async APP_INIT_SET({
-      state, getters, commit, dispatch,
-    }, {
-      name,
-      vuetify,
-      layout,
-      routes,
-      state: sharedState,
-      scripts,
-      styles,
-      use,
-      stateListening,
-      favicon,
-    }) {
+    async APP_INIT_SET(
+      {
+        state, getters, commit, dispatch,
+      },
+      {
+        name,
+        vuetify,
+        layout,
+        routes,
+        state: sharedState,
+        scripts,
+        styles,
+        use,
+        stateListening,
+        favicon,
+      },
+    ) {
       let vueOptions = {};
       // First update state
       Object.assign(SHARED_STATE, sharedState);

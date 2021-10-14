@@ -1,3 +1,10 @@
+## [2.1.7](https://github.com/Kitware/py-web-vue/compare/v2.1.6...v2.1.7) (2021-10-14)
+
+
+### Bug Fixes
+
+* rename state method ([765f645](https://github.com/Kitware/py-web-vue/commit/765f645760405dd129035f97ccd32978bcee7c39))
+
 ## [2.1.6](https://github.com/Kitware/py-web-vue/compare/v2.1.5...v2.1.6) (2021-10-14)
 
 

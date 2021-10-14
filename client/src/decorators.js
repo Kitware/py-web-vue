@@ -7,6 +7,7 @@ export function setAddAttachment(fn) {
 export const fileHandler = {
   priority: 0,
   async decorate(value) {
+    if (value === null || value === undefined) return value;
     if (value.constructor && value.constructor === File) {
       const {
         name, lastModified, size, type,
@@ -30,6 +31,7 @@ export const fileHandler = {
 export const fileListHandler = {
   priority: 0,
   async decorate(value) {
+    if (value === null || value === undefined) return value;
     if (typeof value === 'string') {
       return value;
     }
@@ -49,10 +51,11 @@ export const fileListHandler = {
 export const fileInObjectHandler = {
   priority: 0,
   async decorate(value) {
+    if (value === null || value === undefined) return value;
     if (typeof value === 'string') {
       return value;
     }
-    if (value && (value.constructor && value.constructor === Object)) {
+    if (value.constructor && value.constructor === Object) {
       const newValue = {};
       const names = Object.keys(value);
       /* eslint-disable no-await-in-loop */

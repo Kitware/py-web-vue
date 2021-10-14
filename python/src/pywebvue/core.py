@@ -277,14 +277,14 @@ class App:
 
     # -------------------------------------------------------------------------
 
-    def dirty(self, *args):
+    def is_dirty(self, *args):
         if self._dirty_set is not None:
             return len(set(args).intersection(self._dirty_set)) > 0
         return False
 
     # -------------------------------------------------------------------------
 
-    def dirty_all(self, *args):
+    def is_dirty_all(self, *args):
         if self._dirty_set is not None:
             return len(set(args).intersection(self._dirty_set)) == len(args)
         return False

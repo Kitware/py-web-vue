@@ -1,3 +1,11 @@
+## [2.1.6](https://github.com/Kitware/py-web-vue/compare/v2.1.5...v2.1.6) (2021-10-14)
+
+
+### Bug Fixes
+
+* **decorators:** Add falsey checks ([82b86db](https://github.com/Kitware/py-web-vue/commit/82b86db6cfa69cef7941798a64de7ae57253e7bc))
+* **FileDecorator:** Add support for file inside object ([85c4cad](https://github.com/Kitware/py-web-vue/commit/85c4cad95468ef2640cf077f0ad3d2eca6dffc61))
+
 ## [2.1.5](https://github.com/Kitware/py-web-vue/compare/v2.1.4...v2.1.5) (2021-10-05)
 
 

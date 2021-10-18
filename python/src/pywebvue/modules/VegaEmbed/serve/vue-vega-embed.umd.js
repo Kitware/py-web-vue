@@ -111,14 +111,25 @@ module.exports = String(test) === '[object z]';
 
 /***/ }),
 
+/***/ "00fb":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = (function(a, b) {
+  return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
+});
+
+
+/***/ }),
+
 /***/ "0366":
 /***/ (function(module, exports, __webpack_require__) {
 
-var aFunction = __webpack_require__("1c0b");
+var aCallable = __webpack_require__("59ed");
 
 // optional / simple context binding
 module.exports = function (fn, that, length) {
-  aFunction(fn);
+  aCallable(fn);
   if (that === undefined) return fn;
   switch (length) {
     case 0: return function () {
@@ -150,8 +161,8 @@ module.exports = function (fn, that, length) {
 var $ = __webpack_require__("23e7");
 var flattenIntoArray = __webpack_require__("a2bf");
 var toObject = __webpack_require__("7b0b");
-var toLength = __webpack_require__("50c4");
-var toInteger = __webpack_require__("a691");
+var lengthOfArrayLike = __webpack_require__("07fa");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var arraySpeciesCreate = __webpack_require__("65f0");
 
 // `Array.prototype.flat` method
@@ -160,9 +171,9 @@ $({ target: 'Array', proto: true }, {
   flat: function flat(/* depthArg = 1 */) {
     var depthArg = arguments.length ? arguments[0] : undefined;
     var O = toObject(this);
-    var sourceLen = toLength(O.length);
+    var sourceLen = lengthOfArrayLike(O);
     var A = arraySpeciesCreate(O, 0);
-    A.length = flattenIntoArray(A, O, O, sourceLen, 0, depthArg === undefined ? 1 : toInteger(depthArg));
+    A.length = flattenIntoArray(A, O, O, sourceLen, 0, depthArg === undefined ? 1 : toIntegerOrInfinity(depthArg));
     return A;
   }
 });
@@ -187,7 +198,7 @@ module.exports = !!firefox && +firefox[1];
 
 "use strict";
 
-var aFunction = __webpack_require__("1c0b");
+var aCallable = __webpack_require__("59ed");
 var isObject = __webpack_require__("861d");
 
 var slice = [].slice;
@@ -204,7 +215,7 @@ var construct = function (C, argsLength, args) {
 // `Function.prototype.bind` method implementation
 // https://tc39.es/ecma262/#sec-function.prototype.bind
 module.exports = Function.bind || function bind(that /* , ...args */) {
-  var fn = aFunction(this);
+  var fn = aCallable(this);
   var partArgs = slice.call(arguments, 1);
   var boundFunction = function bound(/* args... */) {
     var args = partArgs.concat(slice.call(arguments));
@@ -265,7 +276,7 @@ var propertyIsEnumerableModule = __webpack_require__("d1e7");
 var createPropertyDescriptor = __webpack_require__("5c6c");
 var toIndexedObject = __webpack_require__("fc6a");
 var toPropertyKey = __webpack_require__("a04b");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var IE8_DOM_DEFINE = __webpack_require__("0cfb");
 
 // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
@@ -279,7 +290,7 @@ exports.f = DESCRIPTORS ? $getOwnPropertyDescriptor : function getOwnPropertyDes
   if (IE8_DOM_DEFINE) try {
     return $getOwnPropertyDescriptor(O, P);
   } catch (error) { /* empty */ }
-  if (has(O, P)) return createPropertyDescriptor(!propertyIsEnumerableModule.f.call(O, P), O[P]);
+  if (hasOwn(O, P)) return createPropertyDescriptor(!propertyIsEnumerableModule.f.call(O, P), O[P]);
 };
 
 
@@ -302,6 +313,77 @@ $({ target: 'Object', stat: true }, {
 
 /***/ }),
 
+/***/ "07fa":
+/***/ (function(module, exports, __webpack_require__) {
+
+var toLength = __webpack_require__("50c4");
+
+// `LengthOfArrayLike` abstract operation
+// https://tc39.es/ecma262/#sec-lengthofarraylike
+module.exports = function (obj) {
+  return toLength(obj.length);
+};
+
+
+/***/ }),
+
+/***/ "09b8":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return formatSpecifier; });
+/* unused harmony export FormatSpecifier */
+// [[fill]align][sign][symbol][0][width][,][.precision][~][type]
+var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+
+function formatSpecifier(specifier) {
+  if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
+  var match;
+  return new FormatSpecifier({
+    fill: match[1],
+    align: match[2],
+    sign: match[3],
+    symbol: match[4],
+    zero: match[5],
+    width: match[6],
+    comma: match[7],
+    precision: match[8] && match[8].slice(1),
+    trim: match[9],
+    type: match[10]
+  });
+}
+
+formatSpecifier.prototype = FormatSpecifier.prototype; // instanceof
+
+function FormatSpecifier(specifier) {
+  this.fill = specifier.fill === undefined ? " " : specifier.fill + "";
+  this.align = specifier.align === undefined ? ">" : specifier.align + "";
+  this.sign = specifier.sign === undefined ? "-" : specifier.sign + "";
+  this.symbol = specifier.symbol === undefined ? "" : specifier.symbol + "";
+  this.zero = !!specifier.zero;
+  this.width = specifier.width === undefined ? undefined : +specifier.width;
+  this.comma = !!specifier.comma;
+  this.precision = specifier.precision === undefined ? undefined : +specifier.precision;
+  this.trim = !!specifier.trim;
+  this.type = specifier.type === undefined ? "" : specifier.type + "";
+}
+
+FormatSpecifier.prototype.toString = function() {
+  return this.fill
+      + this.align
+      + this.sign
+      + this.symbol
+      + (this.zero ? "0" : "")
+      + (this.width === undefined ? "" : Math.max(1, this.width | 0))
+      + (this.comma ? "," : "")
+      + (this.precision === undefined ? "" : "." + Math.max(0, this.precision | 0))
+      + (this.trim ? "~" : "")
+      + this.type;
+};
+
+
+/***/ }),
+
 /***/ "0ac8":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -319,14 +401,14 @@ $({ target: 'Math', stat: true, forced: expm1 != Math.expm1 }, { expm1: expm1 })
 /***/ "0b25":
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var toLength = __webpack_require__("50c4");
 
 // `ToIndex` abstract operation
 // https://tc39.es/ecma262/#sec-toindex
 module.exports = function (it) {
   if (it === undefined) return 0;
-  var number = toInteger(it);
+  var number = toIntegerOrInfinity(it);
   var length = toLength(number);
   if (number !== length) throw RangeError('Wrong length or index');
   return length;
@@ -338,8 +420,9 @@ module.exports = function (it) {
 /***/ "0b42":
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__("861d");
 var isArray = __webpack_require__("e8b5");
+var isConstructor = __webpack_require__("68ee");
+var isObject = __webpack_require__("861d");
 var wellKnownSymbol = __webpack_require__("b622");
 
 var SPECIES = wellKnownSymbol('species');
@@ -351,7 +434,7 @@ module.exports = function (originalArray) {
   if (isArray(originalArray)) {
     C = originalArray.constructor;
     // cross-realm fallback
-    if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;
+    if (isConstructor(C) && (C === Array || isArray(C.prototype))) C = undefined;
     else if (isObject(C)) {
       C = C[SPECIES];
       if (C === null) C = undefined;
@@ -452,6 +535,20 @@ if (String(new Date(NaN)) != INVALID_DATE) {
 
 /***/ }),
 
+/***/ "0d51":
+/***/ (function(module, exports) {
+
+module.exports = function (argument) {
+  try {
+    return String(argument);
+  } catch (error) {
+    return 'Object';
+  }
+};
+
+
+/***/ }),
+
 /***/ "0d7c":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -502,7 +599,7 @@ module.exports = fails(function () {
 
 "use strict";
 
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var toString = __webpack_require__("577e");
 var requireObjectCoercible = __webpack_require__("1d80");
 
@@ -511,11 +608,41 @@ var requireObjectCoercible = __webpack_require__("1d80");
 module.exports = function repeat(count) {
   var str = toString(requireObjectCoercible(this));
   var result = '';
-  var n = toInteger(count);
+  var n = toIntegerOrInfinity(count);
   if (n < 0 || n == Infinity) throw RangeError('Wrong number of repetitions');
   for (;n > 0; (n >>>= 1) && (str += str)) if (n & 1) result += str;
   return result;
 };
+
+
+/***/ }),
+
+/***/ "1231":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return format; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return formatPrefix; });
+/* unused harmony export default */
+/* harmony import */ var _locale_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("b170");
+
+
+var locale;
+var format;
+var formatPrefix;
+
+defaultLocale({
+  thousands: ",",
+  grouping: [3],
+  currency: ["$", ""]
+});
+
+function defaultLocale(definition) {
+  locale = Object(_locale_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(definition);
+  format = locale.format;
+  formatPrefix = locale.formatPrefix;
+  return locale;
+}
 
 
 /***/ }),
@@ -533,6 +660,7 @@ var speciesConstructor = __webpack_require__("4840");
 var advanceStringIndex = __webpack_require__("8aa5");
 var toLength = __webpack_require__("50c4");
 var toString = __webpack_require__("577e");
+var getMethod = __webpack_require__("dc4a");
 var callRegExpExec = __webpack_require__("14c3");
 var regexpExec = __webpack_require__("9263");
 var stickyHelpers = __webpack_require__("9f7f");
@@ -614,8 +742,8 @@ fixRegExpWellKnownSymbolLogic('split', function (SPLIT, nativeSplit, maybeCallNa
     // https://tc39.es/ecma262/#sec-string.prototype.split
     function split(separator, limit) {
       var O = requireObjectCoercible(this);
-      var splitter = separator == undefined ? undefined : separator[SPLIT];
-      return splitter !== undefined
+      var splitter = separator == undefined ? undefined : getMethod(separator, SPLIT);
+      return splitter
         ? splitter.call(separator, O, limit)
         : internalSplit.call(toString(O), separator, limit);
     },
@@ -735,6 +863,8 @@ $({ target: 'Array', proto: true, forced: !STRICT_METHOD || CHROME_BUG }, {
 /***/ "14c3":
 /***/ (function(module, exports, __webpack_require__) {
 
+var anObject = __webpack_require__("825a");
+var isCallable = __webpack_require__("1626");
 var classof = __webpack_require__("c6b6");
 var regexpExec = __webpack_require__("9263");
 
@@ -742,21 +872,14 @@ var regexpExec = __webpack_require__("9263");
 // https://tc39.es/ecma262/#sec-regexpexec
 module.exports = function (R, S) {
   var exec = R.exec;
-  if (typeof exec === 'function') {
+  if (isCallable(exec)) {
     var result = exec.call(R, S);
-    if (typeof result !== 'object') {
-      throw TypeError('RegExp exec method returned something other than an Object or null');
-    }
+    if (result !== null) anObject(result);
     return result;
   }
-
-  if (classof(R) !== 'RegExp') {
-    throw TypeError('RegExp#exec called on incompatible receiver');
-  }
-
-  return regexpExec.call(R, S);
+  if (classof(R) === 'RegExp') return regexpExec.call(R, S);
+  throw TypeError('RegExp#exec called on incompatible receiver');
 };
-
 
 
 /***/ }),
@@ -766,19 +889,60 @@ module.exports = function (R, S) {
 
 var global = __webpack_require__("da84");
 var DOMIterables = __webpack_require__("fdbc");
+var DOMTokenListPrototype = __webpack_require__("785a");
 var forEach = __webpack_require__("17c2");
 var createNonEnumerableProperty = __webpack_require__("9112");
 
-for (var COLLECTION_NAME in DOMIterables) {
-  var Collection = global[COLLECTION_NAME];
-  var CollectionPrototype = Collection && Collection.prototype;
+var handlePrototype = function (CollectionPrototype) {
   // some Chrome versions have non-configurable methods on DOMTokenList
   if (CollectionPrototype && CollectionPrototype.forEach !== forEach) try {
     createNonEnumerableProperty(CollectionPrototype, 'forEach', forEach);
   } catch (error) {
     CollectionPrototype.forEach = forEach;
   }
+};
+
+for (var COLLECTION_NAME in DOMIterables) {
+  if (DOMIterables[COLLECTION_NAME]) {
+    handlePrototype(global[COLLECTION_NAME] && global[COLLECTION_NAME].prototype);
+  }
 }
+
+handlePrototype(DOMTokenListPrototype);
+
+
+/***/ }),
+
+/***/ "1626":
+/***/ (function(module, exports) {
+
+// `IsCallable` abstract operation
+// https://tc39.es/ecma262/#sec-iscallable
+module.exports = function (argument) {
+  return typeof argument === 'function';
+};
+
+
+/***/ }),
+
+/***/ "1738":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return durationSecond; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return durationMinute; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return durationHour; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return durationDay; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return durationWeek; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return durationMonth; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return durationYear; });
+const durationSecond = 1000;
+const durationMinute = durationSecond * 60;
+const durationHour = durationMinute * 60;
+const durationDay = durationHour * 24;
+const durationWeek = durationDay * 7;
+const durationMonth = durationDay * 30;
+const durationYear = durationDay * 365;
 
 
 /***/ }),
@@ -803,6 +967,42 @@ module.exports = !STRICT_METHOD ? function forEach(callbackfn /* , thisArg */) {
 
 /***/ }),
 
+/***/ "1809":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export milliseconds */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+
+
+var millisecond = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function() {
+  // noop
+}, function(date, step) {
+  date.setTime(+date + step);
+}, function(start, end) {
+  return end - start;
+});
+
+// An optimized implementation for this simple case.
+millisecond.every = function(k) {
+  k = Math.floor(k);
+  if (!isFinite(k) || !(k > 0)) return null;
+  if (!(k > 1)) return millisecond;
+  return Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+    date.setTime(Math.floor(date / k) * k);
+  }, function(date, step) {
+    date.setTime(+date + step * k);
+  }, function(start, end) {
+    return (end - start) / k;
+  });
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (millisecond);
+var milliseconds = millisecond.range;
+
+
+/***/ }),
+
 /***/ "18a5":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -823,13 +1023,107 @@ $({ target: 'String', proto: true, forced: forcedStringHTMLMethod('anchor') }, {
 
 /***/ }),
 
+/***/ "18e2":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return newInterval; });
+var t0 = new Date,
+    t1 = new Date;
+
+function newInterval(floori, offseti, count, field) {
+
+  function interval(date) {
+    return floori(date = arguments.length === 0 ? new Date : new Date(+date)), date;
+  }
+
+  interval.floor = function(date) {
+    return floori(date = new Date(+date)), date;
+  };
+
+  interval.ceil = function(date) {
+    return floori(date = new Date(date - 1)), offseti(date, 1), floori(date), date;
+  };
+
+  interval.round = function(date) {
+    var d0 = interval(date),
+        d1 = interval.ceil(date);
+    return date - d0 < d1 - date ? d0 : d1;
+  };
+
+  interval.offset = function(date, step) {
+    return offseti(date = new Date(+date), step == null ? 1 : Math.floor(step)), date;
+  };
+
+  interval.range = function(start, stop, step) {
+    var range = [], previous;
+    start = interval.ceil(start);
+    step = step == null ? 1 : Math.floor(step);
+    if (!(start < stop) || !(step > 0)) return range; // also handles Invalid Date
+    do range.push(previous = new Date(+start)), offseti(start, step), floori(start);
+    while (previous < start && start < stop);
+    return range;
+  };
+
+  interval.filter = function(test) {
+    return newInterval(function(date) {
+      if (date >= date) while (floori(date), !test(date)) date.setTime(date - 1);
+    }, function(date, step) {
+      if (date >= date) {
+        if (step < 0) while (++step <= 0) {
+          while (offseti(date, -1), !test(date)) {} // eslint-disable-line no-empty
+        } else while (--step >= 0) {
+          while (offseti(date, +1), !test(date)) {} // eslint-disable-line no-empty
+        }
+      }
+    });
+  };
+
+  if (count) {
+    interval.count = function(start, end) {
+      t0.setTime(+start), t1.setTime(+end);
+      floori(t0), floori(t1);
+      return Math.floor(count(t0, t1));
+    };
+
+    interval.every = function(step) {
+      step = Math.floor(step);
+      return !isFinite(step) || !(step > 0) ? null
+          : !(step > 1) ? interval
+          : interval.filter(field
+              ? function(d) { return field(d) % step === 0; }
+              : function(d) { return interval.count(0, d) % step === 0; });
+    };
+  }
+
+  return interval;
+}
+
+
+/***/ }),
+
 /***/ "19aa":
 /***/ (function(module, exports) {
 
 module.exports = function (it, Constructor, name) {
-  if (!(it instanceof Constructor)) {
-    throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
-  } return it;
+  if (it instanceof Constructor) return it;
+  throw TypeError('Incorrect ' + (name ? name + ' ' : '') + 'invocation');
+};
+
+
+/***/ }),
+
+/***/ "1a2d":
+/***/ (function(module, exports, __webpack_require__) {
+
+var toObject = __webpack_require__("7b0b");
+
+var hasOwnProperty = {}.hasOwnProperty;
+
+// `HasOwnProperty` abstract operation
+// https://tc39.es/ecma262/#sec-hasownproperty
+module.exports = Object.hasOwn || function hasOwn(it, key) {
+  return hasOwnProperty.call(toObject(it), key);
 };
 
 
@@ -841,18 +1135,6 @@ module.exports = function (it, Constructor, name) {
 var getBuiltIn = __webpack_require__("d066");
 
 module.exports = getBuiltIn('document', 'documentElement');
-
-
-/***/ }),
-
-/***/ "1c0b":
-/***/ (function(module, exports) {
-
-module.exports = function (it) {
-  if (typeof it != 'function') {
-    throw TypeError(String(it) + ' is not a function');
-  } return it;
-};
 
 
 /***/ }),
@@ -1487,8 +1769,9 @@ function fromByteArray (uint8) {
 
 var anObject = __webpack_require__("825a");
 var isArrayIteratorMethod = __webpack_require__("e95a");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var bind = __webpack_require__("0366");
+var getIterator = __webpack_require__("9a1f");
 var getIteratorMethod = __webpack_require__("35a1");
 var iteratorClose = __webpack_require__("2a62");
 
@@ -1506,7 +1789,7 @@ module.exports = function (iterable, unboundFunction, options) {
   var iterator, iterFn, index, length, result, next, step;
 
   var stop = function (condition) {
-    if (iterator) iteratorClose(iterator);
+    if (iterator) iteratorClose(iterator, 'normal', condition);
     return new Result(true, condition);
   };
 
@@ -1521,15 +1804,15 @@ module.exports = function (iterable, unboundFunction, options) {
     iterator = iterable;
   } else {
     iterFn = getIteratorMethod(iterable);
-    if (typeof iterFn != 'function') throw TypeError('Target is not iterable');
+    if (!iterFn) throw TypeError(String(iterable) + ' is not iterable');
     // optimisation for array iterators
     if (isArrayIteratorMethod(iterFn)) {
-      for (index = 0, length = toLength(iterable.length); length > index; index++) {
+      for (index = 0, length = lengthOfArrayLike(iterable); length > index; index++) {
         result = callFn(iterable[index]);
         if (result && result instanceof Result) return result;
       } return new Result(false);
     }
-    iterator = iterFn.call(iterable);
+    iterator = getIterator(iterable, iterFn);
   }
 
   next = iterator.next;
@@ -1537,8 +1820,7 @@ module.exports = function (iterable, unboundFunction, options) {
     try {
       result = callFn(step.value);
     } catch (error) {
-      iteratorClose(iterator);
-      throw error;
+      iteratorClose(iterator, 'throw', error);
     }
     if (typeof result == 'object' && result && result instanceof Result) return result;
   } return new Result(false);
@@ -1739,7 +2021,7 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\.0\.0-0\\s*$')
 /***/ "23cb":
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 
 var max = Math.max;
 var min = Math.min;
@@ -1748,7 +2030,7 @@ var min = Math.min;
 // Let integer be ? ToInteger(index).
 // If integer < 0, let result be max((length + integer), 0); else let result be min(integer, length).
 module.exports = function (index, length) {
-  var integer = toInteger(index);
+  var integer = toIntegerOrInfinity(index);
   return integer < 0 ? max(integer + length, 0) : min(integer, length);
 };
 
@@ -2008,6 +2290,7 @@ var isForced = __webpack_require__("94ca");
   options.sham        - add a flag to not completely full polyfills
   options.enumerable  - export as enumerable property
   options.noTargetGet - prevent calling a getter on target
+  options.name        - the .name of the function if it does not match the key
 */
 module.exports = function (options, source) {
   var TARGET = options.target;
@@ -2343,6 +2626,7 @@ module.exports = lt
 
 "use strict";
 
+var PROPER_FUNCTION_NAME = __webpack_require__("5e77").PROPER;
 var redefine = __webpack_require__("6eeb");
 var anObject = __webpack_require__("825a");
 var $toString = __webpack_require__("577e");
@@ -2355,7 +2639,7 @@ var nativeToString = RegExpPrototype[TO_STRING];
 
 var NOT_GENERIC = fails(function () { return nativeToString.call({ source: 'a', flags: 'b' }) != '/a/b'; });
 // FF44- RegExp#toString has a wrong name
-var INCORRECT_NAME = nativeToString.name != TO_STRING;
+var INCORRECT_NAME = PROPER_FUNCTION_NAME && nativeToString.name != TO_STRING;
 
 // `RegExp.prototype.toString` method
 // https://tc39.es/ecma262/#sec-regexp.prototype.tostring
@@ -2425,6 +2709,59 @@ $({ target: 'Array', proto: true, forced: String(test) === String(test.reverse()
 
 /***/ }),
 
+/***/ "2739":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return utcSunday; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return utcMonday; });
+/* unused harmony export utcTuesday */
+/* unused harmony export utcWednesday */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return utcThursday; });
+/* unused harmony export utcFriday */
+/* unused harmony export utcSaturday */
+/* unused harmony export utcSundays */
+/* unused harmony export utcMondays */
+/* unused harmony export utcTuesdays */
+/* unused harmony export utcWednesdays */
+/* unused harmony export utcThursdays */
+/* unused harmony export utcFridays */
+/* unused harmony export utcSaturdays */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+function utcWeekday(i) {
+  return Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+    date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 7 - i) % 7);
+    date.setUTCHours(0, 0, 0, 0);
+  }, function(date, step) {
+    date.setUTCDate(date.getUTCDate() + step * 7);
+  }, function(start, end) {
+    return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationWeek */ "f"];
+  });
+}
+
+var utcSunday = utcWeekday(0);
+var utcMonday = utcWeekday(1);
+var utcTuesday = utcWeekday(2);
+var utcWednesday = utcWeekday(3);
+var utcThursday = utcWeekday(4);
+var utcFriday = utcWeekday(5);
+var utcSaturday = utcWeekday(6);
+
+var utcSundays = utcSunday.range;
+var utcMondays = utcMonday.range;
+var utcTuesdays = utcTuesday.range;
+var utcWednesdays = utcWednesday.range;
+var utcThursdays = utcThursday.range;
+var utcFridays = utcFriday.range;
+var utcSaturdays = utcSaturday.range;
+
+
+/***/ }),
+
 /***/ "277d":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2470,16 +2807,85 @@ module.exports = {
 
 /***/ }),
 
+/***/ "2a2d":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var _ascending_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("00fb");
+
+
+/* harmony default export */ __webpack_exports__["a"] = (function(f) {
+  let delta = f;
+  let compare = f;
+
+  if (f.length === 1) {
+    delta = (d, x) => f(d) - x;
+    compare = ascendingComparator(f);
+  }
+
+  function left(a, x, lo, hi) {
+    if (lo == null) lo = 0;
+    if (hi == null) hi = a.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (compare(a[mid], x) < 0) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  }
+
+  function right(a, x, lo, hi) {
+    if (lo == null) lo = 0;
+    if (hi == null) hi = a.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (compare(a[mid], x) > 0) hi = mid;
+      else lo = mid + 1;
+    }
+    return lo;
+  }
+
+  function center(a, x, lo, hi) {
+    if (lo == null) lo = 0;
+    if (hi == null) hi = a.length;
+    const i = left(a, x, lo, hi - 1);
+    return i > lo && delta(a[i - 1], x) > -delta(a[i], x) ? i - 1 : i;
+  }
+
+  return {left, center, right};
+});
+
+function ascendingComparator(f) {
+  return (d, x) => Object(_ascending_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(f(d), x);
+}
+
+
+/***/ }),
+
 /***/ "2a62":
 /***/ (function(module, exports, __webpack_require__) {
 
 var anObject = __webpack_require__("825a");
+var getMethod = __webpack_require__("dc4a");
 
-module.exports = function (iterator) {
-  var returnMethod = iterator['return'];
-  if (returnMethod !== undefined) {
-    return anObject(returnMethod.call(iterator)).value;
+module.exports = function (iterator, kind, value) {
+  var innerResult, innerError;
+  anObject(iterator);
+  try {
+    innerResult = getMethod(iterator, 'return');
+    if (!innerResult) {
+      if (kind === 'throw') throw value;
+      return value;
+    }
+    innerResult = innerResult.call(iterator);
+  } catch (error) {
+    innerError = true;
+    innerResult = error;
   }
+  if (kind === 'throw') throw value;
+  if (innerError) throw innerResult;
+  anObject(innerResult);
+  return value;
 };
 
 
@@ -2500,6 +2906,32 @@ $({ target: 'Math', stat: true }, {
 
 /***/ }),
 
+/***/ "2c38":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export minutes */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var minute = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setTime(date - date.getMilliseconds() - date.getSeconds() * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationSecond */ "e"]);
+}, function(date, step) {
+  date.setTime(+date + step * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"]);
+}, function(start, end) {
+  return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"];
+}, function(date) {
+  return date.getMinutes();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (minute);
+var minutes = minute.range;
+
+
+/***/ }),
+
 /***/ "2c9f":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2514,6 +2946,7 @@ module.exports = patch
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
+var isCallable = __webpack_require__("1626");
 var fails = __webpack_require__("d039");
 var bind = __webpack_require__("0366");
 var html = __webpack_require__("1be4");
@@ -2569,7 +3002,7 @@ if (!set || !clear) {
     while (argumentsLength > i) args.push(arguments[i++]);
     queue[++counter] = function () {
       // eslint-disable-next-line no-new-func -- spec requirement
-      (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
+      (isCallable(fn) ? fn : Function(fn)).apply(undefined, args);
     };
     defer(counter);
     return counter;
@@ -2598,7 +3031,7 @@ if (!set || !clear) {
   // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
   } else if (
     global.addEventListener &&
-    typeof postMessage == 'function' &&
+    isCallable(global.postMessage) &&
     !global.importScripts &&
     location && location.protocol !== 'file:' &&
     !fails(post)
@@ -2707,18 +3140,191 @@ module.exports = getBuiltIn('navigator', 'userAgent') || '';
 
 /***/ }),
 
+/***/ "3512":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var EOL = {},
+    EOF = {},
+    QUOTE = 34,
+    NEWLINE = 10,
+    RETURN = 13;
+
+function objectConverter(columns) {
+  return new Function("d", "return {" + columns.map(function(name, i) {
+    return JSON.stringify(name) + ": d[" + i + "] || \"\"";
+  }).join(",") + "}");
+}
+
+function customConverter(columns, f) {
+  var object = objectConverter(columns);
+  return function(row, i) {
+    return f(object(row), i, columns);
+  };
+}
+
+// Compute unique columns in order of discovery.
+function inferColumns(rows) {
+  var columnSet = Object.create(null),
+      columns = [];
+
+  rows.forEach(function(row) {
+    for (var column in row) {
+      if (!(column in columnSet)) {
+        columns.push(columnSet[column] = column);
+      }
+    }
+  });
+
+  return columns;
+}
+
+function pad(value, width) {
+  var s = value + "", length = s.length;
+  return length < width ? new Array(width - length + 1).join(0) + s : s;
+}
+
+function formatYear(year) {
+  return year < 0 ? "-" + pad(-year, 6)
+    : year > 9999 ? "+" + pad(year, 6)
+    : pad(year, 4);
+}
+
+function formatDate(date) {
+  var hours = date.getUTCHours(),
+      minutes = date.getUTCMinutes(),
+      seconds = date.getUTCSeconds(),
+      milliseconds = date.getUTCMilliseconds();
+  return isNaN(date) ? "Invalid Date"
+      : formatYear(date.getUTCFullYear(), 4) + "-" + pad(date.getUTCMonth() + 1, 2) + "-" + pad(date.getUTCDate(), 2)
+      + (milliseconds ? "T" + pad(hours, 2) + ":" + pad(minutes, 2) + ":" + pad(seconds, 2) + "." + pad(milliseconds, 3) + "Z"
+      : seconds ? "T" + pad(hours, 2) + ":" + pad(minutes, 2) + ":" + pad(seconds, 2) + "Z"
+      : minutes || hours ? "T" + pad(hours, 2) + ":" + pad(minutes, 2) + "Z"
+      : "");
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (function(delimiter) {
+  var reFormat = new RegExp("[\"" + delimiter + "\n\r]"),
+      DELIMITER = delimiter.charCodeAt(0);
+
+  function parse(text, f) {
+    var convert, columns, rows = parseRows(text, function(row, i) {
+      if (convert) return convert(row, i - 1);
+      columns = row, convert = f ? customConverter(row, f) : objectConverter(row);
+    });
+    rows.columns = columns || [];
+    return rows;
+  }
+
+  function parseRows(text, f) {
+    var rows = [], // output rows
+        N = text.length,
+        I = 0, // current character index
+        n = 0, // current line number
+        t, // current token
+        eof = N <= 0, // current token followed by EOF?
+        eol = false; // current token followed by EOL?
+
+    // Strip the trailing newline.
+    if (text.charCodeAt(N - 1) === NEWLINE) --N;
+    if (text.charCodeAt(N - 1) === RETURN) --N;
+
+    function token() {
+      if (eof) return EOF;
+      if (eol) return eol = false, EOL;
+
+      // Unescape quotes.
+      var i, j = I, c;
+      if (text.charCodeAt(j) === QUOTE) {
+        while (I++ < N && text.charCodeAt(I) !== QUOTE || text.charCodeAt(++I) === QUOTE);
+        if ((i = I) >= N) eof = true;
+        else if ((c = text.charCodeAt(I++)) === NEWLINE) eol = true;
+        else if (c === RETURN) { eol = true; if (text.charCodeAt(I) === NEWLINE) ++I; }
+        return text.slice(j + 1, i - 1).replace(/""/g, "\"");
+      }
+
+      // Find next delimiter or newline.
+      while (I < N) {
+        if ((c = text.charCodeAt(i = I++)) === NEWLINE) eol = true;
+        else if (c === RETURN) { eol = true; if (text.charCodeAt(I) === NEWLINE) ++I; }
+        else if (c !== DELIMITER) continue;
+        return text.slice(j, i);
+      }
+
+      // Return last token before EOF.
+      return eof = true, text.slice(j, N);
+    }
+
+    while ((t = token()) !== EOF) {
+      var row = [];
+      while (t !== EOL && t !== EOF) row.push(t), t = token();
+      if (f && (row = f(row, n++)) == null) continue;
+      rows.push(row);
+    }
+
+    return rows;
+  }
+
+  function preformatBody(rows, columns) {
+    return rows.map(function(row) {
+      return columns.map(function(column) {
+        return formatValue(row[column]);
+      }).join(delimiter);
+    });
+  }
+
+  function format(rows, columns) {
+    if (columns == null) columns = inferColumns(rows);
+    return [columns.map(formatValue).join(delimiter)].concat(preformatBody(rows, columns)).join("\n");
+  }
+
+  function formatBody(rows, columns) {
+    if (columns == null) columns = inferColumns(rows);
+    return preformatBody(rows, columns).join("\n");
+  }
+
+  function formatRows(rows) {
+    return rows.map(formatRow).join("\n");
+  }
+
+  function formatRow(row) {
+    return row.map(formatValue).join(delimiter);
+  }
+
+  function formatValue(value) {
+    return value == null ? ""
+        : value instanceof Date ? formatDate(value)
+        : reFormat.test(value += "") ? "\"" + value.replace(/"/g, "\"\"") + "\""
+        : value;
+  }
+
+  return {
+    parse: parse,
+    parseRows: parseRows,
+    format: format,
+    formatBody: formatBody,
+    formatRows: formatRows,
+    formatRow: formatRow,
+    formatValue: formatValue
+  };
+});
+
+
+/***/ }),
+
 /***/ "35a1":
 /***/ (function(module, exports, __webpack_require__) {
 
 var classof = __webpack_require__("f5df");
+var getMethod = __webpack_require__("dc4a");
 var Iterators = __webpack_require__("3f8c");
 var wellKnownSymbol = __webpack_require__("b622");
 
 var ITERATOR = wellKnownSymbol('iterator');
 
 module.exports = function (it) {
-  if (it != undefined) return it[ITERATOR]
-    || it['@@iterator']
+  if (it != undefined) return getMethod(it, ITERATOR)
+    || getMethod(it, '@@iterator')
     || Iterators[classof(it)];
 };
 
@@ -2767,12 +3373,11 @@ $({ target: 'String', proto: true }, {
 /***/ "3bbe":
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__("861d");
+var isCallable = __webpack_require__("1626");
 
-module.exports = function (it) {
-  if (!isObject(it) && it !== null) {
-    throw TypeError("Can't set " + String(it) + ' as a prototype');
-  } return it;
+module.exports = function (argument) {
+  if (typeof argument === 'object' || isCallable(argument)) return argument;
+  throw TypeError("Can't set " + String(argument) + ' as a prototype');
 };
 
 
@@ -2838,17 +3443,14 @@ module.exports = {};
 /***/ }),
 
 /***/ "408a":
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-var classof = __webpack_require__("c6b6");
+var valueOf = 1.0.valueOf;
 
 // `thisNumberValue` abstract operation
 // https://tc39.es/ecma262/#sec-thisnumbervalue
 module.exports = function (value) {
-  if (typeof value != 'number' && classof(value) != 'Number') {
-    throw TypeError('Incorrect invocation');
-  }
-  return +value;
+  return valueOf.call(value);
 };
 
 
@@ -3036,6 +3638,7 @@ var anObject = __webpack_require__("825a");
 var toLength = __webpack_require__("50c4");
 var toString = __webpack_require__("577e");
 var requireObjectCoercible = __webpack_require__("1d80");
+var getMethod = __webpack_require__("dc4a");
 var advanceStringIndex = __webpack_require__("8aa5");
 var regExpExec = __webpack_require__("14c3");
 
@@ -3046,8 +3649,8 @@ fixRegExpWellKnownSymbolLogic('match', function (MATCH, nativeMatch, maybeCallNa
     // https://tc39.es/ecma262/#sec-string.prototype.match
     function match(regexp) {
       var O = requireObjectCoercible(this);
-      var matcher = regexp == undefined ? undefined : regexp[MATCH];
-      return matcher !== undefined ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](toString(O));
+      var matcher = regexp == undefined ? undefined : getMethod(regexp, MATCH);
+      return matcher ? matcher.call(regexp, O) : new RegExp(regexp)[MATCH](toString(O));
     },
     // `RegExp.prototype[@@match]` method
     // https://tc39.es/ecma262/#sec-regexp.prototype-@@match
@@ -3084,6 +3687,7 @@ fixRegExpWellKnownSymbolLogic('match', function (MATCH, nativeMatch, maybeCallNa
 
 var $ = __webpack_require__("23e7");
 var global = __webpack_require__("da84");
+var isCallable = __webpack_require__("1626");
 var userAgent = __webpack_require__("342f");
 
 var slice = [].slice;
@@ -3095,7 +3699,7 @@ var wrap = function (scheduler) {
     var args = boundArgs ? slice.call(arguments, 2) : undefined;
     return scheduler(boundArgs ? function () {
       // eslint-disable-next-line no-new-func -- spec requirement
-      (typeof handler == 'function' ? handler : Function(handler)).apply(this, args);
+      (isCallable(handler) ? handler : Function(handler)).apply(this, args);
     } : handler, timeout);
   };
 };
@@ -3118,7 +3722,7 @@ $({ global: true, bind: true, forced: MSIE }, {
 /***/ (function(module, exports, __webpack_require__) {
 
 var anObject = __webpack_require__("825a");
-var aFunction = __webpack_require__("1c0b");
+var aConstructor = __webpack_require__("5087");
 var wellKnownSymbol = __webpack_require__("b622");
 
 var SPECIES = wellKnownSymbol('species');
@@ -3128,7 +3732,7 @@ var SPECIES = wellKnownSymbol('species');
 module.exports = function (O, defaultConstructor) {
   var C = anObject(O).constructor;
   var S;
-  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aFunction(S);
+  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? defaultConstructor : aConstructor(S);
 };
 
 
@@ -3137,15 +3741,16 @@ module.exports = function (O, defaultConstructor) {
 /***/ "485a":
 /***/ (function(module, exports, __webpack_require__) {
 
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
 
 // `OrdinaryToPrimitive` abstract operation
 // https://tc39.es/ecma262/#sec-ordinarytoprimitive
 module.exports = function (input, pref) {
   var fn, val;
-  if (pref === 'string' && typeof (fn = input.toString) == 'function' && !isObject(val = fn.call(input))) return val;
-  if (typeof (fn = input.valueOf) == 'function' && !isObject(val = fn.call(input))) return val;
-  if (pref !== 'string' && typeof (fn = input.toString) == 'function' && !isObject(val = fn.call(input))) return val;
+  if (pref === 'string' && isCallable(fn = input.toString) && !isObject(val = fn.call(input))) return val;
+  if (isCallable(fn = input.valueOf) && !isObject(val = fn.call(input))) return val;
+  if (pref !== 'string' && isCallable(fn = input.toString) && !isObject(val = fn.call(input))) return val;
   throw TypeError("Can't convert object to primitive value");
 };
 
@@ -3197,7 +3802,7 @@ $({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
 
 var $ = __webpack_require__("23e7");
 var getBuiltIn = __webpack_require__("d066");
-var aFunction = __webpack_require__("1c0b");
+var aConstructor = __webpack_require__("5087");
 var anObject = __webpack_require__("825a");
 var isObject = __webpack_require__("861d");
 var create = __webpack_require__("7c73");
@@ -3221,9 +3826,9 @@ var FORCED = NEW_TARGET_BUG || ARGS_BUG;
 
 $({ target: 'Reflect', stat: true, forced: FORCED, sham: FORCED }, {
   construct: function construct(Target, args /* , newTarget */) {
-    aFunction(Target);
+    aConstructor(Target);
     anObject(args);
-    var newTarget = arguments.length < 3 ? Target : aFunction(arguments[2]);
+    var newTarget = arguments.length < 3 ? Target : aConstructor(arguments[2]);
     if (ARGS_BUG && !NEW_TARGET_BUG) return nativeConstruct(Target, args, newTarget);
     if (Target == newTarget) {
       // w/o altered newTarget, optimization for 0-4 arguments
@@ -3250,6 +3855,47 @@ $({ target: 'Reflect', stat: true, forced: FORCED, sham: FORCED }, {
 
 /***/ }),
 
+/***/ "4c23":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return timeFormat; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return timeParse; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return utcFormat; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return utcParse; });
+/* unused harmony export default */
+/* harmony import */ var _locale_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("a591");
+
+
+var locale;
+var timeFormat;
+var timeParse;
+var utcFormat;
+var utcParse;
+
+defaultLocale({
+  dateTime: "%x, %X",
+  date: "%-m/%-d/%Y",
+  time: "%-I:%M:%S %p",
+  periods: ["AM", "PM"],
+  days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  shortDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+});
+
+function defaultLocale(definition) {
+  locale = Object(_locale_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(definition);
+  timeFormat = locale.format;
+  timeParse = locale.parse;
+  utcFormat = locale.utcFormat;
+  utcParse = locale.utcParse;
+  return locale;
+}
+
+
+/***/ }),
+
 /***/ "4d63":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3266,7 +3912,7 @@ var getFlags = __webpack_require__("ad6d");
 var stickyHelpers = __webpack_require__("9f7f");
 var redefine = __webpack_require__("6eeb");
 var fails = __webpack_require__("d039");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var enforceInternalState = __webpack_require__("69f3").enforce;
 var setSpecies = __webpack_require__("2626");
 var wellKnownSymbol = __webpack_require__("b622");
@@ -3347,7 +3993,7 @@ var handleNCG = function (string) {
         groupid++;
         continue;
       case chr === '>' && ncg:
-        if (groupname === '' || has(names, groupname)) {
+        if (groupname === '' || hasOwn(names, groupname)) {
           throw new SyntaxError('Invalid capture group name');
         }
         names[groupname] = true;
@@ -3450,14 +4096,14 @@ setSpecies('RegExp');
 /***/ (function(module, exports, __webpack_require__) {
 
 var toIndexedObject = __webpack_require__("fc6a");
-var toLength = __webpack_require__("50c4");
 var toAbsoluteIndex = __webpack_require__("23cb");
+var lengthOfArrayLike = __webpack_require__("07fa");
 
 // `Array.prototype.{ indexOf, includes }` methods implementation
 var createMethod = function (IS_INCLUDES) {
   return function ($this, el, fromIndex) {
     var O = toIndexedObject($this);
-    var length = toLength(O.length);
+    var length = lengthOfArrayLike(O);
     var index = toAbsoluteIndex(fromIndex, length);
     var value;
     // Array#includes uses SameValueZero equality algorithm
@@ -3517,34 +4163,36 @@ var bind = __webpack_require__("0366");
 var toObject = __webpack_require__("7b0b");
 var callWithSafeIterationClosing = __webpack_require__("9bdd");
 var isArrayIteratorMethod = __webpack_require__("e95a");
-var toLength = __webpack_require__("50c4");
+var isConstructor = __webpack_require__("68ee");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var createProperty = __webpack_require__("8418");
+var getIterator = __webpack_require__("9a1f");
 var getIteratorMethod = __webpack_require__("35a1");
 
 // `Array.from` method implementation
 // https://tc39.es/ecma262/#sec-array.from
 module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
   var O = toObject(arrayLike);
-  var C = typeof this == 'function' ? this : Array;
+  var IS_CONSTRUCTOR = isConstructor(this);
   var argumentsLength = arguments.length;
   var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
   var mapping = mapfn !== undefined;
+  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined, 2);
   var iteratorMethod = getIteratorMethod(O);
   var index = 0;
   var length, result, step, iterator, next, value;
-  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined, 2);
   // if the target is not iterable or it's an array with the default iterator - use a simple case
-  if (iteratorMethod != undefined && !(C == Array && isArrayIteratorMethod(iteratorMethod))) {
-    iterator = iteratorMethod.call(O);
+  if (iteratorMethod && !(this == Array && isArrayIteratorMethod(iteratorMethod))) {
+    iterator = getIterator(O, iteratorMethod);
     next = iterator.next;
-    result = new C();
+    result = IS_CONSTRUCTOR ? new this() : [];
     for (;!(step = next.call(iterator)).done; index++) {
       value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
       createProperty(result, index, value);
     }
   } else {
-    length = toLength(O.length);
-    result = new C(length);
+    length = lengthOfArrayLike(O);
+    result = IS_CONSTRUCTOR ? new this(length) : Array(length);
     for (;length > index; index++) {
       value = mapping ? mapfn(O[index], index) : O[index];
       createProperty(result, index, value);
@@ -3563,9 +4211,9 @@ module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undef
 "use strict";
 
 var $ = __webpack_require__("23e7");
-var aFunction = __webpack_require__("1c0b");
+var aCallable = __webpack_require__("59ed");
 var toObject = __webpack_require__("7b0b");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var toString = __webpack_require__("577e");
 var fails = __webpack_require__("d039");
 var internalSort = __webpack_require__("addb");
@@ -3639,14 +4287,14 @@ var getSortCompare = function (comparefn) {
 // https://tc39.es/ecma262/#sec-array.prototype.sort
 $({ target: 'Array', proto: true, forced: FORCED }, {
   sort: function sort(comparefn) {
-    if (comparefn !== undefined) aFunction(comparefn);
+    if (comparefn !== undefined) aCallable(comparefn);
 
     var array = toObject(this);
 
     if (STABLE_SORT) return comparefn === undefined ? nativeSort.call(array) : nativeSort.call(array, comparefn);
 
     var items = [];
-    var arrayLength = toLength(array.length);
+    var arrayLength = lengthOfArrayLike(array);
     var itemsLength, index;
 
     for (index = 0; index < arrayLength; index++) {
@@ -3684,17 +4332,32 @@ $({ target: 'Object', stat: true }, {
 
 /***/ }),
 
+/***/ "5087":
+/***/ (function(module, exports, __webpack_require__) {
+
+var isConstructor = __webpack_require__("68ee");
+var tryToString = __webpack_require__("0d51");
+
+// `Assert: IsConstructor(argument) is true`
+module.exports = function (argument) {
+  if (isConstructor(argument)) return argument;
+  throw TypeError(tryToString(argument) + ' is not a constructor');
+};
+
+
+/***/ }),
+
 /***/ "50c4":
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 
 var min = Math.min;
 
 // `ToLength` abstract operation
 // https://tc39.es/ecma262/#sec-tolength
 module.exports = function (argument) {
-  return argument > 0 ? min(toInteger(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
+  return argument > 0 ? min(toIntegerOrInfinity(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
 };
 
 
@@ -3712,20 +4375,6 @@ module.exports = !!webkit && +webkit[1];
 
 /***/ }),
 
-/***/ "5135":
-/***/ (function(module, exports, __webpack_require__) {
-
-var toObject = __webpack_require__("7b0b");
-
-var hasOwnProperty = {}.hasOwnProperty;
-
-module.exports = Object.hasOwn || function hasOwn(it, key) {
-  return hasOwnProperty.call(toObject(it), key);
-};
-
-
-/***/ }),
-
 /***/ "5319":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3734,11 +4383,13 @@ module.exports = Object.hasOwn || function hasOwn(it, key) {
 var fixRegExpWellKnownSymbolLogic = __webpack_require__("d784");
 var fails = __webpack_require__("d039");
 var anObject = __webpack_require__("825a");
-var toInteger = __webpack_require__("a691");
+var isCallable = __webpack_require__("1626");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var toLength = __webpack_require__("50c4");
 var toString = __webpack_require__("577e");
 var requireObjectCoercible = __webpack_require__("1d80");
 var advanceStringIndex = __webpack_require__("8aa5");
+var getMethod = __webpack_require__("dc4a");
 var getSubstitution = __webpack_require__("0cb2");
 var regExpExec = __webpack_require__("14c3");
 var wellKnownSymbol = __webpack_require__("b622");
@@ -3786,8 +4437,8 @@ fixRegExpWellKnownSymbolLogic('replace', function (_, nativeReplace, maybeCallNa
     // https://tc39.es/ecma262/#sec-string.prototype.replace
     function replace(searchValue, replaceValue) {
       var O = requireObjectCoercible(this);
-      var replacer = searchValue == undefined ? undefined : searchValue[REPLACE];
-      return replacer !== undefined
+      var replacer = searchValue == undefined ? undefined : getMethod(searchValue, REPLACE);
+      return replacer
         ? replacer.call(searchValue, O, replaceValue)
         : nativeReplace.call(toString(O), searchValue, replaceValue);
     },
@@ -3806,7 +4457,7 @@ fixRegExpWellKnownSymbolLogic('replace', function (_, nativeReplace, maybeCallNa
         if (res.done) return res.value;
       }
 
-      var functionalReplace = typeof replaceValue === 'function';
+      var functionalReplace = isCallable(replaceValue);
       if (!functionalReplace) replaceValue = toString(replaceValue);
 
       var global = rx.global;
@@ -3832,7 +4483,7 @@ fixRegExpWellKnownSymbolLogic('replace', function (_, nativeReplace, maybeCallNa
         result = results[i];
 
         var matched = toString(result[0]);
-        var position = max(min(toInteger(result.index), S.length), 0);
+        var position = max(min(toIntegerOrInfinity(result.index), S.length), 0);
         var captures = [];
         // NOTE: This is equivalent to
         //   captures = result.slice(1).map(maybeToString)
@@ -3971,6 +4622,31 @@ module.exports = cmp
 
 /***/ }),
 
+/***/ "55f8":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export utcMonths */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+
+
+var utcMonth = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setUTCDate(1);
+  date.setUTCHours(0, 0, 0, 0);
+}, function(date, step) {
+  date.setUTCMonth(date.getUTCMonth() + step);
+}, function(start, end) {
+  return end.getUTCMonth() - start.getUTCMonth() + (end.getUTCFullYear() - start.getUTCFullYear()) * 12;
+}, function(date) {
+  return date.getUTCMonth();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (utcMonth);
+var utcMonths = utcMonth.range;
+
+
+/***/ }),
+
 /***/ "566a":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3991,7 +4667,7 @@ var store = __webpack_require__("c6cd");
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
-  version: '3.16.3',
+  version: '3.18.3',
   mode: IS_PURE ? 'pure' : 'global',
   copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
@@ -4020,10 +4696,10 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
 /***/ "577e":
 /***/ (function(module, exports, __webpack_require__) {
 
-var isSymbol = __webpack_require__("d9b5");
+var classof = __webpack_require__("f5df");
 
 module.exports = function (argument) {
-  if (isSymbol(argument)) throw TypeError('Cannot convert a Symbol value to a string');
+  if (classof(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
   return String(argument);
 };
 
@@ -4071,6 +4747,38 @@ module.exports = {
   // `String.prototype.trim` method
   // https://tc39.es/ecma262/#sec-string.prototype.trim
   trim: createMethod(3)
+};
+
+
+/***/ }),
+
+/***/ "5926":
+/***/ (function(module, exports) {
+
+var ceil = Math.ceil;
+var floor = Math.floor;
+
+// `ToIntegerOrInfinity` abstract operation
+// https://tc39.es/ecma262/#sec-tointegerorinfinity
+module.exports = function (argument) {
+  var number = +argument;
+  // eslint-disable-next-line no-self-compare -- safe
+  return number !== number || number === 0 ? 0 : (number > 0 ? floor : ceil)(number);
+};
+
+
+/***/ }),
+
+/***/ "59ed":
+/***/ (function(module, exports, __webpack_require__) {
+
+var isCallable = __webpack_require__("1626");
+var tryToString = __webpack_require__("0d51");
+
+// `Assert: IsCallable(argument) is true`
+module.exports = function (argument) {
+  if (isCallable(argument)) return argument;
+  throw TypeError(tryToString(argument) + ' is not a function');
 };
 
 
@@ -4576,9 +5284,9 @@ $({ target: 'Reflect', stat: true }, {
 
 var $ = __webpack_require__("23e7");
 var flattenIntoArray = __webpack_require__("a2bf");
+var aCallable = __webpack_require__("59ed");
 var toObject = __webpack_require__("7b0b");
-var toLength = __webpack_require__("50c4");
-var aFunction = __webpack_require__("1c0b");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var arraySpeciesCreate = __webpack_require__("65f0");
 
 // `Array.prototype.flatMap` method
@@ -4586,14 +5294,64 @@ var arraySpeciesCreate = __webpack_require__("65f0");
 $({ target: 'Array', proto: true }, {
   flatMap: function flatMap(callbackfn /* , thisArg */) {
     var O = toObject(this);
-    var sourceLen = toLength(O.length);
+    var sourceLen = lengthOfArrayLike(O);
     var A;
-    aFunction(callbackfn);
+    aCallable(callbackfn);
     A = arraySpeciesCreate(O, 0);
     A.length = flattenIntoArray(A, O, O, sourceLen, 0, 1, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     return A;
   }
 });
+
+
+/***/ }),
+
+/***/ "5e77":
+/***/ (function(module, exports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__("83ab");
+var hasOwn = __webpack_require__("1a2d");
+
+var FunctionPrototype = Function.prototype;
+// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+var getDescriptor = DESCRIPTORS && Object.getOwnPropertyDescriptor;
+
+var EXISTS = hasOwn(FunctionPrototype, 'name');
+// additional protection from minified / mangled / dropped function names
+var PROPER = EXISTS && (function something() { /* empty */ }).name === 'something';
+var CONFIGURABLE = EXISTS && (!DESCRIPTORS || (DESCRIPTORS && getDescriptor(FunctionPrototype, 'name').configurable));
+
+module.exports = {
+  EXISTS: EXISTS,
+  PROPER: PROPER,
+  CONFIGURABLE: CONFIGURABLE
+};
+
+
+/***/ }),
+
+/***/ "5edf":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export seconds */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var second = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setTime(date - date.getMilliseconds());
+}, function(date, step) {
+  date.setTime(+date + step * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationSecond */ "e"]);
+}, function(start, end) {
+  return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationSecond */ "e"];
+}, function(date) {
+  return date.getUTCSeconds();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (second);
+var seconds = second.range;
 
 
 /***/ }),
@@ -4754,11 +5512,12 @@ module.exports = parse
 var global = __webpack_require__("da84");
 var DESCRIPTORS = __webpack_require__("83ab");
 var NATIVE_ARRAY_BUFFER = __webpack_require__("a981");
+var FunctionName = __webpack_require__("5e77");
 var createNonEnumerableProperty = __webpack_require__("9112");
 var redefineAll = __webpack_require__("e2cc");
 var fails = __webpack_require__("d039");
 var anInstance = __webpack_require__("19aa");
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var toLength = __webpack_require__("50c4");
 var toIndex = __webpack_require__("0b25");
 var IEEE754 = __webpack_require__("77a7");
@@ -4770,6 +5529,8 @@ var arrayFill = __webpack_require__("81d5");
 var setToStringTag = __webpack_require__("d44e");
 var InternalStateModule = __webpack_require__("69f3");
 
+var PROPER_FUNCTION_NAME = FunctionName.PROPER;
+var CONFIGURABLE_FUNCTION_NAME = FunctionName.CONFIGURABLE;
 var getInternalState = InternalStateModule.get;
 var setInternalState = InternalStateModule.set;
 var ARRAY_BUFFER = 'ArrayBuffer';
@@ -4850,7 +5611,7 @@ if (!NATIVE_ARRAY_BUFFER) {
     anInstance(this, $DataView, DATA_VIEW);
     anInstance(buffer, $ArrayBuffer, DATA_VIEW);
     var bufferLength = getInternalState(buffer).byteLength;
-    var offset = toInteger(byteOffset);
+    var offset = toIntegerOrInfinity(byteOffset);
     if (offset < 0 || offset > bufferLength) throw RangeError('Wrong offset');
     byteLength = byteLength === undefined ? bufferLength - offset : toLength(byteLength);
     if (offset + byteLength > bufferLength) throw RangeError(WRONG_LENGTH);
@@ -4926,6 +5687,7 @@ if (!NATIVE_ARRAY_BUFFER) {
     }
   });
 } else {
+  var INCORRECT_ARRAY_BUFFER_NAME = PROPER_FUNCTION_NAME && NativeArrayBuffer.name !== ARRAY_BUFFER;
   /* eslint-disable no-new -- required for testing */
   if (!fails(function () {
     NativeArrayBuffer(1);
@@ -4935,7 +5697,7 @@ if (!NATIVE_ARRAY_BUFFER) {
     new NativeArrayBuffer();
     new NativeArrayBuffer(1.5);
     new NativeArrayBuffer(NaN);
-    return NativeArrayBuffer.name != ARRAY_BUFFER;
+    return INCORRECT_ARRAY_BUFFER_NAME && !CONFIGURABLE_FUNCTION_NAME;
   })) {
   /* eslint-enable no-new -- required for testing */
     $ArrayBuffer = function ArrayBuffer(length) {
@@ -4949,6 +5711,8 @@ if (!NATIVE_ARRAY_BUFFER) {
       }
     }
     ArrayBufferPrototype.constructor = $ArrayBuffer;
+  } else if (INCORRECT_ARRAY_BUFFER_NAME && CONFIGURABLE_FUNCTION_NAME) {
+    createNonEnumerableProperty(NativeArrayBuffer, 'name', ARRAY_BUFFER);
   }
 
   // WebKit bug - the same parent prototype for typed arrays and data view
@@ -5015,15 +5779,14 @@ module.exports = diff
 /***/ "6547":
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var toString = __webpack_require__("577e");
 var requireObjectCoercible = __webpack_require__("1d80");
 
-// `String.prototype.codePointAt` methods implementation
 var createMethod = function (CONVERT_TO_STRING) {
   return function ($this, pos) {
     var S = toString(requireObjectCoercible($this));
-    var position = toInteger(pos);
+    var position = toIntegerOrInfinity(pos);
     var size = S.length;
     var first, second;
     if (position < 0 || position >= size) return CONVERT_TO_STRING ? '' : undefined;
@@ -5381,6 +6144,54 @@ module.exports = function (originalArray, length) {
 
 /***/ }),
 
+/***/ "68ee":
+/***/ (function(module, exports, __webpack_require__) {
+
+var fails = __webpack_require__("d039");
+var isCallable = __webpack_require__("1626");
+var classof = __webpack_require__("f5df");
+var getBuiltIn = __webpack_require__("d066");
+var inspectSource = __webpack_require__("8925");
+
+var empty = [];
+var construct = getBuiltIn('Reflect', 'construct');
+var constructorRegExp = /^\s*(?:class|function)\b/;
+var exec = constructorRegExp.exec;
+var INCORRECT_TO_STRING = !constructorRegExp.exec(function () { /* empty */ });
+
+var isConstructorModern = function (argument) {
+  if (!isCallable(argument)) return false;
+  try {
+    construct(Object, empty, argument);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+var isConstructorLegacy = function (argument) {
+  if (!isCallable(argument)) return false;
+  switch (classof(argument)) {
+    case 'AsyncFunction':
+    case 'GeneratorFunction':
+    case 'AsyncGeneratorFunction': return false;
+    // we can't check .prototype since constructors produced by .bind haven't it
+  } return INCORRECT_TO_STRING || !!exec.call(constructorRegExp, inspectSource(argument));
+};
+
+// `IsConstructor` abstract operation
+// https://tc39.es/ecma262/#sec-isconstructor
+module.exports = !construct || fails(function () {
+  var called;
+  return isConstructorModern(isConstructorModern.call)
+    || !isConstructorModern(Object)
+    || !isConstructorModern(function () { called = true; })
+    || called;
+}) ? isConstructorLegacy : isConstructorModern;
+
+
+/***/ }),
+
 /***/ "694b":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5442,7 +6253,7 @@ var NATIVE_WEAK_MAP = __webpack_require__("7f9a");
 var global = __webpack_require__("da84");
 var isObject = __webpack_require__("861d");
 var createNonEnumerableProperty = __webpack_require__("9112");
-var objectHas = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var shared = __webpack_require__("c6cd");
 var sharedKey = __webpack_require__("f772");
 var hiddenKeys = __webpack_require__("d012");
@@ -5485,16 +6296,16 @@ if (NATIVE_WEAK_MAP || shared.state) {
   var STATE = sharedKey('state');
   hiddenKeys[STATE] = true;
   set = function (it, metadata) {
-    if (objectHas(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
+    if (hasOwn(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
     metadata.facade = it;
     createNonEnumerableProperty(it, STATE, metadata);
     return metadata;
   };
   get = function (it) {
-    return objectHas(it, STATE) ? it[STATE] : {};
+    return hasOwn(it, STATE) ? it[STATE] : {};
   };
   has = function (it) {
-    return objectHas(it, STATE);
+    return hasOwn(it, STATE);
   };
 }
 
@@ -5521,6 +6332,7 @@ var redefine = __webpack_require__("6eeb");
 var InternalMetadataModule = __webpack_require__("f183");
 var iterate = __webpack_require__("2266");
 var anInstance = __webpack_require__("19aa");
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
 var fails = __webpack_require__("d039");
 var checkCorrectnessOfIteration = __webpack_require__("1c7e");
@@ -5557,7 +6369,7 @@ module.exports = function (CONSTRUCTOR_NAME, wrapper, common) {
 
   var REPLACE = isForced(
     CONSTRUCTOR_NAME,
-    typeof NativeConstructor != 'function' || !(IS_WEAK || NativePrototype.forEach && !fails(function () {
+    !isCallable(NativeConstructor) || !(IS_WEAK || NativePrototype.forEach && !fails(function () {
       new NativeConstructor().entries().next();
     }))
   );
@@ -5630,15 +6442,43 @@ module.exports = lte
 
 /***/ }),
 
+/***/ "6eb2":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export utcDays */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var utcDay = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setUTCHours(0, 0, 0, 0);
+}, function(date, step) {
+  date.setUTCDate(date.getUTCDate() + step);
+}, function(start, end) {
+  return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationDay */ "a"];
+}, function(date) {
+  return date.getUTCDate() - 1;
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (utcDay);
+var utcDays = utcDay.range;
+
+
+/***/ }),
+
 /***/ "6eeb":
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
+var isCallable = __webpack_require__("1626");
+var hasOwn = __webpack_require__("1a2d");
 var createNonEnumerableProperty = __webpack_require__("9112");
-var has = __webpack_require__("5135");
 var setGlobal = __webpack_require__("ce4e");
 var inspectSource = __webpack_require__("8925");
 var InternalStateModule = __webpack_require__("69f3");
+var CONFIGURABLE_FUNCTION_NAME = __webpack_require__("5e77").CONFIGURABLE;
 
 var getInternalState = InternalStateModule.get;
 var enforceInternalState = InternalStateModule.enforce;
@@ -5648,14 +6488,18 @@ var TEMPLATE = String(String).split('String');
   var unsafe = options ? !!options.unsafe : false;
   var simple = options ? !!options.enumerable : false;
   var noTargetGet = options ? !!options.noTargetGet : false;
+  var name = options && options.name !== undefined ? options.name : key;
   var state;
-  if (typeof value == 'function') {
-    if (typeof key == 'string' && !has(value, 'name')) {
-      createNonEnumerableProperty(value, 'name', key);
+  if (isCallable(value)) {
+    if (String(name).slice(0, 7) === 'Symbol(') {
+      name = '[' + String(name).replace(/^Symbol\(([^)]*)\)/, '$1') + ']';
+    }
+    if (!hasOwn(value, 'name') || (CONFIGURABLE_FUNCTION_NAME && value.name !== name)) {
+      createNonEnumerableProperty(value, 'name', name);
     }
     state = enforceInternalState(value);
     if (!state.source) {
-      state.source = TEMPLATE.join(typeof key == 'string' ? key : '');
+      state.source = TEMPLATE.join(typeof name == 'string' ? name : '');
     }
   }
   if (O === global) {
@@ -5671,7 +6515,7 @@ var TEMPLATE = String(String).split('String');
   else createNonEnumerableProperty(O, key, value);
 // add fake Function#toString for correct work wrapped methods / constructors with methods like LoDash isNative
 })(Function.prototype, 'toString', function toString() {
-  return typeof this == 'function' && getInternalState(this).source || inspectSource(this);
+  return isCallable(this) && getInternalState(this).source || inspectSource(this);
 });
 
 
@@ -5761,6 +6605,7 @@ module.exports["default"] = module.exports, module.exports.__esModule = true;
 /***/ "7156":
 /***/ (function(module, exports, __webpack_require__) {
 
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
 var setPrototypeOf = __webpack_require__("d2bb");
 
@@ -5771,7 +6616,7 @@ module.exports = function ($this, dummy, Wrapper) {
     // it can work only with native `setPrototypeOf`
     setPrototypeOf &&
     // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
-    typeof (NewTarget = dummy.constructor) == 'function' &&
+    isCallable(NewTarget = dummy.constructor) &&
     NewTarget !== Wrapper &&
     isObject(NewTargetPrototype = NewTarget.prototype) &&
     NewTargetPrototype !== Wrapper.prototype
@@ -5804,17 +6649,40 @@ exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
 
+/***/ "742c":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export days */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var day = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(
+  date => date.setHours(0, 0, 0, 0),
+  (date, step) => date.setDate(date.getDate() + step),
+  (start, end) => (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"]) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationDay */ "a"],
+  date => date.getDate() - 1
+);
+
+/* harmony default export */ __webpack_exports__["a"] = (day);
+var days = day.range;
+
+
+/***/ }),
+
 /***/ "746f":
 /***/ (function(module, exports, __webpack_require__) {
 
 var path = __webpack_require__("428f");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var wrappedWellKnownSymbolModule = __webpack_require__("e538");
 var defineProperty = __webpack_require__("9bf2").f;
 
 module.exports = function (NAME) {
   var Symbol = path.Symbol || (path.Symbol = {});
-  if (!has(Symbol, NAME)) defineProperty(Symbol, NAME, {
+  if (!hasOwn(Symbol, NAME)) defineProperty(Symbol, NAME, {
     value: wrappedWellKnownSymbolModule.f(NAME)
   });
 };
@@ -5957,6 +6825,42 @@ module.exports = {
 
 /***/ }),
 
+/***/ "77ae":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export utcYears */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+
+
+var utcYear = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setUTCMonth(0, 1);
+  date.setUTCHours(0, 0, 0, 0);
+}, function(date, step) {
+  date.setUTCFullYear(date.getUTCFullYear() + step);
+}, function(start, end) {
+  return end.getUTCFullYear() - start.getUTCFullYear();
+}, function(date) {
+  return date.getUTCFullYear();
+});
+
+// An optimized implementation for this simple case.
+utcYear.every = function(k) {
+  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+    date.setUTCFullYear(Math.floor(date.getUTCFullYear() / k) * k);
+    date.setUTCMonth(0, 1);
+    date.setUTCHours(0, 0, 0, 0);
+  }, function(date, step) {
+    date.setUTCFullYear(date.getUTCFullYear() + step * k);
+  });
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (utcYear);
+var utcYears = utcYear.range;
+
+
+/***/ }),
+
 /***/ "7839":
 /***/ (function(module, exports) {
 
@@ -5970,6 +6874,20 @@ module.exports = [
   'toString',
   'valueOf'
 ];
+
+
+/***/ }),
+
+/***/ "785a":
+/***/ (function(module, exports, __webpack_require__) {
+
+// in old WebKit versions, `element.classList` is not an instance of global `DOMTokenList`
+var documentCreateElement = __webpack_require__("cc12");
+
+var classList = documentCreateElement('span').classList;
+var DOMTokenListPrototype = classList && classList.constructor && classList.constructor.prototype;
+
+module.exports = DOMTokenListPrototype === Object.prototype ? undefined : DOMTokenListPrototype;
 
 
 /***/ }),
@@ -6601,6 +7519,403 @@ const testSet = (set, version, options) => {
 
 /***/ }),
 
+/***/ "7ba4":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(Buffer) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return format; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return formats; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return inferType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return inferTypes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return loader; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return read; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return responseType; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return typeParsers; });
+/* harmony import */ var vega_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("fc17");
+/* harmony import */ var d3_dsv__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("3512");
+/* harmony import */ var topojson_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("d217");
+/* harmony import */ var vega_format__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("c092");
+
+
+
+
+
+//   https://...    file://...    //...
+
+const protocol_re = /^(data:|([A-Za-z]+:)?\/\/)/; // Matches allowed URIs. From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js with added file://
+
+const allowed_re = /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|file|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i; // eslint-disable-line no-useless-escape
+
+const whitespace_re = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g; // eslint-disable-line no-control-regex
+// Special treatment in node.js for the file: protocol
+
+const fileProtocol = 'file://';
+/**
+ * Factory for a loader constructor that provides methods for requesting
+ * files from either the network or disk, and for sanitizing request URIs.
+ * @param {function} fetch - The Fetch API for HTTP network requests.
+ *   If null or undefined, HTTP loading will be disabled.
+ * @param {object} fs - The file system interface for file loading.
+ *   If null or undefined, local file loading will be disabled.
+ * @return {function} A loader constructor with the following signature:
+ *   param {object} [options] - Optional default loading options to use.
+ *   return {object} - A new loader instance.
+ */
+
+function loaderFactory (fetch, fs) {
+  return options => ({
+    options: options || {},
+    sanitize: sanitize,
+    load: load,
+    fileAccess: !!fs,
+    file: fileLoader(fs),
+    http: httpLoader(fetch)
+  });
+}
+/**
+ * Load an external resource, typically either from the web or from the local
+ * filesystem. This function uses {@link sanitize} to first sanitize the uri,
+ * then calls either {@link http} (for web requests) or {@link file} (for
+ * filesystem loading).
+ * @param {string} uri - The resource indicator (e.g., URL or filename).
+ * @param {object} [options] - Optional loading options. These options will
+ *   override any existing default options.
+ * @return {Promise} - A promise that resolves to the loaded content.
+ */
+
+async function load(uri, options) {
+  const opt = await this.sanitize(uri, options),
+        url = opt.href;
+  return opt.localFile ? this.file(url) : this.http(url, options);
+}
+/**
+ * URI sanitizer function.
+ * @param {string} uri - The uri (url or filename) to check.
+ * @param {object} options - An options hash.
+ * @return {Promise} - A promise that resolves to an object containing
+ *  sanitized uri data, or rejects it the input uri is deemed invalid.
+ *  The properties of the resolved object are assumed to be
+ *  valid attributes for an HTML 'a' tag. The sanitized uri *must* be
+ *  provided by the 'href' property of the returned object.
+ */
+
+
+async function sanitize(uri, options) {
+  options = Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* extend */ "p"])({}, this.options, options);
+  const fileAccess = this.fileAccess,
+        result = {
+    href: null
+  };
+  let isFile, loadFile, base;
+  const isAllowed = allowed_re.test(uri.replace(whitespace_re, ''));
+
+  if (uri == null || typeof uri !== 'string' || !isAllowed) {
+    Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('Sanitize failure, invalid URI: ' + Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* stringValue */ "bb"])(uri));
+  }
+
+  const hasProtocol = protocol_re.test(uri); // if relative url (no protocol/host), prepend baseURL
+
+  if ((base = options.baseURL) && !hasProtocol) {
+    // Ensure that there is a slash between the baseURL (e.g. hostname) and url
+    if (!uri.startsWith('/') && !base.endsWith('/')) {
+      uri = '/' + uri;
+    }
+
+    uri = base + uri;
+  } // should we load from file system?
+
+
+  loadFile = (isFile = uri.startsWith(fileProtocol)) || options.mode === 'file' || options.mode !== 'http' && !hasProtocol && fileAccess;
+
+  if (isFile) {
+    // strip file protocol
+    uri = uri.slice(fileProtocol.length);
+  } else if (uri.startsWith('//')) {
+    if (options.defaultProtocol === 'file') {
+      // if is file, strip protocol and set loadFile flag
+      uri = uri.slice(2);
+      loadFile = true;
+    } else {
+      // if relative protocol (starts with '//'), prepend default protocol
+      uri = (options.defaultProtocol || 'http') + ':' + uri;
+    }
+  } // set non-enumerable mode flag to indicate local file load
+
+
+  Object.defineProperty(result, 'localFile', {
+    value: !!loadFile
+  }); // set uri
+
+  result.href = uri; // set default result target, if specified
+
+  if (options.target) {
+    result.target = options.target + '';
+  } // set default result rel, if specified (#1542)
+
+
+  if (options.rel) {
+    result.rel = options.rel + '';
+  } // provide control over cross-origin image handling (#2238)
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
+
+
+  if (options.context === 'image' && options.crossOrigin) {
+    result.crossOrigin = options.crossOrigin + '';
+  } // return
+
+
+  return result;
+}
+/**
+ * File system loader factory.
+ * @param {object} fs - The file system interface.
+ * @return {function} - A file loader with the following signature:
+ *   param {string} filename - The file system path to load.
+ *   param {string} filename - The file system path to load.
+ *   return {Promise} A promise that resolves to the file contents.
+ */
+
+
+function fileLoader(fs) {
+  return fs ? filename => new Promise((accept, reject) => {
+    fs.readFile(filename, (error, data) => {
+      if (error) reject(error);else accept(data);
+    });
+  }) : fileReject;
+}
+/**
+ * Default file system loader that simply rejects.
+ */
+
+
+async function fileReject() {
+  Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('No file system access.');
+}
+/**
+ * HTTP request handler factory.
+ * @param {function} fetch - The Fetch API method.
+ * @return {function} - An http loader with the following signature:
+ *   param {string} url - The url to request.
+ *   param {object} options - An options hash.
+ *   return {Promise} - A promise that resolves to the file contents.
+ */
+
+
+function httpLoader(fetch) {
+  return fetch ? async function (url, options) {
+    const opt = Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* extend */ "p"])({}, this.options.http, options),
+          type = options && options.response,
+          response = await fetch(url, opt);
+    return !response.ok ? Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])(response.status + '' + response.statusText) : Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isFunction */ "E"])(response[type]) ? response[type]() : response.text();
+  } : httpReject;
+}
+/**
+ * Default http request handler that simply rejects.
+ */
+
+
+async function httpReject() {
+  Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('No HTTP fetch method available.');
+}
+
+const isValid = _ => _ != null && _ === _;
+
+const isBoolean = _ => _ === 'true' || _ === 'false' || _ === true || _ === false;
+
+const isDate = _ => !Number.isNaN(Date.parse(_));
+
+const isNumber = _ => !Number.isNaN(+_) && !(_ instanceof Date);
+
+const isInteger = _ => isNumber(_) && Number.isInteger(+_);
+
+const typeParsers = {
+  boolean: vega_util__WEBPACK_IMPORTED_MODULE_0__[/* toBoolean */ "cb"],
+  integer: vega_util__WEBPACK_IMPORTED_MODULE_0__[/* toNumber */ "eb"],
+  number: vega_util__WEBPACK_IMPORTED_MODULE_0__[/* toNumber */ "eb"],
+  date: vega_util__WEBPACK_IMPORTED_MODULE_0__[/* toDate */ "db"],
+  string: vega_util__WEBPACK_IMPORTED_MODULE_0__[/* toString */ "gb"],
+  unknown: vega_util__WEBPACK_IMPORTED_MODULE_0__[/* identity */ "y"]
+};
+const typeTests = [isBoolean, isInteger, isNumber, isDate];
+const typeList = ['boolean', 'integer', 'number', 'date'];
+function inferType(values, field) {
+  if (!values || !values.length) return 'unknown';
+  const n = values.length,
+        m = typeTests.length,
+        a = typeTests.map((_, i) => i + 1);
+
+  for (let i = 0, t = 0, j, value; i < n; ++i) {
+    value = field ? values[i][field] : values[i];
+
+    for (j = 0; j < m; ++j) {
+      if (a[j] && isValid(value) && !typeTests[j](value)) {
+        a[j] = 0;
+        ++t;
+        if (t === typeTests.length) return 'string';
+      }
+    }
+  }
+
+  return typeList[a.reduce((u, v) => u === 0 ? v : u, 0) - 1];
+}
+function inferTypes(data, fields) {
+  return fields.reduce((types, field) => {
+    types[field] = inferType(data, field);
+    return types;
+  }, {});
+}
+
+function delimitedFormat(delimiter) {
+  const parse = function (data, format) {
+    const delim = {
+      delimiter: delimiter
+    };
+    return dsv(data, format ? Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* extend */ "p"])(format, delim) : delim);
+  };
+
+  parse.responseType = 'text';
+  return parse;
+}
+function dsv(data, format) {
+  if (format.header) {
+    data = format.header.map(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* stringValue */ "bb"]).join(format.delimiter) + '\n' + data;
+  }
+
+  return Object(d3_dsv__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(format.delimiter).parse(data + '');
+}
+dsv.responseType = 'text';
+
+function isBuffer(_) {
+  return typeof Buffer === 'function' && Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isFunction */ "E"])(Buffer.isBuffer) ? Buffer.isBuffer(_) : false;
+}
+
+function json(data, format) {
+  const prop = format && format.property ? Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* field */ "u"])(format.property) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* identity */ "y"];
+  return Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isObject */ "H"])(data) && !isBuffer(data) ? parseJSON(prop(data), format) : prop(JSON.parse(data));
+}
+json.responseType = 'json';
+
+function parseJSON(data, format) {
+  if (!Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isArray */ "B"])(data) && Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isIterable */ "F"])(data)) {
+    data = [...data];
+  }
+
+  return format && format.copy ? JSON.parse(JSON.stringify(data)) : data;
+}
+
+const filters = {
+  interior: (a, b) => a !== b,
+  exterior: (a, b) => a === b
+};
+function topojson(data, format) {
+  let method, object, property, filter;
+  data = json(data, format);
+
+  if (format && format.feature) {
+    method = topojson_client__WEBPACK_IMPORTED_MODULE_2__[/* feature */ "a"];
+    property = format.feature;
+  } else if (format && format.mesh) {
+    method = topojson_client__WEBPACK_IMPORTED_MODULE_2__[/* mesh */ "b"];
+    property = format.mesh;
+    filter = filters[format.filter];
+  } else {
+    Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('Missing TopoJSON feature or mesh parameter.');
+  }
+
+  object = (object = data.objects[property]) ? method(data, object, filter) : Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('Invalid TopoJSON object: ' + property);
+  return object && object.features || [object];
+}
+topojson.responseType = 'json';
+
+const format = {
+  dsv: dsv,
+  csv: delimitedFormat(','),
+  tsv: delimitedFormat('\t'),
+  json: json,
+  topojson: topojson
+};
+function formats(name, reader) {
+  if (arguments.length > 1) {
+    format[name] = reader;
+    return this;
+  } else {
+    return Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* hasOwnProperty */ "w"])(format, name) ? format[name] : null;
+  }
+}
+function responseType(type) {
+  const f = formats(type);
+  return f && f.responseType || 'text';
+}
+
+function read (data, schema, timeParser, utcParser) {
+  schema = schema || {};
+  const reader = formats(schema.type || 'json');
+  if (!reader) Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('Unknown data format type: ' + schema.type);
+  data = reader(data, schema);
+  if (schema.parse) parse(data, schema.parse, timeParser, utcParser);
+  if (Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* hasOwnProperty */ "w"])(data, 'columns')) delete data.columns;
+  return data;
+}
+
+function parse(data, types, timeParser, utcParser) {
+  if (!data.length) return; // early exit for empty data
+
+  const locale = Object(vega_format__WEBPACK_IMPORTED_MODULE_3__[/* timeFormatDefaultLocale */ "e"])();
+  timeParser = timeParser || locale.timeParse;
+  utcParser = utcParser || locale.utcParse;
+  let fields = data.columns || Object.keys(data[0]),
+      datum,
+      field,
+      i,
+      j,
+      n,
+      m;
+  if (types === 'auto') types = inferTypes(data, fields);
+  fields = Object.keys(types);
+  const parsers = fields.map(field => {
+    const type = types[field];
+    let parts, pattern;
+
+    if (type && (type.startsWith('date:') || type.startsWith('utc:'))) {
+      parts = type.split(/:(.+)?/, 2); // split on first :
+
+      pattern = parts[1];
+
+      if (pattern[0] === '\'' && pattern[pattern.length - 1] === '\'' || pattern[0] === '"' && pattern[pattern.length - 1] === '"') {
+        pattern = pattern.slice(1, -1);
+      }
+
+      const parse = parts[0] === 'utc' ? utcParser : timeParser;
+      return parse(pattern);
+    }
+
+    if (!typeParsers[type]) {
+      throw Error('Illegal format pattern: ' + field + ':' + type);
+    }
+
+    return typeParsers[type];
+  });
+
+  for (i = 0, n = data.length, m = fields.length; i < n; ++i) {
+    datum = data[i];
+
+    for (j = 0; j < m; ++j) {
+      field = fields[j];
+      datum[field] = parsers[j](datum[field]);
+    }
+  }
+}
+
+const loader = loaderFactory(typeof fetch !== 'undefined' && fetch, // use built-in fetch API
+null // no file system access
+);
+
+
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("b639").Buffer))
+
+/***/ }),
+
 /***/ "7c73":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -6725,6 +8040,9 @@ addToUnscopables(FIND);
 "use strict";
 
 var $ = __webpack_require__("23e7");
+var IS_PURE = __webpack_require__("c430");
+var FunctionName = __webpack_require__("5e77");
+var isCallable = __webpack_require__("1626");
 var createIteratorConstructor = __webpack_require__("9ed3");
 var getPrototypeOf = __webpack_require__("e163");
 var setPrototypeOf = __webpack_require__("d2bb");
@@ -6732,10 +8050,11 @@ var setToStringTag = __webpack_require__("d44e");
 var createNonEnumerableProperty = __webpack_require__("9112");
 var redefine = __webpack_require__("6eeb");
 var wellKnownSymbol = __webpack_require__("b622");
-var IS_PURE = __webpack_require__("c430");
 var Iterators = __webpack_require__("3f8c");
 var IteratorsCore = __webpack_require__("ae93");
 
+var PROPER_FUNCTION_NAME = FunctionName.PROPER;
+var CONFIGURABLE_FUNCTION_NAME = FunctionName.CONFIGURABLE;
 var IteratorPrototype = IteratorsCore.IteratorPrototype;
 var BUGGY_SAFARI_ITERATORS = IteratorsCore.BUGGY_SAFARI_ITERATORS;
 var ITERATOR = wellKnownSymbol('iterator');
@@ -6771,12 +8090,12 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
   // fix native
   if (anyNativeIterator) {
     CurrentIteratorPrototype = getPrototypeOf(anyNativeIterator.call(new Iterable()));
-    if (IteratorPrototype !== Object.prototype && CurrentIteratorPrototype.next) {
+    if (CurrentIteratorPrototype !== Object.prototype && CurrentIteratorPrototype.next) {
       if (!IS_PURE && getPrototypeOf(CurrentIteratorPrototype) !== IteratorPrototype) {
         if (setPrototypeOf) {
           setPrototypeOf(CurrentIteratorPrototype, IteratorPrototype);
-        } else if (typeof CurrentIteratorPrototype[ITERATOR] != 'function') {
-          createNonEnumerableProperty(CurrentIteratorPrototype, ITERATOR, returnThis);
+        } else if (!isCallable(CurrentIteratorPrototype[ITERATOR])) {
+          redefine(CurrentIteratorPrototype, ITERATOR, returnThis);
         }
       }
       // Set @@toStringTag to native iterators
@@ -6786,16 +8105,14 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
   }
 
   // fix Array.prototype.{ values, @@iterator }.name in V8 / FF
-  if (DEFAULT == VALUES && nativeIterator && nativeIterator.name !== VALUES) {
-    INCORRECT_VALUES_NAME = true;
-    defaultIterator = function values() { return nativeIterator.call(this); };
+  if (PROPER_FUNCTION_NAME && DEFAULT == VALUES && nativeIterator && nativeIterator.name !== VALUES) {
+    if (!IS_PURE && CONFIGURABLE_FUNCTION_NAME) {
+      createNonEnumerableProperty(IterablePrototype, 'name', VALUES);
+    } else {
+      INCORRECT_VALUES_NAME = true;
+      defaultIterator = function values() { return nativeIterator.call(this); };
+    }
   }
-
-  // define iterator
-  if ((!IS_PURE || FORCED) && IterablePrototype[ITERATOR] !== defaultIterator) {
-    createNonEnumerableProperty(IterablePrototype, ITERATOR, defaultIterator);
-  }
-  Iterators[NAME] = defaultIterator;
 
   // export additional methods
   if (DEFAULT) {
@@ -6811,6 +8128,12 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
     } else $({ target: NAME, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
   }
 
+  // define iterator
+  if ((!IS_PURE || FORCED) && IterablePrototype[ITERATOR] !== defaultIterator) {
+    redefine(IterablePrototype, ITERATOR, defaultIterator, { name: DEFAULT });
+  }
+  Iterators[NAME] = defaultIterator;
+
   return methods;
 };
 
@@ -6821,12 +8144,17 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
+var fails = __webpack_require__("d039");
 var toString = __webpack_require__("577e");
 var trim = __webpack_require__("58a8").trim;
 var whitespaces = __webpack_require__("5899");
 
 var $parseFloat = global.parseFloat;
-var FORCED = 1 / $parseFloat(whitespaces + '-0') !== -Infinity;
+var Symbol = global.Symbol;
+var ITERATOR = Symbol && Symbol.iterator;
+var FORCED = 1 / $parseFloat(whitespaces + '-0') !== -Infinity
+  // MS Edge 18- broken with boxed symbols
+  || (ITERATOR && !fails(function () { $parseFloat(Object(ITERATOR)); }));
 
 // `parseFloat` method
 // https://tc39.es/ecma262/#sec-parsefloat-string
@@ -6843,11 +8171,12 @@ module.exports = FORCED ? function parseFloat(string) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
+var isCallable = __webpack_require__("1626");
 var inspectSource = __webpack_require__("8925");
 
 var WeakMap = global.WeakMap;
 
-module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
+module.exports = isCallable(WeakMap) && /native code/.test(inspectSource(WeakMap));
 
 
 /***/ }),
@@ -6859,13 +8188,13 @@ module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSour
 
 var toObject = __webpack_require__("7b0b");
 var toAbsoluteIndex = __webpack_require__("23cb");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 
 // `Array.prototype.fill` method implementation
 // https://tc39.es/ecma262/#sec-array.prototype.fill
 module.exports = function fill(value /* , start = 0, end = @length */) {
   var O = toObject(this);
-  var length = toLength(O.length);
+  var length = lengthOfArrayLike(O);
   var argumentsLength = arguments.length;
   var index = toAbsoluteIndex(argumentsLength > 1 ? arguments[1] : undefined, length);
   var end = argumentsLength > 2 ? arguments[2] : undefined;
@@ -6882,10 +8211,10 @@ module.exports = function fill(value /* , start = 0, end = @length */) {
 
 var isObject = __webpack_require__("861d");
 
-module.exports = function (it) {
-  if (!isObject(it)) {
-    throw TypeError(String(it) + ' is not an object');
-  } return it;
+// `Assert: Type(argument) is Object`
+module.exports = function (argument) {
+  if (isObject(argument)) return argument;
+  throw TypeError(String(argument) + ' is not an object');
 };
 
 
@@ -6963,6 +8292,7 @@ var anObject = __webpack_require__("825a");
 var requireObjectCoercible = __webpack_require__("1d80");
 var sameValue = __webpack_require__("129f");
 var toString = __webpack_require__("577e");
+var getMethod = __webpack_require__("dc4a");
 var regExpExec = __webpack_require__("14c3");
 
 // @@search logic
@@ -6972,8 +8302,8 @@ fixRegExpWellKnownSymbolLogic('search', function (SEARCH, nativeSearch, maybeCal
     // https://tc39.es/ecma262/#sec-string.prototype.search
     function search(regexp) {
       var O = requireObjectCoercible(this);
-      var searcher = regexp == undefined ? undefined : regexp[SEARCH];
-      return searcher !== undefined ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](toString(O));
+      var searcher = regexp == undefined ? undefined : getMethod(regexp, SEARCH);
+      return searcher ? searcher.call(regexp, O) : new RegExp(regexp)[SEARCH](toString(O));
     },
     // `RegExp.prototype[@@search]` method
     // https://tc39.es/ecma262/#sec-regexp.prototype-@@search
@@ -7017,10 +8347,12 @@ module.exports = function (string, tag, attribute, value) {
 /***/ }),
 
 /***/ "861d":
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+var isCallable = __webpack_require__("1626");
 
 module.exports = function (it) {
-  return typeof it === 'object' ? it !== null : typeof it === 'function';
+  return typeof it === 'object' ? it !== null : isCallable(it);
 };
 
 
@@ -7128,12 +8460,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 /***/ "8925":
 /***/ (function(module, exports, __webpack_require__) {
 
+var isCallable = __webpack_require__("1626");
 var store = __webpack_require__("c6cd");
 
 var functionToString = Function.toString;
 
 // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
-if (typeof store.inspectSource != 'function') {
+if (!isCallable(store.inspectSource)) {
   store.inspectSource = function (it) {
     return functionToString.call(it);
   };
@@ -7176,7 +8509,7 @@ $({ target: 'String', proto: true, forced: !MDN_POLYFILL_BUG && !CORRECT_IS_REGE
     var that = toString(requireObjectCoercible(this));
     notARegExp(searchString);
     var endPosition = arguments.length > 1 ? arguments[1] : undefined;
-    var len = toLength(that.length);
+    var len = that.length;
     var end = endPosition === undefined ? len : min(toLength(endPosition), len);
     var search = toString(searchString);
     return $endsWith
@@ -7487,6 +8820,7 @@ module.exports = patchedExec;
 /***/ (function(module, exports, __webpack_require__) {
 
 var fails = __webpack_require__("d039");
+var isCallable = __webpack_require__("1626");
 
 var replacement = /#|\.prototype\./;
 
@@ -7494,7 +8828,7 @@ var isForced = function (feature, detection) {
   var value = data[normalize(feature)];
   return value == POLYFILL ? true
     : value == NATIVE ? false
-    : typeof detection == 'function' ? fails(detection)
+    : isCallable(detection) ? fails(detection)
     : !!detection;
 };
 
@@ -7517,6 +8851,31 @@ module.exports = isForced;
 const compareBuild = __webpack_require__("8840")
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
+
+
+/***/ }),
+
+/***/ "9603":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export months */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+
+
+var month = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setDate(1);
+  date.setHours(0, 0, 0, 0);
+}, function(date, step) {
+  date.setMonth(date.getMonth() + step);
+}, function(start, end) {
+  return end.getMonth() - start.getMonth() + (end.getFullYear() - start.getFullYear()) * 12;
+}, function(date) {
+  return date.getMonth();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (month);
+var months = month.range;
 
 
 /***/ }),
@@ -8359,7 +9718,7 @@ var fails = __webpack_require__("d039");
 var isArray = __webpack_require__("e8b5");
 var isObject = __webpack_require__("861d");
 var toObject = __webpack_require__("7b0b");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var createProperty = __webpack_require__("8418");
 var arraySpeciesCreate = __webpack_require__("65f0");
 var arrayMethodHasSpeciesSupport = __webpack_require__("1dde");
@@ -8402,7 +9761,7 @@ $({ target: 'Array', proto: true, forced: FORCED }, {
     for (i = -1, length = arguments.length; i < length; i++) {
       E = i === -1 ? O : arguments[i];
       if (isConcatSpreadable(E)) {
-        len = toLength(E.length);
+        len = lengthOfArrayLike(E);
         if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
         for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
       } else {
@@ -8418,38 +9777,19 @@ $({ target: 'Array', proto: true, forced: FORCED }, {
 
 /***/ }),
 
-/***/ "9b0d":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ "9a1f":
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return json; });
-/* harmony import */ var vega_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("fc17");
+var aCallable = __webpack_require__("59ed");
+var anObject = __webpack_require__("825a");
+var getIteratorMethod = __webpack_require__("35a1");
 
+module.exports = function (argument, usingIterator) {
+  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
+  if (aCallable(iteratorMethod)) return anObject(iteratorMethod.call(argument));
+  throw TypeError(String(argument) + ' is not iterable');
+};
 
-function isBuffer(_) {
-  return (typeof Buffer === 'function' && Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isFunction */ "E"])(Buffer.isBuffer))
-    ? Buffer.isBuffer(_) : false;
-}
-
-function json(data, format) {
-  const prop = (format && format.property) ? Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* field */ "u"])(format.property) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* identity */ "y"];
-  return Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isObject */ "H"])(data) && !isBuffer(data)
-    ? parseJSON(prop(data), format)
-    : prop(JSON.parse(data));
-}
-
-json.responseType = 'json';
-
-function parseJSON(data, format) {
-  if (!Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isArray */ "B"])(data) && Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* isIterable */ "F"])(data)) {
-    data = [...data];
-  }
-  return (format && format.copy)
-    ? JSON.parse(JSON.stringify(data))
-    : data;
-}
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("b639").Buffer))
 
 /***/ }),
 
@@ -8464,8 +9804,7 @@ module.exports = function (iterator, fn, value, ENTRIES) {
   try {
     return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
   } catch (error) {
-    iteratorClose(iterator);
-    throw error;
+    iteratorClose(iterator, 'throw', error);
   }
 };
 
@@ -8578,6 +9917,42 @@ module.exports = function (argument) {
 
 /***/ }),
 
+/***/ "a15a":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export years */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+
+
+var year = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setMonth(0, 1);
+  date.setHours(0, 0, 0, 0);
+}, function(date, step) {
+  date.setFullYear(date.getFullYear() + step);
+}, function(start, end) {
+  return end.getFullYear() - start.getFullYear();
+}, function(date) {
+  return date.getFullYear();
+});
+
+// An optimized implementation for this simple case.
+year.every = function(k) {
+  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+    date.setFullYear(Math.floor(date.getFullYear() / k) * k);
+    date.setMonth(0, 1);
+    date.setHours(0, 0, 0, 0);
+  }, function(date, step) {
+    date.setFullYear(date.getFullYear() + step * k);
+  });
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (year);
+var years = year.range;
+
+
+/***/ }),
+
 /***/ "a15b":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -8620,7 +9995,7 @@ module.exports = rcompare
 "use strict";
 
 var isArray = __webpack_require__("e8b5");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var bind = __webpack_require__("0366");
 
 // `FlattenIntoArray` abstract operation
@@ -8629,14 +10004,15 @@ var flattenIntoArray = function (target, original, source, sourceLen, start, dep
   var targetIndex = start;
   var sourceIndex = 0;
   var mapFn = mapper ? bind(mapper, thisArg, 3) : false;
-  var element;
+  var element, elementLen;
 
   while (sourceIndex < sourceLen) {
     if (sourceIndex in source) {
       element = mapFn ? mapFn(source[sourceIndex], sourceIndex, original) : source[sourceIndex];
 
       if (depth > 0 && isArray(element)) {
-        targetIndex = flattenIntoArray(target, original, element, toLength(element.length), targetIndex, depth - 1) - 1;
+        elementLen = lengthOfArrayLike(element);
+        targetIndex = flattenIntoArray(target, original, element, elementLen, targetIndex, depth - 1) - 1;
       } else {
         if (targetIndex >= 0x1FFFFFFFFFFFFF) throw TypeError('Exceed the acceptable array length');
         target[targetIndex] = element;
@@ -8661,8 +10037,8 @@ module.exports = flattenIntoArray;
 
 var $ = __webpack_require__("23e7");
 var toAbsoluteIndex = __webpack_require__("23cb");
-var toInteger = __webpack_require__("a691");
-var toLength = __webpack_require__("50c4");
+var toIntegerOrInfinity = __webpack_require__("5926");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var toObject = __webpack_require__("7b0b");
 var arraySpeciesCreate = __webpack_require__("65f0");
 var createProperty = __webpack_require__("8418");
@@ -8681,7 +10057,7 @@ var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = 'Maximum allowed length exceeded';
 $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
   splice: function splice(start, deleteCount /* , ...items */) {
     var O = toObject(this);
-    var len = toLength(O.length);
+    var len = lengthOfArrayLike(O);
     var actualStart = toAbsoluteIndex(start, len);
     var argumentsLength = arguments.length;
     var insertCount, actualDeleteCount, A, k, from, to;
@@ -8692,7 +10068,7 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
       actualDeleteCount = len - actualStart;
     } else {
       insertCount = argumentsLength - 2;
-      actualDeleteCount = min(max(toInteger(deleteCount), 0), len - actualStart);
+      actualDeleteCount = min(max(toIntegerOrInfinity(deleteCount), 0), len - actualStart);
     }
     if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
       throw TypeError(MAXIMUM_ALLOWED_LENGTH_EXCEEDED);
@@ -8752,8 +10128,9 @@ var IS_PURE = __webpack_require__("c430");
 var DESCRIPTORS = __webpack_require__("83ab");
 var NATIVE_SYMBOL = __webpack_require__("4930");
 var fails = __webpack_require__("d039");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var isArray = __webpack_require__("e8b5");
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
 var isSymbol = __webpack_require__("d9b5");
 var anObject = __webpack_require__("825a");
@@ -8770,7 +10147,6 @@ var getOwnPropertySymbolsModule = __webpack_require__("7418");
 var getOwnPropertyDescriptorModule = __webpack_require__("06cf");
 var definePropertyModule = __webpack_require__("9bf2");
 var propertyIsEnumerableModule = __webpack_require__("d1e7");
-var createNonEnumerableProperty = __webpack_require__("9112");
 var redefine = __webpack_require__("6eeb");
 var shared = __webpack_require__("5692");
 var sharedKey = __webpack_require__("f772");
@@ -8835,12 +10211,12 @@ var $defineProperty = function defineProperty(O, P, Attributes) {
   anObject(O);
   var key = toPropertyKey(P);
   anObject(Attributes);
-  if (has(AllSymbols, key)) {
+  if (hasOwn(AllSymbols, key)) {
     if (!Attributes.enumerable) {
-      if (!has(O, HIDDEN)) nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
+      if (!hasOwn(O, HIDDEN)) nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
       O[HIDDEN][key] = true;
     } else {
-      if (has(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
+      if (hasOwn(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
       Attributes = nativeObjectCreate(Attributes, { enumerable: createPropertyDescriptor(0, false) });
     } return setSymbolDescriptor(O, key, Attributes);
   } return nativeDefineProperty(O, key, Attributes);
@@ -8863,16 +10239,17 @@ var $create = function create(O, Properties) {
 var $propertyIsEnumerable = function propertyIsEnumerable(V) {
   var P = toPropertyKey(V);
   var enumerable = nativePropertyIsEnumerable.call(this, P);
-  if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P)) return false;
-  return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
+  if (this === ObjectPrototype && hasOwn(AllSymbols, P) && !hasOwn(ObjectPrototypeSymbols, P)) return false;
+  return enumerable || !hasOwn(this, P) || !hasOwn(AllSymbols, P) || hasOwn(this, HIDDEN) && this[HIDDEN][P]
+    ? enumerable : true;
 };
 
 var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
   var it = toIndexedObject(O);
   var key = toPropertyKey(P);
-  if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key)) return;
+  if (it === ObjectPrototype && hasOwn(AllSymbols, key) && !hasOwn(ObjectPrototypeSymbols, key)) return;
   var descriptor = nativeGetOwnPropertyDescriptor(it, key);
-  if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
+  if (descriptor && hasOwn(AllSymbols, key) && !(hasOwn(it, HIDDEN) && it[HIDDEN][key])) {
     descriptor.enumerable = true;
   }
   return descriptor;
@@ -8882,7 +10259,7 @@ var $getOwnPropertyNames = function getOwnPropertyNames(O) {
   var names = nativeGetOwnPropertyNames(toIndexedObject(O));
   var result = [];
   $forEach(names, function (key) {
-    if (!has(AllSymbols, key) && !has(hiddenKeys, key)) result.push(key);
+    if (!hasOwn(AllSymbols, key) && !hasOwn(hiddenKeys, key)) result.push(key);
   });
   return result;
 };
@@ -8892,7 +10269,7 @@ var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
   var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject(O));
   var result = [];
   $forEach(names, function (key) {
-    if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
+    if (hasOwn(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || hasOwn(ObjectPrototype, key))) {
       result.push(AllSymbols[key]);
     }
   });
@@ -8908,7 +10285,7 @@ if (!NATIVE_SYMBOL) {
     var tag = uid(description);
     var setter = function (value) {
       if (this === ObjectPrototype) setter.call(ObjectPrototypeSymbols, value);
-      if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+      if (hasOwn(this, HIDDEN) && hasOwn(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
       setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
     };
     if (DESCRIPTORS && USE_SETTER) setSymbolDescriptor(ObjectPrototype, tag, { configurable: true, set: setter });
@@ -8960,7 +10337,7 @@ $({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
   // https://tc39.es/ecma262/#sec-symbol.for
   'for': function (key) {
     var string = $toString(key);
-    if (has(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
+    if (hasOwn(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
     var symbol = $Symbol(string);
     StringToSymbolRegistry[string] = symbol;
     SymbolToStringRegistry[symbol] = string;
@@ -8970,7 +10347,7 @@ $({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
   // https://tc39.es/ecma262/#sec-symbol.keyfor
   keyFor: function keyFor(sym) {
     if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol');
-    if (has(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
+    if (hasOwn(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
   },
   useSetter: function () { USE_SETTER = true; },
   useSimple: function () { USE_SETTER = false; }
@@ -9031,7 +10408,7 @@ if ($stringify) {
       $replacer = replacer;
       if (!isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
       if (!isArray(replacer)) replacer = function (key, value) {
-        if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+        if (isCallable($replacer)) value = $replacer.call(this, key, value);
         if (!isSymbol(value)) return value;
       };
       args[1] = replacer;
@@ -9043,13 +10420,717 @@ if ($stringify) {
 // `Symbol.prototype[@@toPrimitive]` method
 // https://tc39.es/ecma262/#sec-symbol.prototype-@@toprimitive
 if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
-  createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
+  var valueOf = $Symbol[PROTOTYPE].valueOf;
+  redefine($Symbol[PROTOTYPE], TO_PRIMITIVE, function () {
+    return valueOf.apply(this, arguments);
+  });
 }
 // `Symbol.prototype[@@toStringTag]` property
 // https://tc39.es/ecma262/#sec-symbol.prototype-@@tostringtag
 setToStringTag($Symbol, SYMBOL);
 
 hiddenKeys[HIDDEN] = true;
+
+
+/***/ }),
+
+/***/ "a591":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return formatLocale; });
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("2739");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("6eb2");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("b14c");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("742c");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("a15a");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("77ae");
+
+
+function localDate(d) {
+  if (0 <= d.y && d.y < 100) {
+    var date = new Date(-1, d.m, d.d, d.H, d.M, d.S, d.L);
+    date.setFullYear(d.y);
+    return date;
+  }
+  return new Date(d.y, d.m, d.d, d.H, d.M, d.S, d.L);
+}
+
+function utcDate(d) {
+  if (0 <= d.y && d.y < 100) {
+    var date = new Date(Date.UTC(-1, d.m, d.d, d.H, d.M, d.S, d.L));
+    date.setUTCFullYear(d.y);
+    return date;
+  }
+  return new Date(Date.UTC(d.y, d.m, d.d, d.H, d.M, d.S, d.L));
+}
+
+function newDate(y, m, d) {
+  return {y: y, m: m, d: d, H: 0, M: 0, S: 0, L: 0};
+}
+
+function formatLocale(locale) {
+  var locale_dateTime = locale.dateTime,
+      locale_date = locale.date,
+      locale_time = locale.time,
+      locale_periods = locale.periods,
+      locale_weekdays = locale.days,
+      locale_shortWeekdays = locale.shortDays,
+      locale_months = locale.months,
+      locale_shortMonths = locale.shortMonths;
+
+  var periodRe = formatRe(locale_periods),
+      periodLookup = formatLookup(locale_periods),
+      weekdayRe = formatRe(locale_weekdays),
+      weekdayLookup = formatLookup(locale_weekdays),
+      shortWeekdayRe = formatRe(locale_shortWeekdays),
+      shortWeekdayLookup = formatLookup(locale_shortWeekdays),
+      monthRe = formatRe(locale_months),
+      monthLookup = formatLookup(locale_months),
+      shortMonthRe = formatRe(locale_shortMonths),
+      shortMonthLookup = formatLookup(locale_shortMonths);
+
+  var formats = {
+    "a": formatShortWeekday,
+    "A": formatWeekday,
+    "b": formatShortMonth,
+    "B": formatMonth,
+    "c": null,
+    "d": formatDayOfMonth,
+    "e": formatDayOfMonth,
+    "f": formatMicroseconds,
+    "g": formatYearISO,
+    "G": formatFullYearISO,
+    "H": formatHour24,
+    "I": formatHour12,
+    "j": formatDayOfYear,
+    "L": formatMilliseconds,
+    "m": formatMonthNumber,
+    "M": formatMinutes,
+    "p": formatPeriod,
+    "q": formatQuarter,
+    "Q": formatUnixTimestamp,
+    "s": formatUnixTimestampSeconds,
+    "S": formatSeconds,
+    "u": formatWeekdayNumberMonday,
+    "U": formatWeekNumberSunday,
+    "V": formatWeekNumberISO,
+    "w": formatWeekdayNumberSunday,
+    "W": formatWeekNumberMonday,
+    "x": null,
+    "X": null,
+    "y": formatYear,
+    "Y": formatFullYear,
+    "Z": formatZone,
+    "%": formatLiteralPercent
+  };
+
+  var utcFormats = {
+    "a": formatUTCShortWeekday,
+    "A": formatUTCWeekday,
+    "b": formatUTCShortMonth,
+    "B": formatUTCMonth,
+    "c": null,
+    "d": formatUTCDayOfMonth,
+    "e": formatUTCDayOfMonth,
+    "f": formatUTCMicroseconds,
+    "g": formatUTCYearISO,
+    "G": formatUTCFullYearISO,
+    "H": formatUTCHour24,
+    "I": formatUTCHour12,
+    "j": formatUTCDayOfYear,
+    "L": formatUTCMilliseconds,
+    "m": formatUTCMonthNumber,
+    "M": formatUTCMinutes,
+    "p": formatUTCPeriod,
+    "q": formatUTCQuarter,
+    "Q": formatUnixTimestamp,
+    "s": formatUnixTimestampSeconds,
+    "S": formatUTCSeconds,
+    "u": formatUTCWeekdayNumberMonday,
+    "U": formatUTCWeekNumberSunday,
+    "V": formatUTCWeekNumberISO,
+    "w": formatUTCWeekdayNumberSunday,
+    "W": formatUTCWeekNumberMonday,
+    "x": null,
+    "X": null,
+    "y": formatUTCYear,
+    "Y": formatUTCFullYear,
+    "Z": formatUTCZone,
+    "%": formatLiteralPercent
+  };
+
+  var parses = {
+    "a": parseShortWeekday,
+    "A": parseWeekday,
+    "b": parseShortMonth,
+    "B": parseMonth,
+    "c": parseLocaleDateTime,
+    "d": parseDayOfMonth,
+    "e": parseDayOfMonth,
+    "f": parseMicroseconds,
+    "g": parseYear,
+    "G": parseFullYear,
+    "H": parseHour24,
+    "I": parseHour24,
+    "j": parseDayOfYear,
+    "L": parseMilliseconds,
+    "m": parseMonthNumber,
+    "M": parseMinutes,
+    "p": parsePeriod,
+    "q": parseQuarter,
+    "Q": parseUnixTimestamp,
+    "s": parseUnixTimestampSeconds,
+    "S": parseSeconds,
+    "u": parseWeekdayNumberMonday,
+    "U": parseWeekNumberSunday,
+    "V": parseWeekNumberISO,
+    "w": parseWeekdayNumberSunday,
+    "W": parseWeekNumberMonday,
+    "x": parseLocaleDate,
+    "X": parseLocaleTime,
+    "y": parseYear,
+    "Y": parseFullYear,
+    "Z": parseZone,
+    "%": parseLiteralPercent
+  };
+
+  // These recursive directive definitions must be deferred.
+  formats.x = newFormat(locale_date, formats);
+  formats.X = newFormat(locale_time, formats);
+  formats.c = newFormat(locale_dateTime, formats);
+  utcFormats.x = newFormat(locale_date, utcFormats);
+  utcFormats.X = newFormat(locale_time, utcFormats);
+  utcFormats.c = newFormat(locale_dateTime, utcFormats);
+
+  function newFormat(specifier, formats) {
+    return function(date) {
+      var string = [],
+          i = -1,
+          j = 0,
+          n = specifier.length,
+          c,
+          pad,
+          format;
+
+      if (!(date instanceof Date)) date = new Date(+date);
+
+      while (++i < n) {
+        if (specifier.charCodeAt(i) === 37) {
+          string.push(specifier.slice(j, i));
+          if ((pad = pads[c = specifier.charAt(++i)]) != null) c = specifier.charAt(++i);
+          else pad = c === "e" ? " " : "0";
+          if (format = formats[c]) c = format(date, pad);
+          string.push(c);
+          j = i + 1;
+        }
+      }
+
+      string.push(specifier.slice(j, i));
+      return string.join("");
+    };
+  }
+
+  function newParse(specifier, Z) {
+    return function(string) {
+      var d = newDate(1900, undefined, 1),
+          i = parseSpecifier(d, specifier, string += "", 0),
+          week, day;
+      if (i != string.length) return null;
+
+      // If a UNIX timestamp is specified, return it.
+      if ("Q" in d) return new Date(d.Q);
+      if ("s" in d) return new Date(d.s * 1000 + ("L" in d ? d.L : 0));
+
+      // If this is utcParse, never use the local timezone.
+      if (Z && !("Z" in d)) d.Z = 0;
+
+      // The am-pm flag is 0 for AM, and 1 for PM.
+      if ("p" in d) d.H = d.H % 12 + d.p * 12;
+
+      // If the month was not specified, inherit from the quarter.
+      if (d.m === undefined) d.m = "q" in d ? d.q : 0;
+
+      // Convert day-of-week and week-of-year to day-of-year.
+      if ("V" in d) {
+        if (d.V < 1 || d.V > 53) return null;
+        if (!("w" in d)) d.w = 1;
+        if ("Z" in d) {
+          week = utcDate(newDate(d.y, 0, 1)), day = week.getUTCDay();
+          week = day > 4 || day === 0 ? d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcMonday */ "a"].ceil(week) : Object(d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcMonday */ "a"])(week);
+          week = d3_time__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].offset(week, (d.V - 1) * 7);
+          d.y = week.getUTCFullYear();
+          d.m = week.getUTCMonth();
+          d.d = week.getUTCDate() + (d.w + 6) % 7;
+        } else {
+          week = localDate(newDate(d.y, 0, 1)), day = week.getDay();
+          week = day > 4 || day === 0 ? d3_time__WEBPACK_IMPORTED_MODULE_2__[/* monday */ "a"].ceil(week) : Object(d3_time__WEBPACK_IMPORTED_MODULE_2__[/* monday */ "a"])(week);
+          week = d3_time__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].offset(week, (d.V - 1) * 7);
+          d.y = week.getFullYear();
+          d.m = week.getMonth();
+          d.d = week.getDate() + (d.w + 6) % 7;
+        }
+      } else if ("W" in d || "U" in d) {
+        if (!("w" in d)) d.w = "u" in d ? d.u % 7 : "W" in d ? 1 : 0;
+        day = "Z" in d ? utcDate(newDate(d.y, 0, 1)).getUTCDay() : localDate(newDate(d.y, 0, 1)).getDay();
+        d.m = 0;
+        d.d = "W" in d ? (d.w + 6) % 7 + d.W * 7 - (day + 5) % 7 : d.w + d.U * 7 - (day + 6) % 7;
+      }
+
+      // If a time zone is specified, all fields are interpreted as UTC and then
+      // offset according to the specified time zone.
+      if ("Z" in d) {
+        d.H += d.Z / 100 | 0;
+        d.M += d.Z % 100;
+        return utcDate(d);
+      }
+
+      // Otherwise, all fields are in local time.
+      return localDate(d);
+    };
+  }
+
+  function parseSpecifier(d, specifier, string, j) {
+    var i = 0,
+        n = specifier.length,
+        m = string.length,
+        c,
+        parse;
+
+    while (i < n) {
+      if (j >= m) return -1;
+      c = specifier.charCodeAt(i++);
+      if (c === 37) {
+        c = specifier.charAt(i++);
+        parse = parses[c in pads ? specifier.charAt(i++) : c];
+        if (!parse || ((j = parse(d, string, j)) < 0)) return -1;
+      } else if (c != string.charCodeAt(j++)) {
+        return -1;
+      }
+    }
+
+    return j;
+  }
+
+  function parsePeriod(d, string, i) {
+    var n = periodRe.exec(string.slice(i));
+    return n ? (d.p = periodLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
+  }
+
+  function parseShortWeekday(d, string, i) {
+    var n = shortWeekdayRe.exec(string.slice(i));
+    return n ? (d.w = shortWeekdayLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
+  }
+
+  function parseWeekday(d, string, i) {
+    var n = weekdayRe.exec(string.slice(i));
+    return n ? (d.w = weekdayLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
+  }
+
+  function parseShortMonth(d, string, i) {
+    var n = shortMonthRe.exec(string.slice(i));
+    return n ? (d.m = shortMonthLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
+  }
+
+  function parseMonth(d, string, i) {
+    var n = monthRe.exec(string.slice(i));
+    return n ? (d.m = monthLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
+  }
+
+  function parseLocaleDateTime(d, string, i) {
+    return parseSpecifier(d, locale_dateTime, string, i);
+  }
+
+  function parseLocaleDate(d, string, i) {
+    return parseSpecifier(d, locale_date, string, i);
+  }
+
+  function parseLocaleTime(d, string, i) {
+    return parseSpecifier(d, locale_time, string, i);
+  }
+
+  function formatShortWeekday(d) {
+    return locale_shortWeekdays[d.getDay()];
+  }
+
+  function formatWeekday(d) {
+    return locale_weekdays[d.getDay()];
+  }
+
+  function formatShortMonth(d) {
+    return locale_shortMonths[d.getMonth()];
+  }
+
+  function formatMonth(d) {
+    return locale_months[d.getMonth()];
+  }
+
+  function formatPeriod(d) {
+    return locale_periods[+(d.getHours() >= 12)];
+  }
+
+  function formatQuarter(d) {
+    return 1 + ~~(d.getMonth() / 3);
+  }
+
+  function formatUTCShortWeekday(d) {
+    return locale_shortWeekdays[d.getUTCDay()];
+  }
+
+  function formatUTCWeekday(d) {
+    return locale_weekdays[d.getUTCDay()];
+  }
+
+  function formatUTCShortMonth(d) {
+    return locale_shortMonths[d.getUTCMonth()];
+  }
+
+  function formatUTCMonth(d) {
+    return locale_months[d.getUTCMonth()];
+  }
+
+  function formatUTCPeriod(d) {
+    return locale_periods[+(d.getUTCHours() >= 12)];
+  }
+
+  function formatUTCQuarter(d) {
+    return 1 + ~~(d.getUTCMonth() / 3);
+  }
+
+  return {
+    format: function(specifier) {
+      var f = newFormat(specifier += "", formats);
+      f.toString = function() { return specifier; };
+      return f;
+    },
+    parse: function(specifier) {
+      var p = newParse(specifier += "", false);
+      p.toString = function() { return specifier; };
+      return p;
+    },
+    utcFormat: function(specifier) {
+      var f = newFormat(specifier += "", utcFormats);
+      f.toString = function() { return specifier; };
+      return f;
+    },
+    utcParse: function(specifier) {
+      var p = newParse(specifier += "", true);
+      p.toString = function() { return specifier; };
+      return p;
+    }
+  };
+}
+
+var pads = {"-": "", "_": " ", "0": "0"},
+    numberRe = /^\s*\d+/, // note: ignores next directive
+    percentRe = /^%/,
+    requoteRe = /[\\^$*+?|[\]().{}]/g;
+
+function pad(value, fill, width) {
+  var sign = value < 0 ? "-" : "",
+      string = (sign ? -value : value) + "",
+      length = string.length;
+  return sign + (length < width ? new Array(width - length + 1).join(fill) + string : string);
+}
+
+function requote(s) {
+  return s.replace(requoteRe, "\\$&");
+}
+
+function formatRe(names) {
+  return new RegExp("^(?:" + names.map(requote).join("|") + ")", "i");
+}
+
+function formatLookup(names) {
+  return new Map(names.map((name, i) => [name.toLowerCase(), i]));
+}
+
+function parseWeekdayNumberSunday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
+  return n ? (d.w = +n[0], i + n[0].length) : -1;
+}
+
+function parseWeekdayNumberMonday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
+  return n ? (d.u = +n[0], i + n[0].length) : -1;
+}
+
+function parseWeekNumberSunday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.U = +n[0], i + n[0].length) : -1;
+}
+
+function parseWeekNumberISO(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.V = +n[0], i + n[0].length) : -1;
+}
+
+function parseWeekNumberMonday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.W = +n[0], i + n[0].length) : -1;
+}
+
+function parseFullYear(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 4));
+  return n ? (d.y = +n[0], i + n[0].length) : -1;
+}
+
+function parseYear(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.y = +n[0] + (+n[0] > 68 ? 1900 : 2000), i + n[0].length) : -1;
+}
+
+function parseZone(d, string, i) {
+  var n = /^(Z)|([+-]\d\d)(?::?(\d\d))?/.exec(string.slice(i, i + 6));
+  return n ? (d.Z = n[1] ? 0 : -(n[2] + (n[3] || "00")), i + n[0].length) : -1;
+}
+
+function parseQuarter(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
+  return n ? (d.q = n[0] * 3 - 3, i + n[0].length) : -1;
+}
+
+function parseMonthNumber(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.m = n[0] - 1, i + n[0].length) : -1;
+}
+
+function parseDayOfMonth(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.d = +n[0], i + n[0].length) : -1;
+}
+
+function parseDayOfYear(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 3));
+  return n ? (d.m = 0, d.d = +n[0], i + n[0].length) : -1;
+}
+
+function parseHour24(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.H = +n[0], i + n[0].length) : -1;
+}
+
+function parseMinutes(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.M = +n[0], i + n[0].length) : -1;
+}
+
+function parseSeconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
+  return n ? (d.S = +n[0], i + n[0].length) : -1;
+}
+
+function parseMilliseconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 3));
+  return n ? (d.L = +n[0], i + n[0].length) : -1;
+}
+
+function parseMicroseconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 6));
+  return n ? (d.L = Math.floor(n[0] / 1000), i + n[0].length) : -1;
+}
+
+function parseLiteralPercent(d, string, i) {
+  var n = percentRe.exec(string.slice(i, i + 1));
+  return n ? i + n[0].length : -1;
+}
+
+function parseUnixTimestamp(d, string, i) {
+  var n = numberRe.exec(string.slice(i));
+  return n ? (d.Q = +n[0], i + n[0].length) : -1;
+}
+
+function parseUnixTimestampSeconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i));
+  return n ? (d.s = +n[0], i + n[0].length) : -1;
+}
+
+function formatDayOfMonth(d, p) {
+  return pad(d.getDate(), p, 2);
+}
+
+function formatHour24(d, p) {
+  return pad(d.getHours(), p, 2);
+}
+
+function formatHour12(d, p) {
+  return pad(d.getHours() % 12 || 12, p, 2);
+}
+
+function formatDayOfYear(d, p) {
+  return pad(1 + d3_time__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"])(d), d), p, 3);
+}
+
+function formatMilliseconds(d, p) {
+  return pad(d.getMilliseconds(), p, 3);
+}
+
+function formatMicroseconds(d, p) {
+  return formatMilliseconds(d, p) + "000";
+}
+
+function formatMonthNumber(d, p) {
+  return pad(d.getMonth() + 1, p, 2);
+}
+
+function formatMinutes(d, p) {
+  return pad(d.getMinutes(), p, 2);
+}
+
+function formatSeconds(d, p) {
+  return pad(d.getSeconds(), p, 2);
+}
+
+function formatWeekdayNumberMonday(d) {
+  var day = d.getDay();
+  return day === 0 ? 7 : day;
+}
+
+function formatWeekNumberSunday(d, p) {
+  return pad(d3_time__WEBPACK_IMPORTED_MODULE_2__[/* sunday */ "b"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"])(d) - 1, d), p, 2);
+}
+
+function dISO(d) {
+  var day = d.getDay();
+  return (day >= 4 || day === 0) ? Object(d3_time__WEBPACK_IMPORTED_MODULE_2__[/* thursday */ "c"])(d) : d3_time__WEBPACK_IMPORTED_MODULE_2__[/* thursday */ "c"].ceil(d);
+}
+
+function formatWeekNumberISO(d, p) {
+  d = dISO(d);
+  return pad(d3_time__WEBPACK_IMPORTED_MODULE_2__[/* thursday */ "c"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"])(d), d) + (Object(d3_time__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"])(d).getDay() === 4), p, 2);
+}
+
+function formatWeekdayNumberSunday(d) {
+  return d.getDay();
+}
+
+function formatWeekNumberMonday(d, p) {
+  return pad(d3_time__WEBPACK_IMPORTED_MODULE_2__[/* monday */ "a"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"])(d) - 1, d), p, 2);
+}
+
+function formatYear(d, p) {
+  return pad(d.getFullYear() % 100, p, 2);
+}
+
+function formatYearISO(d, p) {
+  d = dISO(d);
+  return pad(d.getFullYear() % 100, p, 2);
+}
+
+function formatFullYear(d, p) {
+  return pad(d.getFullYear() % 10000, p, 4);
+}
+
+function formatFullYearISO(d, p) {
+  var day = d.getDay();
+  d = (day >= 4 || day === 0) ? Object(d3_time__WEBPACK_IMPORTED_MODULE_2__[/* thursday */ "c"])(d) : d3_time__WEBPACK_IMPORTED_MODULE_2__[/* thursday */ "c"].ceil(d);
+  return pad(d.getFullYear() % 10000, p, 4);
+}
+
+function formatZone(d) {
+  var z = d.getTimezoneOffset();
+  return (z > 0 ? "-" : (z *= -1, "+"))
+      + pad(z / 60 | 0, "0", 2)
+      + pad(z % 60, "0", 2);
+}
+
+function formatUTCDayOfMonth(d, p) {
+  return pad(d.getUTCDate(), p, 2);
+}
+
+function formatUTCHour24(d, p) {
+  return pad(d.getUTCHours(), p, 2);
+}
+
+function formatUTCHour12(d, p) {
+  return pad(d.getUTCHours() % 12 || 12, p, 2);
+}
+
+function formatUTCDayOfYear(d, p) {
+  return pad(1 + d3_time__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(d), d), p, 3);
+}
+
+function formatUTCMilliseconds(d, p) {
+  return pad(d.getUTCMilliseconds(), p, 3);
+}
+
+function formatUTCMicroseconds(d, p) {
+  return formatUTCMilliseconds(d, p) + "000";
+}
+
+function formatUTCMonthNumber(d, p) {
+  return pad(d.getUTCMonth() + 1, p, 2);
+}
+
+function formatUTCMinutes(d, p) {
+  return pad(d.getUTCMinutes(), p, 2);
+}
+
+function formatUTCSeconds(d, p) {
+  return pad(d.getUTCSeconds(), p, 2);
+}
+
+function formatUTCWeekdayNumberMonday(d) {
+  var dow = d.getUTCDay();
+  return dow === 0 ? 7 : dow;
+}
+
+function formatUTCWeekNumberSunday(d, p) {
+  return pad(d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcSunday */ "b"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(d) - 1, d), p, 2);
+}
+
+function UTCdISO(d) {
+  var day = d.getUTCDay();
+  return (day >= 4 || day === 0) ? Object(d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcThursday */ "c"])(d) : d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcThursday */ "c"].ceil(d);
+}
+
+function formatUTCWeekNumberISO(d, p) {
+  d = UTCdISO(d);
+  return pad(d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcThursday */ "c"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(d), d) + (Object(d3_time__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(d).getUTCDay() === 4), p, 2);
+}
+
+function formatUTCWeekdayNumberSunday(d) {
+  return d.getUTCDay();
+}
+
+function formatUTCWeekNumberMonday(d, p) {
+  return pad(d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcMonday */ "a"].count(Object(d3_time__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(d) - 1, d), p, 2);
+}
+
+function formatUTCYear(d, p) {
+  return pad(d.getUTCFullYear() % 100, p, 2);
+}
+
+function formatUTCYearISO(d, p) {
+  d = UTCdISO(d);
+  return pad(d.getUTCFullYear() % 100, p, 2);
+}
+
+function formatUTCFullYear(d, p) {
+  return pad(d.getUTCFullYear() % 10000, p, 4);
+}
+
+function formatUTCFullYearISO(d, p) {
+  var day = d.getUTCDay();
+  d = (day >= 4 || day === 0) ? Object(d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcThursday */ "c"])(d) : d3_time__WEBPACK_IMPORTED_MODULE_0__[/* utcThursday */ "c"].ceil(d);
+  return pad(d.getUTCFullYear() % 10000, p, 4);
+}
+
+function formatUTCZone() {
+  return "+0000";
+}
+
+function formatLiteralPercent() {
+  return "%";
+}
+
+function formatUnixTimestamp(d) {
+  return +d;
+}
+
+function formatUnixTimestampSeconds(d) {
+  return Math.floor(+d / 1000);
+}
 
 
 /***/ }),
@@ -9115,17 +11196,16 @@ module.exports = function (METHOD_NAME, argument) {
 
 /***/ }),
 
-/***/ "a691":
-/***/ (function(module, exports) {
+/***/ "a7fd":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-var ceil = Math.ceil;
-var floor = Math.floor;
+"use strict";
+/* harmony import */ var _formatDecimal_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("aa74");
 
-// `ToInteger` abstract operation
-// https://tc39.es/ecma262/#sec-tointeger
-module.exports = function (argument) {
-  return isNaN(argument = +argument) ? 0 : (argument > 0 ? floor : ceil)(argument);
-};
+
+/* harmony default export */ __webpack_exports__["a"] = (function(x) {
+  return x = Object(_formatDecimal_js__WEBPACK_IMPORTED_MODULE_0__[/* formatDecimalParts */ "b"])(Math.abs(x)), x ? x[1] : NaN;
+});
 
 
 /***/ }),
@@ -9155,31 +11235,34 @@ var DESCRIPTORS = __webpack_require__("83ab");
 var global = __webpack_require__("da84");
 var isForced = __webpack_require__("94ca");
 var redefine = __webpack_require__("6eeb");
-var has = __webpack_require__("5135");
-var classof = __webpack_require__("c6b6");
+var hasOwn = __webpack_require__("1a2d");
 var inheritIfRequired = __webpack_require__("7156");
 var isSymbol = __webpack_require__("d9b5");
 var toPrimitive = __webpack_require__("c04e");
 var fails = __webpack_require__("d039");
-var create = __webpack_require__("7c73");
 var getOwnPropertyNames = __webpack_require__("241c").f;
 var getOwnPropertyDescriptor = __webpack_require__("06cf").f;
 var defineProperty = __webpack_require__("9bf2").f;
+var thisNumberValue = __webpack_require__("408a");
 var trim = __webpack_require__("58a8").trim;
 
 var NUMBER = 'Number';
 var NativeNumber = global[NUMBER];
 var NumberPrototype = NativeNumber.prototype;
 
-// Opera ~12 has broken Object#toString
-var BROKEN_CLASSOF = classof(create(NumberPrototype)) == NUMBER;
+// `ToNumeric` abstract operation
+// https://tc39.es/ecma262/#sec-tonumeric
+var toNumeric = function (value) {
+  var primValue = toPrimitive(value, 'number');
+  return typeof primValue === 'bigint' ? primValue : toNumber(primValue);
+};
 
 // `ToNumber` abstract operation
 // https://tc39.es/ecma262/#sec-tonumber
 var toNumber = function (argument) {
-  if (isSymbol(argument)) throw TypeError('Cannot convert a Symbol value to a number');
   var it = toPrimitive(argument, 'number');
   var first, third, radix, maxCode, digits, length, index, code;
+  if (isSymbol(it)) throw TypeError('Cannot convert a Symbol value to a number');
   if (typeof it == 'string' && it.length > 2) {
     it = trim(it);
     first = it.charCodeAt(0);
@@ -9208,29 +11291,56 @@ var toNumber = function (argument) {
 // https://tc39.es/ecma262/#sec-number-constructor
 if (isForced(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumber('+0x1'))) {
   var NumberWrapper = function Number(value) {
-    var it = arguments.length < 1 ? 0 : value;
+    var n = arguments.length < 1 ? 0 : NativeNumber(toNumeric(value));
     var dummy = this;
-    return dummy instanceof NumberWrapper
-      // check on 1..constructor(foo) case
-      && (BROKEN_CLASSOF ? fails(function () { NumberPrototype.valueOf.call(dummy); }) : classof(dummy) != NUMBER)
-        ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
+    // check on 1..constructor(foo) case
+    return dummy instanceof NumberWrapper && fails(function () { thisNumberValue(dummy); })
+      ? inheritIfRequired(Object(n), dummy, NumberWrapper) : n;
   };
   for (var keys = DESCRIPTORS ? getOwnPropertyNames(NativeNumber) : (
     // ES3:
     'MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,' +
     // ES2015 (in case, if modules with ES2015 Number statics required before):
-    'EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,' +
-    'MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger,' +
+    'EPSILON,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,isFinite,isInteger,isNaN,isSafeInteger,parseFloat,parseInt,' +
     // ESNext
     'fromString,range'
   ).split(','), j = 0, key; keys.length > j; j++) {
-    if (has(NativeNumber, key = keys[j]) && !has(NumberWrapper, key)) {
+    if (hasOwn(NativeNumber, key = keys[j]) && !hasOwn(NumberWrapper, key)) {
       defineProperty(NumberWrapper, key, getOwnPropertyDescriptor(NativeNumber, key));
     }
   }
   NumberWrapper.prototype = NumberPrototype;
   NumberPrototype.constructor = NumberWrapper;
   redefine(global, NUMBER, NumberWrapper);
+}
+
+
+/***/ }),
+
+/***/ "aa74":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return formatDecimalParts; });
+/* harmony default export */ __webpack_exports__["a"] = (function(x) {
+  return Math.abs(x = Math.round(x)) >= 1e21
+      ? x.toLocaleString("en").replace(/,/g, "")
+      : x.toString(10);
+});
+
+// Computes the decimal coefficient and exponent of the specified number x with
+// significant digits p, where x is positive and p is in [1, 21] or undefined.
+// For example, formatDecimalParts(1.23) returns ["123", 0].
+function formatDecimalParts(x, p) {
+  if ((i = (x = p ? x.toExponential(p - 1) : x.toExponential()).indexOf("e")) < 0) return null; // NaN, ±Infinity
+  var i, coefficient = x.slice(0, i);
+
+  // The string returned by toExponential either has the form \d\.\d+e[-+]\d+
+  // (e.g., 1.2e+3) or the form \de[-+]\d+ (e.g., 1e+3).
+  return [
+    coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
+    +x.slice(i + 1)
+  ];
 }
 
 
@@ -9279,12 +11389,12 @@ $({ target: 'RegExp', proto: true, forced: /./.exec !== exec }, {
 /***/ (function(module, exports, __webpack_require__) {
 
 var $ = __webpack_require__("23e7");
-var parseFloatImplementation = __webpack_require__("7e12");
+var $parseFloat = __webpack_require__("7e12");
 
 // `parseFloat` method
 // https://tc39.es/ecma262/#sec-parsefloat-string
-$({ global: true, forced: parseFloat != parseFloatImplementation }, {
-  parseFloat: parseFloatImplementation
+$({ global: true, forced: parseFloat != $parseFloat }, {
+  parseFloat: $parseFloat
 });
 
 
@@ -9416,16 +11526,15 @@ module.exports = mergeSort;
 "use strict";
 
 var fails = __webpack_require__("d039");
+var isCallable = __webpack_require__("1626");
+var create = __webpack_require__("7c73");
 var getPrototypeOf = __webpack_require__("e163");
-var createNonEnumerableProperty = __webpack_require__("9112");
-var has = __webpack_require__("5135");
+var redefine = __webpack_require__("6eeb");
 var wellKnownSymbol = __webpack_require__("b622");
 var IS_PURE = __webpack_require__("c430");
 
 var ITERATOR = wellKnownSymbol('iterator');
 var BUGGY_SAFARI_ITERATORS = false;
-
-var returnThis = function () { return this; };
 
 // `%IteratorPrototype%` object
 // https://tc39.es/ecma262/#sec-%iteratorprototype%-object
@@ -9449,11 +11558,14 @@ var NEW_ITERATOR_PROTOTYPE = IteratorPrototype == undefined || fails(function ()
 });
 
 if (NEW_ITERATOR_PROTOTYPE) IteratorPrototype = {};
+else if (IS_PURE) IteratorPrototype = create(IteratorPrototype);
 
 // `%IteratorPrototype%[@@iterator]()` method
 // https://tc39.es/ecma262/#sec-%iteratorprototype%-@@iterator
-if ((!IS_PURE || NEW_ITERATOR_PROTOTYPE) && !has(IteratorPrototype, ITERATOR)) {
-  createNonEnumerableProperty(IteratorPrototype, ITERATOR, returnThis);
+if (!isCallable(IteratorPrototype[ITERATOR])) {
+  redefine(IteratorPrototype, ITERATOR, function () {
+    return this;
+  });
 }
 
 module.exports = {
@@ -9502,6 +11614,7 @@ module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
 /***/ (function(module, exports, __webpack_require__) {
 
 var DESCRIPTORS = __webpack_require__("83ab");
+var FUNCTION_NAME_EXISTS = __webpack_require__("5e77").EXISTS;
 var defineProperty = __webpack_require__("9bf2").f;
 
 var FunctionPrototype = Function.prototype;
@@ -9511,7 +11624,7 @@ var NAME = 'name';
 
 // Function instances `.name` property
 // https://tc39.es/ecma262/#sec-function-instances-name
-if (DESCRIPTORS && !(NAME in FunctionPrototype)) {
+if (DESCRIPTORS && !FUNCTION_NAME_EXISTS) {
   defineProperty(FunctionPrototype, NAME, {
     configurable: true,
     get: function () {
@@ -9523,6 +11636,351 @@ if (DESCRIPTORS && !(NAME in FunctionPrototype)) {
     }
   });
 }
+
+
+/***/ }),
+
+/***/ "b14c":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return sunday; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return monday; });
+/* unused harmony export tuesday */
+/* unused harmony export wednesday */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return thursday; });
+/* unused harmony export friday */
+/* unused harmony export saturday */
+/* unused harmony export sundays */
+/* unused harmony export mondays */
+/* unused harmony export tuesdays */
+/* unused harmony export wednesdays */
+/* unused harmony export thursdays */
+/* unused harmony export fridays */
+/* unused harmony export saturdays */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+function weekday(i) {
+  return Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+    date.setDate(date.getDate() - (date.getDay() + 7 - i) % 7);
+    date.setHours(0, 0, 0, 0);
+  }, function(date, step) {
+    date.setDate(date.getDate() + step * 7);
+  }, function(start, end) {
+    return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"]) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationWeek */ "f"];
+  });
+}
+
+var sunday = weekday(0);
+var monday = weekday(1);
+var tuesday = weekday(2);
+var wednesday = weekday(3);
+var thursday = weekday(4);
+var friday = weekday(5);
+var saturday = weekday(6);
+
+var sundays = sunday.range;
+var mondays = monday.range;
+var tuesdays = tuesday.range;
+var wednesdays = wednesday.range;
+var thursdays = thursday.range;
+var fridays = friday.range;
+var saturdays = saturday.range;
+
+
+/***/ }),
+
+/***/ "b170":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/exponent.js
+var src_exponent = __webpack_require__("a7fd");
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/formatGroup.js
+/* harmony default export */ var formatGroup = (function(grouping, thousands) {
+  return function(value, width) {
+    var i = value.length,
+        t = [],
+        j = 0,
+        g = grouping[0],
+        length = 0;
+
+    while (i > 0 && g > 0) {
+      if (length + g + 1 > width) g = Math.max(1, width - length);
+      t.push(value.substring(i -= g, i + g));
+      if ((length += g + 1) > width) break;
+      g = grouping[j = (j + 1) % grouping.length];
+    }
+
+    return t.reverse().join(thousands);
+  };
+});
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/formatNumerals.js
+/* harmony default export */ var formatNumerals = (function(numerals) {
+  return function(value) {
+    return value.replace(/[0-9]/g, function(i) {
+      return numerals[+i];
+    });
+  };
+});
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/formatSpecifier.js
+var formatSpecifier = __webpack_require__("09b8");
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/formatTrim.js
+// Trims insignificant zeros, e.g., replaces 1.2000k with 1.2k.
+/* harmony default export */ var formatTrim = (function(s) {
+  out: for (var n = s.length, i = 1, i0 = -1, i1; i < n; ++i) {
+    switch (s[i]) {
+      case ".": i0 = i1 = i; break;
+      case "0": if (i0 === 0) i0 = i; i1 = i; break;
+      default: if (!+s[i]) break out; if (i0 > 0) i0 = 0; break;
+    }
+  }
+  return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
+});
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/formatDecimal.js
+var formatDecimal = __webpack_require__("aa74");
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/formatPrefixAuto.js
+
+
+var prefixExponent;
+
+/* harmony default export */ var formatPrefixAuto = (function(x, p) {
+  var d = Object(formatDecimal["b" /* formatDecimalParts */])(x, p);
+  if (!d) return x + "";
+  var coefficient = d[0],
+      exponent = d[1],
+      i = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1,
+      n = coefficient.length;
+  return i === n ? coefficient
+      : i > n ? coefficient + new Array(i - n + 1).join("0")
+      : i > 0 ? coefficient.slice(0, i) + "." + coefficient.slice(i)
+      : "0." + new Array(1 - i).join("0") + Object(formatDecimal["b" /* formatDecimalParts */])(x, Math.max(0, p + i - 1))[0]; // less than 1y!
+});
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/formatRounded.js
+
+
+/* harmony default export */ var formatRounded = (function(x, p) {
+  var d = Object(formatDecimal["b" /* formatDecimalParts */])(x, p);
+  if (!d) return x + "";
+  var coefficient = d[0],
+      exponent = d[1];
+  return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient
+      : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1)
+      : coefficient + new Array(exponent - coefficient.length + 2).join("0");
+});
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/formatTypes.js
+
+
+
+
+/* harmony default export */ var formatTypes = ({
+  "%": (x, p) => (x * 100).toFixed(p),
+  "b": (x) => Math.round(x).toString(2),
+  "c": (x) => x + "",
+  "d": formatDecimal["a" /* default */],
+  "e": (x, p) => x.toExponential(p),
+  "f": (x, p) => x.toFixed(p),
+  "g": (x, p) => x.toPrecision(p),
+  "o": (x) => Math.round(x).toString(8),
+  "p": (x, p) => formatRounded(x * 100, p),
+  "r": formatRounded,
+  "s": formatPrefixAuto,
+  "X": (x) => Math.round(x).toString(16).toUpperCase(),
+  "x": (x) => Math.round(x).toString(16)
+});
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/identity.js
+/* harmony default export */ var identity = (function(x) {
+  return x;
+});
+
+// CONCATENATED MODULE: ./node_modules/d3-format/src/locale.js
+
+
+
+
+
+
+
+
+
+var map = Array.prototype.map,
+    prefixes = ["y","z","a","f","p","n","µ","m","","k","M","G","T","P","E","Z","Y"];
+
+/* harmony default export */ var src_locale = __webpack_exports__["a"] = (function(locale) {
+  var group = locale.grouping === undefined || locale.thousands === undefined ? identity : formatGroup(map.call(locale.grouping, Number), locale.thousands + ""),
+      currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "",
+      currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "",
+      decimal = locale.decimal === undefined ? "." : locale.decimal + "",
+      numerals = locale.numerals === undefined ? identity : formatNumerals(map.call(locale.numerals, String)),
+      percent = locale.percent === undefined ? "%" : locale.percent + "",
+      minus = locale.minus === undefined ? "−" : locale.minus + "",
+      nan = locale.nan === undefined ? "NaN" : locale.nan + "";
+
+  function newFormat(specifier) {
+    specifier = Object(formatSpecifier["a" /* default */])(specifier);
+
+    var fill = specifier.fill,
+        align = specifier.align,
+        sign = specifier.sign,
+        symbol = specifier.symbol,
+        zero = specifier.zero,
+        width = specifier.width,
+        comma = specifier.comma,
+        precision = specifier.precision,
+        trim = specifier.trim,
+        type = specifier.type;
+
+    // The "n" type is an alias for ",g".
+    if (type === "n") comma = true, type = "g";
+
+    // The "" type, and any invalid type, is an alias for ".12~g".
+    else if (!formatTypes[type]) precision === undefined && (precision = 12), trim = true, type = "g";
+
+    // If zero fill is specified, padding goes after sign and before digits.
+    if (zero || (fill === "0" && align === "=")) zero = true, fill = "0", align = "=";
+
+    // Compute the prefix and suffix.
+    // For SI-prefix, the suffix is lazily computed.
+    var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type) ? "0" + type.toLowerCase() : "",
+        suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type) ? percent : "";
+
+    // What format function should we use?
+    // Is this an integer type?
+    // Can this type generate exponential notation?
+    var formatType = formatTypes[type],
+        maybeSuffix = /[defgprs%]/.test(type);
+
+    // Set the default precision if not specified,
+    // or clamp the specified precision to the supported range.
+    // For significant precision, it must be in [1, 21].
+    // For fixed precision, it must be in [0, 20].
+    precision = precision === undefined ? 6
+        : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision))
+        : Math.max(0, Math.min(20, precision));
+
+    function format(value) {
+      var valuePrefix = prefix,
+          valueSuffix = suffix,
+          i, n, c;
+
+      if (type === "c") {
+        valueSuffix = formatType(value) + valueSuffix;
+        value = "";
+      } else {
+        value = +value;
+
+        // Determine the sign. -0 is not less than 0, but 1 / -0 is!
+        var valueNegative = value < 0 || 1 / value < 0;
+
+        // Perform the initial formatting.
+        value = isNaN(value) ? nan : formatType(Math.abs(value), precision);
+
+        // Trim insignificant zeros.
+        if (trim) value = formatTrim(value);
+
+        // If a negative value rounds to zero after formatting, and no explicit positive sign is requested, hide the sign.
+        if (valueNegative && +value === 0 && sign !== "+") valueNegative = false;
+
+        // Compute the prefix and suffix.
+        valuePrefix = (valueNegative ? (sign === "(" ? sign : minus) : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
+        valueSuffix = (type === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : "");
+
+        // Break the formatted value into the integer “value” part that can be
+        // grouped, and fractional or exponential “suffix” part that is not.
+        if (maybeSuffix) {
+          i = -1, n = value.length;
+          while (++i < n) {
+            if (c = value.charCodeAt(i), 48 > c || c > 57) {
+              valueSuffix = (c === 46 ? decimal + value.slice(i + 1) : value.slice(i)) + valueSuffix;
+              value = value.slice(0, i);
+              break;
+            }
+          }
+        }
+      }
+
+      // If the fill character is not "0", grouping is applied before padding.
+      if (comma && !zero) value = group(value, Infinity);
+
+      // Compute the padding.
+      var length = valuePrefix.length + value.length + valueSuffix.length,
+          padding = length < width ? new Array(width - length + 1).join(fill) : "";
+
+      // If the fill character is "0", grouping is applied after padding.
+      if (comma && zero) value = group(padding + value, padding.length ? width - valueSuffix.length : Infinity), padding = "";
+
+      // Reconstruct the final output based on the desired alignment.
+      switch (align) {
+        case "<": value = valuePrefix + value + valueSuffix + padding; break;
+        case "=": value = valuePrefix + padding + value + valueSuffix; break;
+        case "^": value = padding.slice(0, length = padding.length >> 1) + valuePrefix + value + valueSuffix + padding.slice(length); break;
+        default: value = padding + valuePrefix + value + valueSuffix; break;
+      }
+
+      return numerals(value);
+    }
+
+    format.toString = function() {
+      return specifier + "";
+    };
+
+    return format;
+  }
+
+  function formatPrefix(specifier, value) {
+    var f = newFormat((specifier = Object(formatSpecifier["a" /* default */])(specifier), specifier.type = "f", specifier)),
+        e = Math.max(-8, Math.min(8, Math.floor(Object(src_exponent["a" /* default */])(value) / 3))) * 3,
+        k = Math.pow(10, -e),
+        prefix = prefixes[8 + e / 3];
+    return function(value) {
+      return f(k * value) + prefix;
+    };
+  }
+
+  return {
+    format: newFormat,
+    formatPrefix: formatPrefix
+  };
+});
+
+
+/***/ }),
+
+/***/ "b3c3":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export hours */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var hour = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setTime(date - date.getMilliseconds() - date.getSeconds() * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationSecond */ "e"] - date.getMinutes() * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"]);
+}, function(date, step) {
+  date.setTime(+date + step * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationHour */ "b"]);
+}, function(start, end) {
+  return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationHour */ "b"];
+}, function(date) {
+  return date.getHours();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (hour);
+var hours = hour.range;
 
 
 /***/ }),
@@ -9638,7 +12096,7 @@ module.exports = queueMicrotask || function (fn) {
 
 var global = __webpack_require__("da84");
 var shared = __webpack_require__("5692");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var uid = __webpack_require__("90e3");
 var NATIVE_SYMBOL = __webpack_require__("4930");
 var USE_SYMBOL_AS_UID = __webpack_require__("fdbf");
@@ -9648,8 +12106,8 @@ var Symbol = global.Symbol;
 var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol : Symbol && Symbol.withoutSetter || uid;
 
 module.exports = function (name) {
-  if (!has(WellKnownSymbolsStore, name) || !(NATIVE_SYMBOL || typeof WellKnownSymbolsStore[name] == 'string')) {
-    if (NATIVE_SYMBOL && has(Symbol, name)) {
+  if (!hasOwn(WellKnownSymbolsStore, name) || !(NATIVE_SYMBOL || typeof WellKnownSymbolsStore[name] == 'string')) {
+    if (NATIVE_SYMBOL && hasOwn(Symbol, name)) {
       WellKnownSymbolsStore[name] = Symbol[name];
     } else {
       WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
@@ -11485,7 +13943,7 @@ $({ target: 'Object', stat: true, forced: FAILS_ON_PRIMITIVES }, {
 "use strict";
 
 var $ = __webpack_require__("23e7");
-var toInteger = __webpack_require__("a691");
+var toIntegerOrInfinity = __webpack_require__("5926");
 var thisNumberValue = __webpack_require__("408a");
 var repeat = __webpack_require__("1148");
 var fails = __webpack_require__("d039");
@@ -11556,7 +14014,7 @@ var FORCED = nativeToFixed && (
 $({ target: 'Number', proto: true, forced: FORCED }, {
   toFixed: function toFixed(fractionDigits) {
     var number = thisNumberValue(this);
-    var fractDigits = toInteger(fractionDigits);
+    var fractDigits = toIntegerOrInfinity(fractionDigits);
     var data = [0, 0, 0, 0, 0, 0];
     var sign = '';
     var result = '0';
@@ -11618,7 +14076,7 @@ $({ target: 'Number', proto: true, forced: FORCED }, {
 var bind = __webpack_require__("0366");
 var IndexedObject = __webpack_require__("44ad");
 var toObject = __webpack_require__("7b0b");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var arraySpeciesCreate = __webpack_require__("65f0");
 
 var push = [].push;
@@ -11636,7 +14094,7 @@ var createMethod = function (TYPE) {
     var O = toObject($this);
     var self = IndexedObject(O);
     var boundFunction = bind(callbackfn, that, 3);
-    var length = toLength(self.length);
+    var length = lengthOfArrayLike(self);
     var index = 0;
     var create = specificCreate || arraySpeciesCreate;
     var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
@@ -11934,6 +14392,7 @@ module.exports = (versions, range, options) => {
 
 var isObject = __webpack_require__("861d");
 var isSymbol = __webpack_require__("d9b5");
+var getMethod = __webpack_require__("dc4a");
 var ordinaryToPrimitive = __webpack_require__("485a");
 var wellKnownSymbol = __webpack_require__("b622");
 
@@ -11943,9 +14402,9 @@ var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
 // https://tc39.es/ecma262/#sec-toprimitive
 module.exports = function (input, pref) {
   if (!isObject(input) || isSymbol(input)) return input;
-  var exoticToPrim = input[TO_PRIMITIVE];
+  var exoticToPrim = getMethod(input, TO_PRIMITIVE);
   var result;
-  if (exoticToPrim !== undefined) {
+  if (exoticToPrim) {
     if (pref === undefined) pref = 'default';
     result = exoticToPrim.call(input, pref);
     if (!isObject(result) || isSymbol(result)) return result;
@@ -11954,6 +14413,245 @@ module.exports = function (input, pref) {
   if (pref === undefined) pref = 'number';
   return ordinaryToPrimitive(input, pref);
 };
+
+
+/***/ }),
+
+/***/ "c092":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return defaultLocale; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return locale; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return numberFormatDefaultLocale; });
+/* unused harmony export numberFormatLocale */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return resetDefaultLocale; });
+/* unused harmony export resetNumberFormatDefaultLocale */
+/* unused harmony export resetTimeFormatDefaultLocale */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return timeFormatDefaultLocale; });
+/* unused harmony export timeFormatLocale */
+/* harmony import */ var d3_array__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("eecb");
+/* harmony import */ var d3_format__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("09b8");
+/* harmony import */ var d3_format__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("d933");
+/* harmony import */ var d3_format__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("d989");
+/* harmony import */ var d3_format__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("dad1");
+/* harmony import */ var d3_format__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("1231");
+/* harmony import */ var d3_format__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("b170");
+/* harmony import */ var vega_time__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("de28");
+/* harmony import */ var vega_util__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("fc17");
+/* harmony import */ var d3_time_format__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("4c23");
+/* harmony import */ var d3_time_format__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("a591");
+
+
+
+
+
+
+function memoize (method) {
+  const cache = {};
+  return spec => cache[spec] || (cache[spec] = method(spec));
+}
+
+function trimZeroes(numberFormat, decimalChar) {
+  return x => {
+    const str = numberFormat(x),
+          dec = str.indexOf(decimalChar);
+    if (dec < 0) return str;
+    let idx = rightmostDigit(str, dec);
+    const end = idx < str.length ? str.slice(idx) : '';
+
+    while (--idx > dec) if (str[idx] !== '0') {
+      ++idx;
+      break;
+    }
+
+    return str.slice(0, idx) + end;
+  };
+}
+
+function rightmostDigit(str, dec) {
+  let i = str.lastIndexOf('e'),
+      c;
+  if (i > 0) return i;
+
+  for (i = str.length; --i > dec;) {
+    c = str.charCodeAt(i);
+    if (c >= 48 && c <= 57) return i + 1; // is digit
+  }
+}
+
+function numberLocale(locale) {
+  const format = memoize(locale.format),
+        formatPrefix = locale.formatPrefix;
+  return {
+    format,
+    formatPrefix,
+
+    formatFloat(spec) {
+      const s = Object(d3_format__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(spec || ',');
+
+      if (s.precision == null) {
+        s.precision = 12;
+
+        switch (s.type) {
+          case '%':
+            s.precision -= 2;
+            break;
+
+          case 'e':
+            s.precision -= 1;
+            break;
+        }
+
+        return trimZeroes(format(s), // number format
+        format('.1f')(1)[1] // decimal point character
+        );
+      } else {
+        return format(s);
+      }
+    },
+
+    formatSpan(start, stop, count, specifier) {
+      specifier = Object(d3_format__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(specifier == null ? ',f' : specifier);
+      const step = Object(d3_array__WEBPACK_IMPORTED_MODULE_0__[/* tickStep */ "c"])(start, stop, count),
+            value = Math.max(Math.abs(start), Math.abs(stop));
+      let precision;
+
+      if (specifier.precision == null) {
+        switch (specifier.type) {
+          case 's':
+            {
+              if (!isNaN(precision = Object(d3_format__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"])(step, value))) {
+                specifier.precision = precision;
+              }
+
+              return formatPrefix(specifier, value);
+            }
+
+          case '':
+          case 'e':
+          case 'g':
+          case 'p':
+          case 'r':
+            {
+              if (!isNaN(precision = Object(d3_format__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"])(step, value))) {
+                specifier.precision = precision - (specifier.type === 'e');
+              }
+
+              break;
+            }
+
+          case 'f':
+          case '%':
+            {
+              if (!isNaN(precision = Object(d3_format__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"])(step))) {
+                specifier.precision = precision - (specifier.type === '%') * 2;
+              }
+
+              break;
+            }
+        }
+      }
+
+      return format(specifier);
+    }
+
+  };
+}
+
+let defaultNumberLocale;
+resetNumberFormatDefaultLocale();
+function resetNumberFormatDefaultLocale() {
+  return defaultNumberLocale = numberLocale({
+    format: d3_format__WEBPACK_IMPORTED_MODULE_5__[/* format */ "a"],
+    formatPrefix: d3_format__WEBPACK_IMPORTED_MODULE_5__[/* formatPrefix */ "b"]
+  });
+}
+function numberFormatLocale(definition) {
+  return numberLocale(Object(d3_format__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"])(definition));
+}
+function numberFormatDefaultLocale(definition) {
+  return arguments.length ? defaultNumberLocale = numberFormatLocale(definition) : defaultNumberLocale;
+}
+
+function timeMultiFormat(format, interval, spec) {
+  spec = spec || {};
+
+  if (!Object(vega_util__WEBPACK_IMPORTED_MODULE_8__[/* isObject */ "H"])(spec)) {
+    Object(vega_util__WEBPACK_IMPORTED_MODULE_8__[/* error */ "o"])("Invalid time multi-format specifier: ".concat(spec));
+  }
+
+  const second = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* SECONDS */ "i"]),
+        minute = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* MINUTES */ "f"]),
+        hour = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* HOURS */ "d"]),
+        day = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* DATE */ "a"]),
+        week = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* WEEK */ "k"]),
+        month = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* MONTH */ "g"]),
+        quarter = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* QUARTER */ "h"]),
+        year = interval(vega_time__WEBPACK_IMPORTED_MODULE_7__[/* YEAR */ "l"]),
+        L = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* MILLISECONDS */ "e"]] || '.%L'),
+        S = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* SECONDS */ "i"]] || ':%S'),
+        M = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* MINUTES */ "f"]] || '%I:%M'),
+        H = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* HOURS */ "d"]] || '%I %p'),
+        d = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* DATE */ "a"]] || spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* DAY */ "b"]] || '%a %d'),
+        w = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* WEEK */ "k"]] || '%b %d'),
+        m = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* MONTH */ "g"]] || '%B'),
+        q = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* QUARTER */ "h"]] || '%B'),
+        y = format(spec[vega_time__WEBPACK_IMPORTED_MODULE_7__[/* YEAR */ "l"]] || '%Y');
+  return date => (second(date) < date ? L : minute(date) < date ? S : hour(date) < date ? M : day(date) < date ? H : month(date) < date ? week(date) < date ? d : w : year(date) < date ? quarter(date) < date ? m : q : y)(date);
+}
+
+function timeLocale(locale) {
+  const timeFormat = memoize(locale.format),
+        utcFormat = memoize(locale.utcFormat);
+  return {
+    timeFormat: spec => Object(vega_util__WEBPACK_IMPORTED_MODULE_8__[/* isString */ "J"])(spec) ? timeFormat(spec) : timeMultiFormat(timeFormat, vega_time__WEBPACK_IMPORTED_MODULE_7__[/* timeInterval */ "p"], spec),
+    utcFormat: spec => Object(vega_util__WEBPACK_IMPORTED_MODULE_8__[/* isString */ "J"])(spec) ? utcFormat(spec) : timeMultiFormat(utcFormat, vega_time__WEBPACK_IMPORTED_MODULE_7__[/* utcInterval */ "v"], spec),
+    timeParse: memoize(locale.parse),
+    utcParse: memoize(locale.utcParse)
+  };
+}
+
+let defaultTimeLocale;
+resetTimeFormatDefaultLocale();
+function resetTimeFormatDefaultLocale() {
+  return defaultTimeLocale = timeLocale({
+    format: d3_time_format__WEBPACK_IMPORTED_MODULE_9__[/* timeFormat */ "a"],
+    parse: d3_time_format__WEBPACK_IMPORTED_MODULE_9__[/* timeParse */ "b"],
+    utcFormat: d3_time_format__WEBPACK_IMPORTED_MODULE_9__[/* utcFormat */ "c"],
+    utcParse: d3_time_format__WEBPACK_IMPORTED_MODULE_9__[/* utcParse */ "d"]
+  });
+}
+function timeFormatLocale(definition) {
+  return timeLocale(Object(d3_time_format__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"])(definition));
+}
+function timeFormatDefaultLocale(definition) {
+  return arguments.length ? defaultTimeLocale = timeFormatLocale(definition) : defaultTimeLocale;
+}
+
+const createLocale = (number, time) => Object(vega_util__WEBPACK_IMPORTED_MODULE_8__[/* extend */ "p"])({}, number, time);
+
+function locale(numberSpec, timeSpec) {
+  const number = numberSpec ? numberFormatLocale(numberSpec) : numberFormatDefaultLocale();
+  const time = timeSpec ? timeFormatLocale(timeSpec) : timeFormatDefaultLocale();
+  return createLocale(number, time);
+}
+function defaultLocale(numberSpec, timeSpec) {
+  const args = arguments.length;
+
+  if (args && args !== 2) {
+    Object(vega_util__WEBPACK_IMPORTED_MODULE_8__[/* error */ "o"])('defaultLocale expects either zero or two arguments.');
+  }
+
+  return args ? createLocale(numberFormatDefaultLocale(numberSpec), timeFormatDefaultLocale(timeSpec)) : createLocale(numberFormatDefaultLocale(), timeFormatDefaultLocale());
+}
+function resetDefaultLocale() {
+  resetNumberFormatDefaultLocale();
+  resetTimeFormatDefaultLocale();
+  return defaultLocale();
+}
+
+
 
 
 /***/ }),
@@ -12002,13 +14700,18 @@ setSpecies(ARRAY_BUFFER);
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
+var fails = __webpack_require__("d039");
 var toString = __webpack_require__("577e");
 var trim = __webpack_require__("58a8").trim;
 var whitespaces = __webpack_require__("5899");
 
 var $parseInt = global.parseInt;
-var hex = /^[+-]?0[Xx]/;
-var FORCED = $parseInt(whitespaces + '08') !== 8 || $parseInt(whitespaces + '0x16') !== 22;
+var Symbol = global.Symbol;
+var ITERATOR = Symbol && Symbol.iterator;
+var hex = /^[+-]?0x/i;
+var FORCED = $parseInt(whitespaces + '08') !== 8 || $parseInt(whitespaces + '0x16') !== 22
+  // MS Edge 18- broken with boxed symbols
+  || (ITERATOR && !fails(function () { $parseInt(Object(ITERATOR)); }));
 
 // `parseInt` method
 // https://tc39.es/ecma262/#sec-parseint-string-radix
@@ -12041,10 +14744,10 @@ module.exports = eq
 /***/ "c60d":
 /***/ (function(module, exports, __webpack_require__) {
 
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 
 module.exports = function (descriptor) {
-  return descriptor !== undefined && (has(descriptor, 'value') || has(descriptor, 'writable'));
+  return descriptor !== undefined && (hasOwn(descriptor, 'value') || hasOwn(descriptor, 'writable'));
 };
 
 
@@ -12135,6 +14838,7 @@ module.exports = g;
 /***/ "c8d2":
 /***/ (function(module, exports, __webpack_require__) {
 
+var PROPER_FUNCTION_NAME = __webpack_require__("5e77").PROPER;
 var fails = __webpack_require__("d039");
 var whitespaces = __webpack_require__("5899");
 
@@ -12144,7 +14848,9 @@ var non = '\u200B\u0085\u180E';
 // of whitespaces and has a correct name
 module.exports = function (METHOD_NAME) {
   return fails(function () {
-    return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
+    return !!whitespaces[METHOD_NAME]()
+      || non[METHOD_NAME]() !== non
+      || (PROPER_FUNCTION_NAME && whitespaces[METHOD_NAME].name !== METHOD_NAME);
   });
 };
 
@@ -12227,7 +14933,7 @@ $({ target: 'Math', stat: true }, { log1p: log1p });
 /***/ "ca84":
 /***/ (function(module, exports, __webpack_require__) {
 
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var toIndexedObject = __webpack_require__("fc6a");
 var indexOf = __webpack_require__("4d64").indexOf;
 var hiddenKeys = __webpack_require__("d012");
@@ -12237,9 +14943,9 @@ module.exports = function (object, names) {
   var i = 0;
   var result = [];
   var key;
-  for (key in O) !has(hiddenKeys, key) && has(O, key) && result.push(key);
+  for (key in O) !hasOwn(hiddenKeys, key) && hasOwn(O, key) && result.push(key);
   // Don't enum bug & hidden keys
-  while (names.length > i) if (has(O, key = names[i++])) {
+  while (names.length > i) if (hasOwn(O, key = names[i++])) {
     ~indexOf(result, key) || result.push(key);
   }
   return result;
@@ -12380,9 +15086,10 @@ module.exports = function (exec) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
+var isCallable = __webpack_require__("1626");
 
-var aFunction = function (variable) {
-  return typeof variable == 'function' ? variable : undefined;
+var aFunction = function (argument) {
+  return isCallable(argument) ? argument : undefined;
 };
 
 module.exports = function (namespace, method) {
@@ -12501,6 +15208,549 @@ exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
 
 /***/ }),
 
+/***/ "d217":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* reexport */ feature; });
+__webpack_require__.d(__webpack_exports__, "b", function() { return /* reexport */ mesh; });
+
+// UNUSED EXPORTS: bbox, meshArcs, merge, mergeArcs, neighbors, quantize, transform, untransform
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/identity.js
+/* harmony default export */ var identity = (function(x) {
+  return x;
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/transform.js
+
+
+/* harmony default export */ var src_transform = (function(transform) {
+  if (transform == null) return identity;
+  var x0,
+      y0,
+      kx = transform.scale[0],
+      ky = transform.scale[1],
+      dx = transform.translate[0],
+      dy = transform.translate[1];
+  return function(input, i) {
+    if (!i) x0 = y0 = 0;
+    var j = 2, n = input.length, output = new Array(n);
+    output[0] = (x0 += input[0]) * kx + dx;
+    output[1] = (y0 += input[1]) * ky + dy;
+    while (j < n) output[j] = input[j], ++j;
+    return output;
+  };
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/bbox.js
+
+
+/* harmony default export */ var bbox = (function(topology) {
+  var t = src_transform(topology.transform), key,
+      x0 = Infinity, y0 = x0, x1 = -x0, y1 = -x0;
+
+  function bboxPoint(p) {
+    p = t(p);
+    if (p[0] < x0) x0 = p[0];
+    if (p[0] > x1) x1 = p[0];
+    if (p[1] < y0) y0 = p[1];
+    if (p[1] > y1) y1 = p[1];
+  }
+
+  function bboxGeometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(bboxGeometry); break;
+      case "Point": bboxPoint(o.coordinates); break;
+      case "MultiPoint": o.coordinates.forEach(bboxPoint); break;
+    }
+  }
+
+  topology.arcs.forEach(function(arc) {
+    var i = -1, n = arc.length, p;
+    while (++i < n) {
+      p = t(arc[i], i);
+      if (p[0] < x0) x0 = p[0];
+      if (p[0] > x1) x1 = p[0];
+      if (p[1] < y0) y0 = p[1];
+      if (p[1] > y1) y1 = p[1];
+    }
+  });
+
+  for (key in topology.objects) {
+    bboxGeometry(topology.objects[key]);
+  }
+
+  return [x0, y0, x1, y1];
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/reverse.js
+/* harmony default export */ var reverse = (function(array, n) {
+  var t, j = array.length, i = j - n;
+  while (i < --j) t = array[i], array[i++] = array[j], array[j] = t;
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/feature.js
+
+
+
+/* harmony default export */ var feature = (function(topology, o) {
+  if (typeof o === "string") o = topology.objects[o];
+  return o.type === "GeometryCollection"
+      ? {type: "FeatureCollection", features: o.geometries.map(function(o) { return feature_feature(topology, o); })}
+      : feature_feature(topology, o);
+});
+
+function feature_feature(topology, o) {
+  var id = o.id,
+      bbox = o.bbox,
+      properties = o.properties == null ? {} : o.properties,
+      geometry = feature_object(topology, o);
+  return id == null && bbox == null ? {type: "Feature", properties: properties, geometry: geometry}
+      : bbox == null ? {type: "Feature", id: id, properties: properties, geometry: geometry}
+      : {type: "Feature", id: id, bbox: bbox, properties: properties, geometry: geometry};
+}
+
+function feature_object(topology, o) {
+  var transformPoint = src_transform(topology.transform),
+      arcs = topology.arcs;
+
+  function arc(i, points) {
+    if (points.length) points.pop();
+    for (var a = arcs[i < 0 ? ~i : i], k = 0, n = a.length; k < n; ++k) {
+      points.push(transformPoint(a[k], k));
+    }
+    if (i < 0) reverse(points, n);
+  }
+
+  function point(p) {
+    return transformPoint(p);
+  }
+
+  function line(arcs) {
+    var points = [];
+    for (var i = 0, n = arcs.length; i < n; ++i) arc(arcs[i], points);
+    if (points.length < 2) points.push(points[0]); // This should never happen per the specification.
+    return points;
+  }
+
+  function ring(arcs) {
+    var points = line(arcs);
+    while (points.length < 4) points.push(points[0]); // This may happen if an arc has only two points.
+    return points;
+  }
+
+  function polygon(arcs) {
+    return arcs.map(ring);
+  }
+
+  function geometry(o) {
+    var type = o.type, coordinates;
+    switch (type) {
+      case "GeometryCollection": return {type: type, geometries: o.geometries.map(geometry)};
+      case "Point": coordinates = point(o.coordinates); break;
+      case "MultiPoint": coordinates = o.coordinates.map(point); break;
+      case "LineString": coordinates = line(o.arcs); break;
+      case "MultiLineString": coordinates = o.arcs.map(line); break;
+      case "Polygon": coordinates = polygon(o.arcs); break;
+      case "MultiPolygon": coordinates = o.arcs.map(polygon); break;
+      default: return null;
+    }
+    return {type: type, coordinates: coordinates};
+  }
+
+  return geometry(o);
+}
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/stitch.js
+/* harmony default export */ var stitch = (function(topology, arcs) {
+  var stitchedArcs = {},
+      fragmentByStart = {},
+      fragmentByEnd = {},
+      fragments = [],
+      emptyIndex = -1;
+
+  // Stitch empty arcs first, since they may be subsumed by other arcs.
+  arcs.forEach(function(i, j) {
+    var arc = topology.arcs[i < 0 ? ~i : i], t;
+    if (arc.length < 3 && !arc[1][0] && !arc[1][1]) {
+      t = arcs[++emptyIndex], arcs[emptyIndex] = i, arcs[j] = t;
+    }
+  });
+
+  arcs.forEach(function(i) {
+    var e = ends(i),
+        start = e[0],
+        end = e[1],
+        f, g;
+
+    if (f = fragmentByEnd[start]) {
+      delete fragmentByEnd[f.end];
+      f.push(i);
+      f.end = end;
+      if (g = fragmentByStart[end]) {
+        delete fragmentByStart[g.start];
+        var fg = g === f ? f : f.concat(g);
+        fragmentByStart[fg.start = f.start] = fragmentByEnd[fg.end = g.end] = fg;
+      } else {
+        fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
+      }
+    } else if (f = fragmentByStart[end]) {
+      delete fragmentByStart[f.start];
+      f.unshift(i);
+      f.start = start;
+      if (g = fragmentByEnd[start]) {
+        delete fragmentByEnd[g.end];
+        var gf = g === f ? f : g.concat(f);
+        fragmentByStart[gf.start = g.start] = fragmentByEnd[gf.end = f.end] = gf;
+      } else {
+        fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
+      }
+    } else {
+      f = [i];
+      fragmentByStart[f.start = start] = fragmentByEnd[f.end = end] = f;
+    }
+  });
+
+  function ends(i) {
+    var arc = topology.arcs[i < 0 ? ~i : i], p0 = arc[0], p1;
+    if (topology.transform) p1 = [0, 0], arc.forEach(function(dp) { p1[0] += dp[0], p1[1] += dp[1]; });
+    else p1 = arc[arc.length - 1];
+    return i < 0 ? [p1, p0] : [p0, p1];
+  }
+
+  function flush(fragmentByEnd, fragmentByStart) {
+    for (var k in fragmentByEnd) {
+      var f = fragmentByEnd[k];
+      delete fragmentByStart[f.start];
+      delete f.start;
+      delete f.end;
+      f.forEach(function(i) { stitchedArcs[i < 0 ? ~i : i] = 1; });
+      fragments.push(f);
+    }
+  }
+
+  flush(fragmentByEnd, fragmentByStart);
+  flush(fragmentByStart, fragmentByEnd);
+  arcs.forEach(function(i) { if (!stitchedArcs[i < 0 ? ~i : i]) fragments.push([i]); });
+
+  return fragments;
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/mesh.js
+
+
+
+/* harmony default export */ var mesh = (function(topology) {
+  return feature_object(topology, meshArcs.apply(this, arguments));
+});
+
+function meshArcs(topology, object, filter) {
+  var arcs, i, n;
+  if (arguments.length > 1) arcs = extractArcs(topology, object, filter);
+  else for (i = 0, arcs = new Array(n = topology.arcs.length); i < n; ++i) arcs[i] = i;
+  return {type: "MultiLineString", arcs: stitch(topology, arcs)};
+}
+
+function extractArcs(topology, object, filter) {
+  var arcs = [],
+      geomsByArc = [],
+      geom;
+
+  function extract0(i) {
+    var j = i < 0 ? ~i : i;
+    (geomsByArc[j] || (geomsByArc[j] = [])).push({i: i, g: geom});
+  }
+
+  function extract1(arcs) {
+    arcs.forEach(extract0);
+  }
+
+  function extract2(arcs) {
+    arcs.forEach(extract1);
+  }
+
+  function extract3(arcs) {
+    arcs.forEach(extract2);
+  }
+
+  function geometry(o) {
+    switch (geom = o, o.type) {
+      case "GeometryCollection": o.geometries.forEach(geometry); break;
+      case "LineString": extract1(o.arcs); break;
+      case "MultiLineString": case "Polygon": extract2(o.arcs); break;
+      case "MultiPolygon": extract3(o.arcs); break;
+    }
+  }
+
+  geometry(object);
+
+  geomsByArc.forEach(filter == null
+      ? function(geoms) { arcs.push(geoms[0].i); }
+      : function(geoms) { if (filter(geoms[0].g, geoms[geoms.length - 1].g)) arcs.push(geoms[0].i); });
+
+  return arcs;
+}
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/merge.js
+
+
+
+function planarRingArea(ring) {
+  var i = -1, n = ring.length, a, b = ring[n - 1], area = 0;
+  while (++i < n) a = b, b = ring[i], area += a[0] * b[1] - a[1] * b[0];
+  return Math.abs(area); // Note: doubled area!
+}
+
+/* harmony default export */ var merge = (function(topology) {
+  return feature_object(topology, mergeArcs.apply(this, arguments));
+});
+
+function mergeArcs(topology, objects) {
+  var polygonsByArc = {},
+      polygons = [],
+      groups = [];
+
+  objects.forEach(geometry);
+
+  function geometry(o) {
+    switch (o.type) {
+      case "GeometryCollection": o.geometries.forEach(geometry); break;
+      case "Polygon": extract(o.arcs); break;
+      case "MultiPolygon": o.arcs.forEach(extract); break;
+    }
+  }
+
+  function extract(polygon) {
+    polygon.forEach(function(ring) {
+      ring.forEach(function(arc) {
+        (polygonsByArc[arc = arc < 0 ? ~arc : arc] || (polygonsByArc[arc] = [])).push(polygon);
+      });
+    });
+    polygons.push(polygon);
+  }
+
+  function area(ring) {
+    return planarRingArea(feature_object(topology, {type: "Polygon", arcs: [ring]}).coordinates[0]);
+  }
+
+  polygons.forEach(function(polygon) {
+    if (!polygon._) {
+      var group = [],
+          neighbors = [polygon];
+      polygon._ = 1;
+      groups.push(group);
+      while (polygon = neighbors.pop()) {
+        group.push(polygon);
+        polygon.forEach(function(ring) {
+          ring.forEach(function(arc) {
+            polygonsByArc[arc < 0 ? ~arc : arc].forEach(function(polygon) {
+              if (!polygon._) {
+                polygon._ = 1;
+                neighbors.push(polygon);
+              }
+            });
+          });
+        });
+      }
+    }
+  });
+
+  polygons.forEach(function(polygon) {
+    delete polygon._;
+  });
+
+  return {
+    type: "MultiPolygon",
+    arcs: groups.map(function(polygons) {
+      var arcs = [], n;
+
+      // Extract the exterior (unique) arcs.
+      polygons.forEach(function(polygon) {
+        polygon.forEach(function(ring) {
+          ring.forEach(function(arc) {
+            if (polygonsByArc[arc < 0 ? ~arc : arc].length < 2) {
+              arcs.push(arc);
+            }
+          });
+        });
+      });
+
+      // Stitch the arcs into one or more rings.
+      arcs = stitch(topology, arcs);
+
+      // If more than one ring is returned,
+      // at most one of these rings can be the exterior;
+      // choose the one with the greatest absolute area.
+      if ((n = arcs.length) > 1) {
+        for (var i = 1, k = area(arcs[0]), ki, t; i < n; ++i) {
+          if ((ki = area(arcs[i])) > k) {
+            t = arcs[0], arcs[0] = arcs[i], arcs[i] = t, k = ki;
+          }
+        }
+      }
+
+      return arcs;
+    }).filter(function(arcs) {
+      return arcs.length > 0;
+    })
+  };
+}
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/bisect.js
+/* harmony default export */ var bisect = (function(a, x) {
+  var lo = 0, hi = a.length;
+  while (lo < hi) {
+    var mid = lo + hi >>> 1;
+    if (a[mid] < x) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/neighbors.js
+
+
+/* harmony default export */ var src_neighbors = (function(objects) {
+  var indexesByArc = {}, // arc index -> array of object indexes
+      neighbors = objects.map(function() { return []; });
+
+  function line(arcs, i) {
+    arcs.forEach(function(a) {
+      if (a < 0) a = ~a;
+      var o = indexesByArc[a];
+      if (o) o.push(i);
+      else indexesByArc[a] = [i];
+    });
+  }
+
+  function polygon(arcs, i) {
+    arcs.forEach(function(arc) { line(arc, i); });
+  }
+
+  function geometry(o, i) {
+    if (o.type === "GeometryCollection") o.geometries.forEach(function(o) { geometry(o, i); });
+    else if (o.type in geometryType) geometryType[o.type](o.arcs, i);
+  }
+
+  var geometryType = {
+    LineString: line,
+    MultiLineString: polygon,
+    Polygon: polygon,
+    MultiPolygon: function(arcs, i) { arcs.forEach(function(arc) { polygon(arc, i); }); }
+  };
+
+  objects.forEach(geometry);
+
+  for (var i in indexesByArc) {
+    for (var indexes = indexesByArc[i], m = indexes.length, j = 0; j < m; ++j) {
+      for (var k = j + 1; k < m; ++k) {
+        var ij = indexes[j], ik = indexes[k], n;
+        if ((n = neighbors[ij])[i = bisect(n, ik)] !== ik) n.splice(i, 0, ik);
+        if ((n = neighbors[ik])[i = bisect(n, ij)] !== ij) n.splice(i, 0, ij);
+      }
+    }
+  }
+
+  return neighbors;
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/untransform.js
+
+
+/* harmony default export */ var untransform = (function(transform) {
+  if (transform == null) return identity;
+  var x0,
+      y0,
+      kx = transform.scale[0],
+      ky = transform.scale[1],
+      dx = transform.translate[0],
+      dy = transform.translate[1];
+  return function(input, i) {
+    if (!i) x0 = y0 = 0;
+    var j = 2,
+        n = input.length,
+        output = new Array(n),
+        x1 = Math.round((input[0] - dx) / kx),
+        y1 = Math.round((input[1] - dy) / ky);
+    output[0] = x1 - x0, x0 = x1;
+    output[1] = y1 - y0, y0 = y1;
+    while (j < n) output[j] = input[j], ++j;
+    return output;
+  };
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/quantize.js
+
+
+
+/* harmony default export */ var quantize = (function(topology, transform) {
+  if (topology.transform) throw new Error("already quantized");
+
+  if (!transform || !transform.scale) {
+    if (!((n = Math.floor(transform)) >= 2)) throw new Error("n must be ≥2");
+    box = topology.bbox || bbox(topology);
+    var x0 = box[0], y0 = box[1], x1 = box[2], y1 = box[3], n;
+    transform = {scale: [x1 - x0 ? (x1 - x0) / (n - 1) : 1, y1 - y0 ? (y1 - y0) / (n - 1) : 1], translate: [x0, y0]};
+  } else {
+    box = topology.bbox;
+  }
+
+  var t = untransform(transform), box, key, inputs = topology.objects, outputs = {};
+
+  function quantizePoint(point) {
+    return t(point);
+  }
+
+  function quantizeGeometry(input) {
+    var output;
+    switch (input.type) {
+      case "GeometryCollection": output = {type: "GeometryCollection", geometries: input.geometries.map(quantizeGeometry)}; break;
+      case "Point": output = {type: "Point", coordinates: quantizePoint(input.coordinates)}; break;
+      case "MultiPoint": output = {type: "MultiPoint", coordinates: input.coordinates.map(quantizePoint)}; break;
+      default: return input;
+    }
+    if (input.id != null) output.id = input.id;
+    if (input.bbox != null) output.bbox = input.bbox;
+    if (input.properties != null) output.properties = input.properties;
+    return output;
+  }
+
+  function quantizeArc(input) {
+    var i = 0, j = 1, n = input.length, p, output = new Array(n); // pessimistic
+    output[0] = t(input[0], 0);
+    while (++i < n) if ((p = t(input[i], i))[0] || p[1]) output[j++] = p; // non-coincident points
+    if (j === 1) output[j++] = [0, 0]; // an arc must have at least two points
+    output.length = j;
+    return output;
+  }
+
+  for (key in inputs) outputs[key] = quantizeGeometry(inputs[key]);
+
+  return {
+    type: "Topology",
+    bbox: box,
+    transform: transform,
+    objects: outputs,
+    arcs: topology.arcs.map(quantizeArc)
+  };
+});
+
+// CONCATENATED MODULE: ./node_modules/topojson-client/src/index.js
+
+
+
+
+
+
+
+
+
+
+/***/ }),
+
 /***/ "d28b":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12566,13 +15816,13 @@ if (!TO_STRING_TAG_SUPPORT) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var defineProperty = __webpack_require__("9bf2").f;
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var wellKnownSymbol = __webpack_require__("b622");
 
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 
 module.exports = function (it, TAG, STATIC) {
-  if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
+  if (it && !hasOwn(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
     defineProperty(it, TO_STRING_TAG, { configurable: true, value: TAG });
   }
 };
@@ -12594,18 +15844,18 @@ module.exports = /ipad|iphone|ipod/i.test(userAgent) && global.Pebble !== undefi
 /***/ "d58f":
 /***/ (function(module, exports, __webpack_require__) {
 
-var aFunction = __webpack_require__("1c0b");
+var aCallable = __webpack_require__("59ed");
 var toObject = __webpack_require__("7b0b");
 var IndexedObject = __webpack_require__("44ad");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 
 // `Array.prototype.{ reduce, reduceRight }` methods implementation
 var createMethod = function (IS_RIGHT) {
   return function (that, callbackfn, argumentsLength, memo) {
-    aFunction(callbackfn);
+    aCallable(callbackfn);
     var O = toObject(that);
     var self = IndexedObject(O);
-    var length = toLength(O.length);
+    var length = lengthOfArrayLike(O);
     var index = IS_RIGHT ? length - 1 : 0;
     var i = IS_RIGHT ? -1 : 1;
     if (argumentsLength < 2) while (true) {
@@ -12755,6 +16005,35 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
 
 /***/ }),
 
+/***/ "d933":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var _exponent_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("a7fd");
+
+
+/* harmony default export */ __webpack_exports__["a"] = (function(step, value) {
+  return Math.max(0, Math.max(-8, Math.min(8, Math.floor(Object(_exponent_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(value) / 3))) * 3 - Object(_exponent_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(Math.abs(step)));
+});
+
+
+/***/ }),
+
+/***/ "d989":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var _exponent_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("a7fd");
+
+
+/* harmony default export */ __webpack_exports__["a"] = (function(step, max) {
+  step = Math.abs(step), max = Math.abs(max) - step;
+  return Math.max(0, Object(_exponent_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(max) - Object(_exponent_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(step)) + 1;
+});
+
+
+/***/ }),
+
 /***/ "d998":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12768,6 +16047,7 @@ module.exports = /MSIE|Trident/.test(UA);
 /***/ "d9b5":
 /***/ (function(module, exports, __webpack_require__) {
 
+var isCallable = __webpack_require__("1626");
 var getBuiltIn = __webpack_require__("d066");
 var USE_SYMBOL_AS_UID = __webpack_require__("fdbf");
 
@@ -12775,7 +16055,7 @@ module.exports = USE_SYMBOL_AS_UID ? function (it) {
   return typeof it == 'symbol';
 } : function (it) {
   var $Symbol = getBuiltIn('Symbol');
-  return typeof $Symbol == 'function' && Object(it) instanceof $Symbol;
+  return isCallable($Symbol) && Object(it) instanceof $Symbol;
 };
 
 
@@ -12803,6 +16083,20 @@ module.exports =
 
 /***/ }),
 
+/***/ "dad1":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var _exponent_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("a7fd");
+
+
+/* harmony default export */ __webpack_exports__["a"] = (function(step) {
+  return Math.max(0, -Object(_exponent_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(Math.abs(step)));
+});
+
+
+/***/ }),
+
 /***/ "db0b":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12824,11 +16118,27 @@ module.exports = rsort
 
 /***/ }),
 
+/***/ "dc4a":
+/***/ (function(module, exports, __webpack_require__) {
+
+var aCallable = __webpack_require__("59ed");
+
+// `GetMethod` abstract operation
+// https://tc39.es/ecma262/#sec-getmethod
+module.exports = function (V, P) {
+  var func = V[P];
+  return func == null ? undefined : aCallable(func);
+};
+
+
+/***/ }),
+
 /***/ "ddb0":
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__("da84");
 var DOMIterables = __webpack_require__("fdbc");
+var DOMTokenListPrototype = __webpack_require__("785a");
 var ArrayIteratorMethods = __webpack_require__("e260");
 var createNonEnumerableProperty = __webpack_require__("9112");
 var wellKnownSymbol = __webpack_require__("b622");
@@ -12837,9 +16147,7 @@ var ITERATOR = wellKnownSymbol('iterator');
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 var ArrayValues = ArrayIteratorMethods.values;
 
-for (var COLLECTION_NAME in DOMIterables) {
-  var Collection = global[COLLECTION_NAME];
-  var CollectionPrototype = Collection && Collection.prototype;
+var handlePrototype = function (CollectionPrototype, COLLECTION_NAME) {
   if (CollectionPrototype) {
     // some Chrome versions have non-configurable methods on DOMTokenList
     if (CollectionPrototype[ITERATOR] !== ArrayValues) try {
@@ -12859,7 +16167,13 @@ for (var COLLECTION_NAME in DOMIterables) {
       }
     }
   }
+};
+
+for (var COLLECTION_NAME in DOMIterables) {
+  handlePrototype(global[COLLECTION_NAME] && global[COLLECTION_NAME].prototype, COLLECTION_NAME);
 }
+
+handlePrototype(DOMTokenListPrototype, 'DOMTokenList');
 
 
 /***/ }),
@@ -12915,6 +16229,376 @@ module.exports = {
   simplifyRange: __webpack_require__("bfa6"),
   subset: __webpack_require__("23d7"),
 }
+
+
+/***/ }),
+
+/***/ "de28":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DATE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return DAY; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return DAYOFYEAR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return HOURS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return MILLISECONDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return MINUTES; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return MONTH; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return QUARTER; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return SECONDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return TIME_UNITS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return WEEK; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return YEAR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return dayofyear; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return bin; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return timeFloor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return timeInterval; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return timeOffset; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return timeSequence; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return timeUnitSpecifier; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return timeUnits; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return utcFloor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return utcInterval; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return utcOffset; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return utcSequence; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return utcdayofyear; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return utcweek; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "A", function() { return week; });
+/* harmony import */ var vega_util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("fc17");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("742c");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("b14c");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("6eb2");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("2739");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("a15a");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("9603");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("b3c3");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("2c38");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("5edf");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("1809");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("77ae");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("55f8");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("f623");
+/* harmony import */ var d3_time__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("f8ee");
+/* harmony import */ var d3_array__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("2a2d");
+/* harmony import */ var d3_array__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("eecb");
+
+
+
+
+const YEAR = 'year';
+const QUARTER = 'quarter';
+const MONTH = 'month';
+const WEEK = 'week';
+const DATE = 'date';
+const DAY = 'day';
+const DAYOFYEAR = 'dayofyear';
+const HOURS = 'hours';
+const MINUTES = 'minutes';
+const SECONDS = 'seconds';
+const MILLISECONDS = 'milliseconds';
+const TIME_UNITS = [YEAR, QUARTER, MONTH, WEEK, DATE, DAY, DAYOFYEAR, HOURS, MINUTES, SECONDS, MILLISECONDS];
+const UNITS = TIME_UNITS.reduce((o, u, i) => (o[u] = 1 + i, o), {});
+function timeUnits(units) {
+  const u = Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* array */ "i"])(units).slice(),
+        m = {}; // check validity
+
+  if (!u.length) Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])('Missing time unit.');
+  u.forEach(unit => {
+    if (Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* hasOwnProperty */ "w"])(UNITS, unit)) {
+      m[unit] = 1;
+    } else {
+      Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])("Invalid time unit: ".concat(unit, "."));
+    }
+  });
+  const numTypes = (m[WEEK] || m[DAY] ? 1 : 0) + (m[QUARTER] || m[MONTH] || m[DATE] ? 1 : 0) + (m[DAYOFYEAR] ? 1 : 0);
+
+  if (numTypes > 1) {
+    Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* error */ "o"])("Incompatible time units: ".concat(units));
+  } // ensure proper sort order
+
+
+  u.sort((a, b) => UNITS[a] - UNITS[b]);
+  return u;
+}
+const defaultSpecifiers = {
+  [YEAR]: '%Y ',
+  [QUARTER]: 'Q%q ',
+  [MONTH]: '%b ',
+  [DATE]: '%d ',
+  [WEEK]: 'W%U ',
+  [DAY]: '%a ',
+  [DAYOFYEAR]: '%j ',
+  [HOURS]: '%H:00',
+  [MINUTES]: '00:%M',
+  [SECONDS]: ':%S',
+  [MILLISECONDS]: '.%L',
+  ["".concat(YEAR, "-").concat(MONTH)]: '%Y-%m ',
+  ["".concat(YEAR, "-").concat(MONTH, "-").concat(DATE)]: '%Y-%m-%d ',
+  ["".concat(HOURS, "-").concat(MINUTES)]: '%H:%M'
+};
+function timeUnitSpecifier(units, specifiers) {
+  const s = Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* extend */ "p"])({}, defaultSpecifiers, specifiers),
+        u = timeUnits(units),
+        n = u.length;
+  let fmt = '',
+      start = 0,
+      end,
+      key;
+
+  for (start = 0; start < n;) {
+    for (end = u.length; end > start; --end) {
+      key = u.slice(start, end).join('-');
+
+      if (s[key] != null) {
+        fmt += s[key];
+        start = end;
+        break;
+      }
+    }
+  }
+
+  return fmt.trim();
+}
+
+const t0 = new Date();
+
+function localYear(y) {
+  t0.setFullYear(y);
+  t0.setMonth(0);
+  t0.setDate(1);
+  t0.setHours(0, 0, 0, 0);
+  return t0;
+}
+
+function dayofyear(d) {
+  return localDayOfYear(new Date(d));
+}
+function week(d) {
+  return localWeekNum(new Date(d));
+}
+function localDayOfYear(d) {
+  return d3_time__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].count(localYear(d.getFullYear()) - 1, d);
+}
+function localWeekNum(d) {
+  return d3_time__WEBPACK_IMPORTED_MODULE_2__[/* sunday */ "b"].count(localYear(d.getFullYear()) - 1, d);
+}
+function localFirst(y) {
+  return localYear(y).getDay();
+}
+function localDate(y, m, d, H, M, S, L) {
+  if (0 <= y && y < 100) {
+    const date = new Date(-1, m, d, H, M, S, L);
+    date.setFullYear(y);
+    return date;
+  }
+
+  return new Date(y, m, d, H, M, S, L);
+}
+function utcdayofyear(d) {
+  return utcDayOfYear(new Date(d));
+}
+function utcweek(d) {
+  return utcWeekNum(new Date(d));
+}
+function utcDayOfYear(d) {
+  const y = Date.UTC(d.getUTCFullYear(), 0, 1);
+  return d3_time__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"].count(y - 1, d);
+}
+function utcWeekNum(d) {
+  const y = Date.UTC(d.getUTCFullYear(), 0, 1);
+  return d3_time__WEBPACK_IMPORTED_MODULE_4__[/* utcSunday */ "b"].count(y - 1, d);
+}
+function utcFirst(y) {
+  t0.setTime(Date.UTC(y, 0, 1));
+  return t0.getUTCDay();
+}
+function utcDate(y, m, d, H, M, S, L) {
+  if (0 <= y && y < 100) {
+    const date = new Date(Date.UTC(-1, m, d, H, M, S, L));
+    date.setUTCFullYear(d.y);
+    return date;
+  }
+
+  return new Date(Date.UTC(y, m, d, H, M, S, L));
+}
+
+function floor(units, step, get, inv, newDate) {
+  const s = step || 1,
+        b = Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* peek */ "W"])(units),
+        _ = (unit, p, key) => {
+    key = key || unit;
+    return getUnit(get[key], inv[key], unit === b && s, p);
+  };
+
+  const t = new Date(),
+        u = Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* toSet */ "fb"])(units),
+        y = u[YEAR] ? _(YEAR) : Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* constant */ "m"])(2012),
+        m = u[MONTH] ? _(MONTH) : u[QUARTER] ? _(QUARTER) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* zero */ "mb"],
+        d = u[WEEK] && u[DAY] ? _(DAY, 1, WEEK + DAY) : u[WEEK] ? _(WEEK, 1) : u[DAY] ? _(DAY, 1) : u[DATE] ? _(DATE, 1) : u[DAYOFYEAR] ? _(DAYOFYEAR, 1) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* one */ "Q"],
+        H = u[HOURS] ? _(HOURS) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* zero */ "mb"],
+        M = u[MINUTES] ? _(MINUTES) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* zero */ "mb"],
+        S = u[SECONDS] ? _(SECONDS) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* zero */ "mb"],
+        L = u[MILLISECONDS] ? _(MILLISECONDS) : vega_util__WEBPACK_IMPORTED_MODULE_0__[/* zero */ "mb"];
+  return function (v) {
+    t.setTime(+v);
+    const year = y(t);
+    return newDate(year, m(t), d(t, year), H(t), M(t), S(t), L(t));
+  };
+}
+
+function getUnit(f, inv, step, phase) {
+  const u = step <= 1 ? f : phase ? (d, y) => phase + step * Math.floor((f(d, y) - phase) / step) : (d, y) => step * Math.floor(f(d, y) / step);
+  return inv ? (d, y) => inv(u(d, y), y) : u;
+} // returns the day of the year based on week number, day of week,
+// and the day of the week for the first day of the year
+
+
+function weekday(week, day, firstDay) {
+  return day + week * 7 - (firstDay + 6) % 7;
+} // -- LOCAL TIME --
+
+
+const localGet = {
+  [YEAR]: d => d.getFullYear(),
+  [QUARTER]: d => Math.floor(d.getMonth() / 3),
+  [MONTH]: d => d.getMonth(),
+  [DATE]: d => d.getDate(),
+  [HOURS]: d => d.getHours(),
+  [MINUTES]: d => d.getMinutes(),
+  [SECONDS]: d => d.getSeconds(),
+  [MILLISECONDS]: d => d.getMilliseconds(),
+  [DAYOFYEAR]: d => localDayOfYear(d),
+  [WEEK]: d => localWeekNum(d),
+  [WEEK + DAY]: (d, y) => weekday(localWeekNum(d), d.getDay(), localFirst(y)),
+  [DAY]: (d, y) => weekday(1, d.getDay(), localFirst(y))
+};
+const localInv = {
+  [QUARTER]: q => 3 * q,
+  [WEEK]: (w, y) => weekday(w, 0, localFirst(y))
+};
+function timeFloor(units, step) {
+  return floor(units, step || 1, localGet, localInv, localDate);
+} // -- UTC TIME --
+
+const utcGet = {
+  [YEAR]: d => d.getUTCFullYear(),
+  [QUARTER]: d => Math.floor(d.getUTCMonth() / 3),
+  [MONTH]: d => d.getUTCMonth(),
+  [DATE]: d => d.getUTCDate(),
+  [HOURS]: d => d.getUTCHours(),
+  [MINUTES]: d => d.getUTCMinutes(),
+  [SECONDS]: d => d.getUTCSeconds(),
+  [MILLISECONDS]: d => d.getUTCMilliseconds(),
+  [DAYOFYEAR]: d => utcDayOfYear(d),
+  [WEEK]: d => utcWeekNum(d),
+  [DAY]: (d, y) => weekday(1, d.getUTCDay(), utcFirst(y)),
+  [WEEK + DAY]: (d, y) => weekday(utcWeekNum(d), d.getUTCDay(), utcFirst(y))
+};
+const utcInv = {
+  [QUARTER]: q => 3 * q,
+  [WEEK]: (w, y) => weekday(w, 0, utcFirst(y))
+};
+function utcFloor(units, step) {
+  return floor(units, step || 1, utcGet, utcInv, utcDate);
+}
+
+const timeIntervals = {
+  [YEAR]: d3_time__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"],
+  [QUARTER]: d3_time__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"].every(3),
+  [MONTH]: d3_time__WEBPACK_IMPORTED_MODULE_6__[/* default */ "a"],
+  [WEEK]: d3_time__WEBPACK_IMPORTED_MODULE_2__[/* sunday */ "b"],
+  [DATE]: d3_time__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"],
+  [DAY]: d3_time__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"],
+  [DAYOFYEAR]: d3_time__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"],
+  [HOURS]: d3_time__WEBPACK_IMPORTED_MODULE_7__[/* default */ "a"],
+  [MINUTES]: d3_time__WEBPACK_IMPORTED_MODULE_8__[/* default */ "a"],
+  [SECONDS]: d3_time__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"],
+  [MILLISECONDS]: d3_time__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"]
+};
+const utcIntervals = {
+  [YEAR]: d3_time__WEBPACK_IMPORTED_MODULE_11__[/* default */ "a"],
+  [QUARTER]: d3_time__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"].every(3),
+  [MONTH]: d3_time__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"],
+  [WEEK]: d3_time__WEBPACK_IMPORTED_MODULE_4__[/* utcSunday */ "b"],
+  [DATE]: d3_time__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"],
+  [DAY]: d3_time__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"],
+  [DAYOFYEAR]: d3_time__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"],
+  [HOURS]: d3_time__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"],
+  [MINUTES]: d3_time__WEBPACK_IMPORTED_MODULE_14__[/* default */ "a"],
+  [SECONDS]: d3_time__WEBPACK_IMPORTED_MODULE_9__[/* default */ "a"],
+  [MILLISECONDS]: d3_time__WEBPACK_IMPORTED_MODULE_10__[/* default */ "a"]
+};
+function timeInterval(unit) {
+  return timeIntervals[unit];
+}
+function utcInterval(unit) {
+  return utcIntervals[unit];
+}
+
+function offset(ival, date, step) {
+  return ival ? ival.offset(date, step) : undefined;
+}
+
+function timeOffset(unit, date, step) {
+  return offset(timeInterval(unit), date, step);
+}
+function utcOffset(unit, date, step) {
+  return offset(utcInterval(unit), date, step);
+}
+
+function sequence(ival, start, stop, step) {
+  return ival ? ival.range(start, stop, step) : undefined;
+}
+
+function timeSequence(unit, start, stop, step) {
+  return sequence(timeInterval(unit), start, stop, step);
+}
+function utcSequence(unit, start, stop, step) {
+  return sequence(utcInterval(unit), start, stop, step);
+}
+
+const durationSecond = 1000,
+      durationMinute = durationSecond * 60,
+      durationHour = durationMinute * 60,
+      durationDay = durationHour * 24,
+      durationWeek = durationDay * 7,
+      durationMonth = durationDay * 30,
+      durationYear = durationDay * 365;
+const Milli = [YEAR, MONTH, DATE, HOURS, MINUTES, SECONDS, MILLISECONDS],
+      Seconds = Milli.slice(0, -1),
+      Minutes = Seconds.slice(0, -1),
+      Hours = Minutes.slice(0, -1),
+      Day = Hours.slice(0, -1),
+      Week = [YEAR, WEEK],
+      Month = [YEAR, MONTH],
+      Year = [YEAR];
+const intervals = [[Seconds, 1, durationSecond], [Seconds, 5, 5 * durationSecond], [Seconds, 15, 15 * durationSecond], [Seconds, 30, 30 * durationSecond], [Minutes, 1, durationMinute], [Minutes, 5, 5 * durationMinute], [Minutes, 15, 15 * durationMinute], [Minutes, 30, 30 * durationMinute], [Hours, 1, durationHour], [Hours, 3, 3 * durationHour], [Hours, 6, 6 * durationHour], [Hours, 12, 12 * durationHour], [Day, 1, durationDay], [Week, 1, durationWeek], [Month, 1, durationMonth], [Month, 3, 3 * durationMonth], [Year, 1, durationYear]];
+function bin (opt) {
+  const ext = opt.extent,
+        max = opt.maxbins || 40,
+        target = Math.abs(Object(vega_util__WEBPACK_IMPORTED_MODULE_0__[/* span */ "Z"])(ext)) / max;
+  let i = Object(d3_array__WEBPACK_IMPORTED_MODULE_15__[/* default */ "a"])(i => i[2]).right(intervals, target),
+      units,
+      step;
+
+  if (i === intervals.length) {
+    units = Year, step = Object(d3_array__WEBPACK_IMPORTED_MODULE_16__[/* tickStep */ "c"])(ext[0] / durationYear, ext[1] / durationYear, max);
+  } else if (i) {
+    i = intervals[target / intervals[i - 1][2] < intervals[i][2] / target ? i - 1 : i];
+    units = i[0];
+    step = i[1];
+  } else {
+    units = Milli;
+    step = Math.max(Object(d3_array__WEBPACK_IMPORTED_MODULE_16__[/* tickStep */ "c"])(ext[0], ext[1], max), 1);
+  }
+
+  return {
+    units,
+    step
+  };
+}
+
+
 
 
 /***/ }),
@@ -13549,14 +17233,15 @@ var substr = 'ab'.substr(-1) === 'b'
 var $ = __webpack_require__("23e7");
 var DESCRIPTORS = __webpack_require__("83ab");
 var global = __webpack_require__("da84");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
 var defineProperty = __webpack_require__("9bf2").f;
 var copyConstructorProperties = __webpack_require__("e893");
 
 var NativeSymbol = global.Symbol;
 
-if (DESCRIPTORS && typeof NativeSymbol == 'function' && (!('description' in NativeSymbol.prototype) ||
+if (DESCRIPTORS && isCallable(NativeSymbol) && (!('description' in NativeSymbol.prototype) ||
   // Safari 12 bug
   NativeSymbol().description !== undefined
 )) {
@@ -13576,15 +17261,15 @@ if (DESCRIPTORS && typeof NativeSymbol == 'function' && (!('description' in Nati
   symbolPrototype.constructor = SymbolWrapper;
 
   var symbolToString = symbolPrototype.toString;
-  var native = String(NativeSymbol('test')) == 'Symbol(test)';
+  var nativeSymbol = String(NativeSymbol('test')) == 'Symbol(test)';
   var regexp = /^Symbol\((.*)\)[^)]+$/;
   defineProperty(symbolPrototype, 'description', {
     configurable: true,
     get: function description() {
       var symbol = isObject(this) ? this.valueOf() : this;
       var string = symbolToString.call(symbol);
-      if (has(EmptyStringDescriptionStore, symbol)) return '';
-      var desc = native ? string.slice(7, -1) : string.replace(regexp, '$1');
+      if (hasOwn(EmptyStringDescriptionStore, symbol)) return '';
+      var desc = nativeSymbol ? string.slice(7, -1) : string.replace(regexp, '$1');
       return desc === '' ? undefined : desc;
     }
   });
@@ -13618,7 +17303,8 @@ module.exports = parseOptions
 /***/ "e163":
 /***/ (function(module, exports, __webpack_require__) {
 
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
+var isCallable = __webpack_require__("1626");
 var toObject = __webpack_require__("7b0b");
 var sharedKey = __webpack_require__("f772");
 var CORRECT_PROTOTYPE_GETTER = __webpack_require__("e177");
@@ -13630,11 +17316,12 @@ var ObjectPrototype = Object.prototype;
 // https://tc39.es/ecma262/#sec-object.getprototypeof
 // eslint-disable-next-line es/no-object-getprototypeof -- safe
 module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O) {
-  O = toObject(O);
-  if (has(O, IE_PROTO)) return O[IE_PROTO];
-  if (typeof O.constructor == 'function' && O instanceof O.constructor) {
-    return O.constructor.prototype;
-  } return O instanceof Object ? ObjectPrototype : null;
+  var object = toObject(O);
+  if (hasOwn(object, IE_PROTO)) return object[IE_PROTO];
+  var constructor = object.constructor;
+  if (isCallable(constructor) && object instanceof constructor) {
+    return constructor.prototype;
+  } return object instanceof Object ? ObjectPrototype : null;
 };
 
 
@@ -13659,12 +17346,12 @@ module.exports = !fails(function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 var $ = __webpack_require__("23e7");
-var parseIntImplementation = __webpack_require__("c20d");
+var $parseInt = __webpack_require__("c20d");
 
 // `parseInt` method
 // https://tc39.es/ecma262/#sec-parseint-string-radix
-$({ global: true, forced: parseInt != parseIntImplementation }, {
-  parseInt: parseIntImplementation
+$({ global: true, forced: parseInt != $parseInt }, {
+  parseInt: $parseInt
 });
 
 
@@ -13813,8 +17500,8 @@ exports.f = wellKnownSymbol;
 
 /* eslint-disable es/no-array-prototype-lastindexof -- safe */
 var toIndexedObject = __webpack_require__("fc6a");
-var toInteger = __webpack_require__("a691");
-var toLength = __webpack_require__("50c4");
+var toIntegerOrInfinity = __webpack_require__("5926");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var arrayMethodIsStrict = __webpack_require__("a640");
 
 var min = Math.min;
@@ -13829,9 +17516,9 @@ module.exports = FORCED ? function lastIndexOf(searchElement /* , fromIndex = @[
   // convert -0 to +0
   if (NEGATIVE_ZERO) return $lastIndexOf.apply(this, arguments) || 0;
   var O = toIndexedObject(this);
-  var length = toLength(O.length);
+  var length = lengthOfArrayLike(O);
   var index = length - 1;
-  if (arguments.length > 1) index = min(index, toInteger(arguments[1]));
+  if (arguments.length > 1) index = min(index, toIntegerOrInfinity(arguments[1]));
   if (index < 0) index = length + index;
   for (;index >= 0; index--) if (index in O && O[index] === searchElement) return index || 0;
   return -1;
@@ -13869,8 +17556,9 @@ var redefineAll = __webpack_require__("e2cc");
 var setPrototypeOf = __webpack_require__("d2bb");
 var setToStringTag = __webpack_require__("d44e");
 var setSpecies = __webpack_require__("2626");
+var aCallable = __webpack_require__("59ed");
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
-var aFunction = __webpack_require__("1c0b");
 var anInstance = __webpack_require__("19aa");
 var inspectSource = __webpack_require__("8925");
 var iterate = __webpack_require__("2266");
@@ -13903,7 +17591,7 @@ var process = global.process;
 var newPromiseCapability = newPromiseCapabilityModule.f;
 var newGenericPromiseCapability = newPromiseCapability;
 var DISPATCH_EVENT = !!(document && document.createEvent && global.dispatchEvent);
-var NATIVE_REJECTION_EVENT = typeof PromiseRejectionEvent == 'function';
+var NATIVE_REJECTION_EVENT = isCallable(global.PromiseRejectionEvent);
 var UNHANDLED_REJECTION = 'unhandledrejection';
 var REJECTION_HANDLED = 'rejectionhandled';
 var PENDING = 0;
@@ -13947,7 +17635,7 @@ var INCORRECT_ITERATION = FORCED || !checkCorrectnessOfIteration(function (itera
 // helpers
 var isThenable = function (it) {
   var then;
-  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
+  return isObject(it) && isCallable(then = it.then) ? then : false;
 };
 
 var notify = function (state, isReject) {
@@ -14092,7 +17780,7 @@ if (FORCED) {
   // 25.4.3.1 Promise(executor)
   PromiseConstructor = function Promise(executor) {
     anInstance(this, PromiseConstructor, PROMISE);
-    aFunction(executor);
+    aCallable(executor);
     Internal.call(this);
     var state = getInternalState(this);
     try {
@@ -14121,8 +17809,8 @@ if (FORCED) {
     then: function then(onFulfilled, onRejected) {
       var state = getInternalPromiseState(this);
       var reaction = newPromiseCapability(speciesConstructor(this, PromiseConstructor));
-      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
-      reaction.fail = typeof onRejected == 'function' && onRejected;
+      reaction.ok = isCallable(onFulfilled) ? onFulfilled : true;
+      reaction.fail = isCallable(onRejected) && onRejected;
       reaction.domain = IS_NODE ? process.domain : undefined;
       state.parent = true;
       state.reactions.push(reaction);
@@ -14148,7 +17836,7 @@ if (FORCED) {
       : newGenericPromiseCapability(C);
   };
 
-  if (!IS_PURE && typeof NativePromise == 'function' && NativePromisePrototype !== Object.prototype) {
+  if (!IS_PURE && isCallable(NativePromise) && NativePromisePrototype !== Object.prototype) {
     nativeThen = NativePromisePrototype.then;
 
     if (!SUBCLASSING) {
@@ -14214,7 +17902,7 @@ $({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
     var resolve = capability.resolve;
     var reject = capability.reject;
     var result = perform(function () {
-      var $promiseResolve = aFunction(C.resolve);
+      var $promiseResolve = aCallable(C.resolve);
       var values = [];
       var counter = 0;
       var remaining = 1;
@@ -14242,7 +17930,7 @@ $({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
     var capability = newPromiseCapability(C);
     var reject = capability.reject;
     var result = perform(function () {
-      var $promiseResolve = aFunction(C.resolve);
+      var $promiseResolve = aCallable(C.resolve);
       iterate(iterable, function (promise) {
         $promiseResolve.call(C, promise).then(capability.resolve, reject);
       });
@@ -14258,7 +17946,7 @@ $({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
 /***/ "e893":
 /***/ (function(module, exports, __webpack_require__) {
 
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var ownKeys = __webpack_require__("56ef");
 var getOwnPropertyDescriptorModule = __webpack_require__("06cf");
 var definePropertyModule = __webpack_require__("9bf2");
@@ -14269,7 +17957,7 @@ module.exports = function (target, source) {
   var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    if (!has(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
+    if (!hasOwn(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
   }
 };
 
@@ -14284,8 +17972,8 @@ var classof = __webpack_require__("c6b6");
 // `IsArray` abstract operation
 // https://tc39.es/ecma262/#sec-isarray
 // eslint-disable-next-line es/no-array-isarray -- safe
-module.exports = Array.isArray || function isArray(arg) {
-  return classof(arg) == 'Array';
+module.exports = Array.isArray || function isArray(argument) {
+  return classof(argument) == 'Array';
 };
 
 
@@ -14316,9 +18004,11 @@ module.exports = function (it) {
 var NATIVE_ARRAY_BUFFER = __webpack_require__("a981");
 var DESCRIPTORS = __webpack_require__("83ab");
 var global = __webpack_require__("da84");
+var isCallable = __webpack_require__("1626");
 var isObject = __webpack_require__("861d");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var classof = __webpack_require__("f5df");
+var tryToString = __webpack_require__("0d51");
 var createNonEnumerableProperty = __webpack_require__("9112");
 var redefine = __webpack_require__("6eeb");
 var defineProperty = __webpack_require__("9bf2").f;
@@ -14365,15 +18055,15 @@ var isView = function isView(it) {
   if (!isObject(it)) return false;
   var klass = classof(it);
   return klass === 'DataView'
-    || has(TypedArrayConstructorsList, klass)
-    || has(BigIntArrayConstructorsList, klass);
+    || hasOwn(TypedArrayConstructorsList, klass)
+    || hasOwn(BigIntArrayConstructorsList, klass);
 };
 
 var isTypedArray = function (it) {
   if (!isObject(it)) return false;
   var klass = classof(it);
-  return has(TypedArrayConstructorsList, klass)
-    || has(BigIntArrayConstructorsList, klass);
+  return hasOwn(TypedArrayConstructorsList, klass)
+    || hasOwn(BigIntArrayConstructorsList, klass);
 };
 
 var aTypedArray = function (it) {
@@ -14382,16 +18072,15 @@ var aTypedArray = function (it) {
 };
 
 var aTypedArrayConstructor = function (C) {
-  if (setPrototypeOf && !isPrototypeOf.call(TypedArray, C)) {
-    throw TypeError('Target is not a typed array constructor');
-  } return C;
+  if (isCallable(C) && (!setPrototypeOf || isPrototypeOf.call(TypedArray, C))) return C;
+  throw TypeError(tryToString(C) + ' is not a typed array constructor');
 };
 
 var exportTypedArrayMethod = function (KEY, property, forced) {
   if (!DESCRIPTORS) return;
   if (forced) for (var ARRAY in TypedArrayConstructorsList) {
     var TypedArrayConstructor = global[ARRAY];
-    if (TypedArrayConstructor && has(TypedArrayConstructor.prototype, KEY)) try {
+    if (TypedArrayConstructor && hasOwn(TypedArrayConstructor.prototype, KEY)) try {
       delete TypedArrayConstructor.prototype[KEY];
     } catch (error) { /* empty */ }
   }
@@ -14407,7 +18096,7 @@ var exportTypedArrayStaticMethod = function (KEY, property, forced) {
   if (setPrototypeOf) {
     if (forced) for (ARRAY in TypedArrayConstructorsList) {
       TypedArrayConstructor = global[ARRAY];
-      if (TypedArrayConstructor && has(TypedArrayConstructor, KEY)) try {
+      if (TypedArrayConstructor && hasOwn(TypedArrayConstructor, KEY)) try {
         delete TypedArrayConstructor[KEY];
       } catch (error) { /* empty */ }
     }
@@ -14440,7 +18129,7 @@ for (NAME in BigIntArrayConstructorsList) {
 }
 
 // WebKit bug - typed arrays constructors prototype is Object.prototype
-if (!NATIVE_ARRAY_BUFFER_VIEWS || typeof TypedArray != 'function' || TypedArray === Function.prototype) {
+if (!NATIVE_ARRAY_BUFFER_VIEWS || !isCallable(TypedArray) || TypedArray === Function.prototype) {
   // eslint-disable-next-line no-shadow -- safe
   TypedArray = function TypedArray() {
     throw TypeError('Incorrect invocation');
@@ -14462,7 +18151,7 @@ if (NATIVE_ARRAY_BUFFER_VIEWS && getPrototypeOf(Uint8ClampedArrayPrototype) !== 
   setPrototypeOf(Uint8ClampedArrayPrototype, TypedArrayPrototype);
 }
 
-if (DESCRIPTORS && !has(TypedArrayPrototype, TO_STRING_TAG)) {
+if (DESCRIPTORS && !hasOwn(TypedArrayPrototype, TO_STRING_TAG)) {
   TYPED_ARRAY_TAG_REQIRED = true;
   defineProperty(TypedArrayPrototype, TO_STRING_TAG, { get: function () {
     return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
@@ -14499,6 +18188,70 @@ module.exports = gt
 
 /***/ }),
 
+/***/ "eecb":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return tickIncrement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return tickStep; });
+var e10 = Math.sqrt(50),
+    e5 = Math.sqrt(10),
+    e2 = Math.sqrt(2);
+
+/* harmony default export */ __webpack_exports__["a"] = (function(start, stop, count) {
+  var reverse,
+      i = -1,
+      n,
+      ticks,
+      step;
+
+  stop = +stop, start = +start, count = +count;
+  if (start === stop && count > 0) return [start];
+  if (reverse = stop < start) n = start, start = stop, stop = n;
+  if ((step = tickIncrement(start, stop, count)) === 0 || !isFinite(step)) return [];
+
+  if (step > 0) {
+    let r0 = Math.round(start / step), r1 = Math.round(stop / step);
+    if (r0 * step < start) ++r0;
+    if (r1 * step > stop) --r1;
+    ticks = new Array(n = r1 - r0 + 1);
+    while (++i < n) ticks[i] = (r0 + i) * step;
+  } else {
+    step = -step;
+    let r0 = Math.round(start * step), r1 = Math.round(stop * step);
+    if (r0 / step < start) ++r0;
+    if (r1 / step > stop) --r1;
+    ticks = new Array(n = r1 - r0 + 1);
+    while (++i < n) ticks[i] = (r0 + i) / step;
+  }
+
+  if (reverse) ticks.reverse();
+
+  return ticks;
+});
+
+function tickIncrement(start, stop, count) {
+  var step = (stop - start) / Math.max(0, count),
+      power = Math.floor(Math.log(step) / Math.LN10),
+      error = step / Math.pow(10, power);
+  return power >= 0
+      ? (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1) * Math.pow(10, power)
+      : -Math.pow(10, -power) / (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1);
+}
+
+function tickStep(start, stop, count) {
+  var step0 = Math.abs(stop - start) / Math.max(0, count),
+      step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10)),
+      error = step0 / step1;
+  if (error >= e10) step1 *= 10;
+  else if (error >= e5) step1 *= 5;
+  else if (error >= e2) step1 *= 2;
+  return stop < start ? -step1 : step1;
+}
+
+
+/***/ }),
+
 /***/ "f00c":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14517,7 +18270,7 @@ $({ target: 'Number', stat: true }, { isFinite: numberIsFinite });
 
 "use strict";
 
-var aFunction = __webpack_require__("1c0b");
+var aCallable = __webpack_require__("59ed");
 
 var PromiseCapability = function (C) {
   var resolve, reject;
@@ -14526,8 +18279,8 @@ var PromiseCapability = function (C) {
     resolve = $$resolve;
     reject = $$reject;
   });
-  this.resolve = aFunction(resolve);
-  this.reject = aFunction(reject);
+  this.resolve = aCallable(resolve);
+  this.reject = aCallable(reject);
 };
 
 // `NewPromiseCapability` abstract operation
@@ -14567,7 +18320,7 @@ module.exports = compareLoose
 var $ = __webpack_require__("23e7");
 var hiddenKeys = __webpack_require__("d012");
 var isObject = __webpack_require__("861d");
-var has = __webpack_require__("5135");
+var hasOwn = __webpack_require__("1a2d");
 var defineProperty = __webpack_require__("9bf2").f;
 var getOwnPropertyNamesModule = __webpack_require__("241c");
 var getOwnPropertyNamesExternalModule = __webpack_require__("057f");
@@ -14593,7 +18346,7 @@ var setMetadata = function (it) {
 var fastKey = function (it, create) {
   // return a primitive with prefix
   if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-  if (!has(it, METADATA)) {
+  if (!hasOwn(it, METADATA)) {
     // can't set metadata to uncaught frozen object
     if (!isExtensible(it)) return 'F';
     // not necessary to add metadata
@@ -14605,7 +18358,7 @@ var fastKey = function (it, create) {
 };
 
 var getWeakData = function (it, create) {
-  if (!has(it, METADATA)) {
+  if (!hasOwn(it, METADATA)) {
     // can't set metadata to uncaught frozen object
     if (!isExtensible(it)) return true;
     // not necessary to add metadata
@@ -14618,7 +18371,7 @@ var getWeakData = function (it, create) {
 
 // add metadata on freeze-family methods calling
 var onFreeze = function (it) {
-  if (FREEZING && REQUIRED && isExtensible(it) && !has(it, METADATA)) setMetadata(it);
+  if (FREEZING && REQUIRED && isExtensible(it) && !hasOwn(it, METADATA)) setMetadata(it);
   return it;
 };
 
@@ -14664,6 +18417,7 @@ hiddenKeys[METADATA] = true;
 /***/ (function(module, exports, __webpack_require__) {
 
 var TO_STRING_TAG_SUPPORT = __webpack_require__("00ee");
+var isCallable = __webpack_require__("1626");
 var classofRaw = __webpack_require__("c6b6");
 var wellKnownSymbol = __webpack_require__("b622");
 
@@ -14687,8 +18441,34 @@ module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
     // builtinTag case
     : CORRECT_ARGUMENTS ? classofRaw(O)
     // ES3 arguments fallback
-    : (result = classofRaw(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : result;
+    : (result = classofRaw(O)) == 'Object' && isCallable(O.callee) ? 'Arguments' : result;
 };
+
+
+/***/ }),
+
+/***/ "f623":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export utcHours */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var utcHour = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setUTCMinutes(0, 0, 0);
+}, function(date, step) {
+  date.setTime(+date + step * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationHour */ "b"]);
+}, function(start, end) {
+  return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationHour */ "b"];
+}, function(date) {
+  return date.getUTCHours();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (utcHour);
+var utcHours = utcHour.range;
 
 
 /***/ }),
@@ -14789,6 +18569,32 @@ module.exports = function (key) {
 
 /***/ }),
 
+/***/ "f8ee":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export utcMinutes */
+/* harmony import */ var _interval_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("18e2");
+/* harmony import */ var _duration_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("1738");
+
+
+
+var utcMinute = Object(_interval_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])(function(date) {
+  date.setUTCSeconds(0, 0);
+}, function(date, step) {
+  date.setTime(+date + step * _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"]);
+}, function(start, end) {
+  return (end - start) / _duration_js__WEBPACK_IMPORTED_MODULE_1__[/* durationMinute */ "c"];
+}, function(date) {
+  return date.getUTCMinutes();
+});
+
+/* harmony default export */ __webpack_exports__["a"] = (utcMinute);
+var utcMinutes = utcMinute.range;
+
+
+/***/ }),
+
 /***/ "fb15":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -14862,35 +18668,35 @@ __webpack_require__.d(vega_transforms_module_namespaceObject, "values", function
 __webpack_require__.d(vega_transforms_module_namespaceObject, "window", function() { return Window; });
 
 // NAMESPACE OBJECT: ./node_modules/d3-interpolate/src/index.js
-var d3_interpolate_src_namespaceObject = {};
-__webpack_require__.r(d3_interpolate_src_namespaceObject);
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolate", function() { return src_value; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateArray", function() { return d3_interpolate_src_array; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateBasis", function() { return src_basis; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateBasisClosed", function() { return src_basisClosed; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateDate", function() { return src_date; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateDiscrete", function() { return discrete; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHue", function() { return src_hue; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateNumber", function() { return d3_interpolate_src_number; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateNumberArray", function() { return numberArray; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateObject", function() { return src_object; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRound", function() { return src_round; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateString", function() { return src_string; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateTransformCss", function() { return interpolateTransformCss; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateTransformSvg", function() { return interpolateTransformSvg; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateZoom", function() { return zoom; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRgb", function() { return src_rgb; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRgbBasis", function() { return rgbBasis; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRgbBasisClosed", function() { return rgbBasisClosed; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHsl", function() { return src_hsl; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHslLong", function() { return hslLong; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateLab", function() { return lab_lab; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHcl", function() { return src_hcl; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHclLong", function() { return hclLong; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateCubehelix", function() { return src_cubehelix; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateCubehelixLong", function() { return cubehelixLong; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "piecewise", function() { return piecewise_piecewise; });
-__webpack_require__.d(d3_interpolate_src_namespaceObject, "quantize", function() { return src_quantize; });
+var src_namespaceObject = {};
+__webpack_require__.r(src_namespaceObject);
+__webpack_require__.d(src_namespaceObject, "interpolate", function() { return src_value; });
+__webpack_require__.d(src_namespaceObject, "interpolateArray", function() { return d3_interpolate_src_array; });
+__webpack_require__.d(src_namespaceObject, "interpolateBasis", function() { return src_basis; });
+__webpack_require__.d(src_namespaceObject, "interpolateBasisClosed", function() { return src_basisClosed; });
+__webpack_require__.d(src_namespaceObject, "interpolateDate", function() { return src_date; });
+__webpack_require__.d(src_namespaceObject, "interpolateDiscrete", function() { return discrete; });
+__webpack_require__.d(src_namespaceObject, "interpolateHue", function() { return src_hue; });
+__webpack_require__.d(src_namespaceObject, "interpolateNumber", function() { return src_number; });
+__webpack_require__.d(src_namespaceObject, "interpolateNumberArray", function() { return numberArray; });
+__webpack_require__.d(src_namespaceObject, "interpolateObject", function() { return src_object; });
+__webpack_require__.d(src_namespaceObject, "interpolateRound", function() { return src_round; });
+__webpack_require__.d(src_namespaceObject, "interpolateString", function() { return src_string; });
+__webpack_require__.d(src_namespaceObject, "interpolateTransformCss", function() { return interpolateTransformCss; });
+__webpack_require__.d(src_namespaceObject, "interpolateTransformSvg", function() { return interpolateTransformSvg; });
+__webpack_require__.d(src_namespaceObject, "interpolateZoom", function() { return zoom; });
+__webpack_require__.d(src_namespaceObject, "interpolateRgb", function() { return src_rgb; });
+__webpack_require__.d(src_namespaceObject, "interpolateRgbBasis", function() { return rgbBasis; });
+__webpack_require__.d(src_namespaceObject, "interpolateRgbBasisClosed", function() { return rgbBasisClosed; });
+__webpack_require__.d(src_namespaceObject, "interpolateHsl", function() { return src_hsl; });
+__webpack_require__.d(src_namespaceObject, "interpolateHslLong", function() { return hslLong; });
+__webpack_require__.d(src_namespaceObject, "interpolateLab", function() { return lab_lab; });
+__webpack_require__.d(src_namespaceObject, "interpolateHcl", function() { return src_hcl; });
+__webpack_require__.d(src_namespaceObject, "interpolateHclLong", function() { return hclLong; });
+__webpack_require__.d(src_namespaceObject, "interpolateCubehelix", function() { return src_cubehelix; });
+__webpack_require__.d(src_namespaceObject, "interpolateCubehelixLong", function() { return cubehelixLong; });
+__webpack_require__.d(src_namespaceObject, "piecewise", function() { return piecewise_piecewise; });
+__webpack_require__.d(src_namespaceObject, "quantize", function() { return src_quantize; });
 
 // NAMESPACE OBJECT: ./node_modules/vega-view-transforms/build/vega-view-transforms.module.js
 var vega_view_transforms_module_namespaceObject = {};
@@ -15093,41 +18899,41 @@ __webpack_require__.d(vega_module_namespaceObject, "sampleLogNormal", function()
 __webpack_require__.d(vega_module_namespaceObject, "sampleNormal", function() { return sampleNormal; });
 __webpack_require__.d(vega_module_namespaceObject, "sampleUniform", function() { return sampleUniform; });
 __webpack_require__.d(vega_module_namespaceObject, "setRandom", function() { return setRandom; });
-__webpack_require__.d(vega_module_namespaceObject, "DATE", function() { return vega_time_module_DATE; });
-__webpack_require__.d(vega_module_namespaceObject, "DAY", function() { return DAY; });
-__webpack_require__.d(vega_module_namespaceObject, "DAYOFYEAR", function() { return DAYOFYEAR; });
-__webpack_require__.d(vega_module_namespaceObject, "HOURS", function() { return HOURS; });
-__webpack_require__.d(vega_module_namespaceObject, "MILLISECONDS", function() { return MILLISECONDS; });
-__webpack_require__.d(vega_module_namespaceObject, "MINUTES", function() { return MINUTES; });
-__webpack_require__.d(vega_module_namespaceObject, "MONTH", function() { return MONTH; });
-__webpack_require__.d(vega_module_namespaceObject, "QUARTER", function() { return QUARTER; });
-__webpack_require__.d(vega_module_namespaceObject, "SECONDS", function() { return SECONDS; });
-__webpack_require__.d(vega_module_namespaceObject, "TIME_UNITS", function() { return TIME_UNITS; });
-__webpack_require__.d(vega_module_namespaceObject, "WEEK", function() { return WEEK; });
-__webpack_require__.d(vega_module_namespaceObject, "YEAR", function() { return YEAR; });
-__webpack_require__.d(vega_module_namespaceObject, "dayofyear", function() { return dayofyear; });
-__webpack_require__.d(vega_module_namespaceObject, "timeBin", function() { return vega_time_module_bin; });
-__webpack_require__.d(vega_module_namespaceObject, "timeFloor", function() { return timeFloor; });
-__webpack_require__.d(vega_module_namespaceObject, "timeInterval", function() { return timeInterval; });
-__webpack_require__.d(vega_module_namespaceObject, "timeOffset", function() { return timeOffset; });
-__webpack_require__.d(vega_module_namespaceObject, "timeSequence", function() { return timeSequence; });
-__webpack_require__.d(vega_module_namespaceObject, "timeUnitSpecifier", function() { return timeUnitSpecifier; });
-__webpack_require__.d(vega_module_namespaceObject, "timeUnits", function() { return vega_time_module_timeUnits; });
-__webpack_require__.d(vega_module_namespaceObject, "utcFloor", function() { return utcFloor; });
-__webpack_require__.d(vega_module_namespaceObject, "utcInterval", function() { return utcInterval; });
-__webpack_require__.d(vega_module_namespaceObject, "utcOffset", function() { return utcOffset; });
-__webpack_require__.d(vega_module_namespaceObject, "utcSequence", function() { return utcSequence; });
-__webpack_require__.d(vega_module_namespaceObject, "utcdayofyear", function() { return utcdayofyear; });
-__webpack_require__.d(vega_module_namespaceObject, "utcweek", function() { return utcweek; });
-__webpack_require__.d(vega_module_namespaceObject, "week", function() { return vega_time_module_week; });
-__webpack_require__.d(vega_module_namespaceObject, "loader", function() { return index_browser_loader; });
-__webpack_require__.d(vega_module_namespaceObject, "read", function() { return read; });
-__webpack_require__.d(vega_module_namespaceObject, "inferType", function() { return inferType; });
-__webpack_require__.d(vega_module_namespaceObject, "inferTypes", function() { return inferTypes; });
-__webpack_require__.d(vega_module_namespaceObject, "typeParsers", function() { return typeParsers; });
-__webpack_require__.d(vega_module_namespaceObject, "format", function() { return formats_format; });
-__webpack_require__.d(vega_module_namespaceObject, "formats", function() { return formats_formats; });
-__webpack_require__.d(vega_module_namespaceObject, "responseType", function() { return responseType; });
+__webpack_require__.d(vega_module_namespaceObject, "DATE", function() { return vega_time_module["a" /* DATE */]; });
+__webpack_require__.d(vega_module_namespaceObject, "DAY", function() { return vega_time_module["b" /* DAY */]; });
+__webpack_require__.d(vega_module_namespaceObject, "DAYOFYEAR", function() { return vega_time_module["c" /* DAYOFYEAR */]; });
+__webpack_require__.d(vega_module_namespaceObject, "HOURS", function() { return vega_time_module["d" /* HOURS */]; });
+__webpack_require__.d(vega_module_namespaceObject, "MILLISECONDS", function() { return vega_time_module["e" /* MILLISECONDS */]; });
+__webpack_require__.d(vega_module_namespaceObject, "MINUTES", function() { return vega_time_module["f" /* MINUTES */]; });
+__webpack_require__.d(vega_module_namespaceObject, "MONTH", function() { return vega_time_module["g" /* MONTH */]; });
+__webpack_require__.d(vega_module_namespaceObject, "QUARTER", function() { return vega_time_module["h" /* QUARTER */]; });
+__webpack_require__.d(vega_module_namespaceObject, "SECONDS", function() { return vega_time_module["i" /* SECONDS */]; });
+__webpack_require__.d(vega_module_namespaceObject, "TIME_UNITS", function() { return vega_time_module["j" /* TIME_UNITS */]; });
+__webpack_require__.d(vega_module_namespaceObject, "WEEK", function() { return vega_time_module["k" /* WEEK */]; });
+__webpack_require__.d(vega_module_namespaceObject, "YEAR", function() { return vega_time_module["l" /* YEAR */]; });
+__webpack_require__.d(vega_module_namespaceObject, "dayofyear", function() { return vega_time_module["m" /* dayofyear */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeBin", function() { return vega_time_module["n" /* timeBin */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeFloor", function() { return vega_time_module["o" /* timeFloor */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeInterval", function() { return vega_time_module["p" /* timeInterval */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeOffset", function() { return vega_time_module["q" /* timeOffset */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeSequence", function() { return vega_time_module["r" /* timeSequence */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeUnitSpecifier", function() { return vega_time_module["s" /* timeUnitSpecifier */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeUnits", function() { return vega_time_module["t" /* timeUnits */]; });
+__webpack_require__.d(vega_module_namespaceObject, "utcFloor", function() { return vega_time_module["u" /* utcFloor */]; });
+__webpack_require__.d(vega_module_namespaceObject, "utcInterval", function() { return vega_time_module["v" /* utcInterval */]; });
+__webpack_require__.d(vega_module_namespaceObject, "utcOffset", function() { return vega_time_module["w" /* utcOffset */]; });
+__webpack_require__.d(vega_module_namespaceObject, "utcSequence", function() { return vega_time_module["x" /* utcSequence */]; });
+__webpack_require__.d(vega_module_namespaceObject, "utcdayofyear", function() { return vega_time_module["y" /* utcdayofyear */]; });
+__webpack_require__.d(vega_module_namespaceObject, "utcweek", function() { return vega_time_module["z" /* utcweek */]; });
+__webpack_require__.d(vega_module_namespaceObject, "week", function() { return vega_time_module["A" /* week */]; });
+__webpack_require__.d(vega_module_namespaceObject, "format", function() { return vega_loader_browser_module["a" /* format */]; });
+__webpack_require__.d(vega_module_namespaceObject, "formats", function() { return vega_loader_browser_module["b" /* formats */]; });
+__webpack_require__.d(vega_module_namespaceObject, "inferType", function() { return vega_loader_browser_module["c" /* inferType */]; });
+__webpack_require__.d(vega_module_namespaceObject, "inferTypes", function() { return vega_loader_browser_module["d" /* inferTypes */]; });
+__webpack_require__.d(vega_module_namespaceObject, "loader", function() { return vega_loader_browser_module["e" /* loader */]; });
+__webpack_require__.d(vega_module_namespaceObject, "read", function() { return vega_loader_browser_module["f" /* read */]; });
+__webpack_require__.d(vega_module_namespaceObject, "responseType", function() { return vega_loader_browser_module["g" /* responseType */]; });
+__webpack_require__.d(vega_module_namespaceObject, "typeParsers", function() { return vega_loader_browser_module["h" /* typeParsers */]; });
 __webpack_require__.d(vega_module_namespaceObject, "Bounds", function() { return Bounds; });
 __webpack_require__.d(vega_module_namespaceObject, "CanvasHandler", function() { return CanvasHandler; });
 __webpack_require__.d(vega_module_namespaceObject, "CanvasRenderer", function() { return CanvasRenderer; });
@@ -15190,49 +18996,49 @@ __webpack_require__.d(vega_module_namespaceObject, "scale", function() { return 
 __webpack_require__.d(vega_module_namespaceObject, "scheme", function() { return vega_scale_module_scheme; });
 __webpack_require__.d(vega_module_namespaceObject, "projection", function() { return vega_projection_module_projection; });
 __webpack_require__.d(vega_module_namespaceObject, "View", function() { return View; });
-__webpack_require__.d(vega_module_namespaceObject, "defaultLocale", function() { return vega_format_module_defaultLocale; });
-__webpack_require__.d(vega_module_namespaceObject, "formatLocale", function() { return numberFormatDefaultLocale; });
-__webpack_require__.d(vega_module_namespaceObject, "locale", function() { return vega_format_module_locale; });
-__webpack_require__.d(vega_module_namespaceObject, "resetDefaultLocale", function() { return resetDefaultLocale; });
-__webpack_require__.d(vega_module_namespaceObject, "timeFormatLocale", function() { return timeFormatDefaultLocale; });
+__webpack_require__.d(vega_module_namespaceObject, "defaultLocale", function() { return vega_format_module["a" /* defaultLocale */]; });
+__webpack_require__.d(vega_module_namespaceObject, "formatLocale", function() { return vega_format_module["c" /* numberFormatDefaultLocale */]; });
+__webpack_require__.d(vega_module_namespaceObject, "locale", function() { return vega_format_module["b" /* locale */]; });
+__webpack_require__.d(vega_module_namespaceObject, "resetDefaultLocale", function() { return vega_format_module["d" /* resetDefaultLocale */]; });
+__webpack_require__.d(vega_module_namespaceObject, "timeFormatLocale", function() { return vega_format_module["e" /* timeFormatDefaultLocale */]; });
 __webpack_require__.d(vega_module_namespaceObject, "expressionFunction", function() { return expressionFunction; });
-__webpack_require__.d(vega_module_namespaceObject, "parse", function() { return parse$1; });
+__webpack_require__.d(vega_module_namespaceObject, "parse", function() { return vega_parser_module_parse; });
 __webpack_require__.d(vega_module_namespaceObject, "runtimeContext", function() { return vega_runtime_module_context; });
-__webpack_require__.d(vega_module_namespaceObject, "codegenExpression", function() { return vega_expression_module_codegen; });
-__webpack_require__.d(vega_module_namespaceObject, "parseExpression", function() { return parser; });
-__webpack_require__.d(vega_module_namespaceObject, "parseSelector", function() { return eventSelector; });
+__webpack_require__.d(vega_module_namespaceObject, "codegenExpression", function() { return vega_expression_build_vega_expression_module_codegen; });
+__webpack_require__.d(vega_module_namespaceObject, "parseExpression", function() { return build_vega_expression_module_parser; });
+__webpack_require__.d(vega_module_namespaceObject, "parseSelector", function() { return vega_event_selector_module_eventSelector; });
 __webpack_require__.d(vega_module_namespaceObject, "version", function() { return version; });
 
 // NAMESPACE OBJECT: ./node_modules/vega-lite/node_modules/d3-interpolate/src/index.js
-var node_modules_d3_interpolate_src_namespaceObject = {};
-__webpack_require__.r(node_modules_d3_interpolate_src_namespaceObject);
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolate", function() { return d3_interpolate_src_value; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateArray", function() { return node_modules_d3_interpolate_src_array; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateBasis", function() { return d3_interpolate_src_basis; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateBasisClosed", function() { return d3_interpolate_src_basisClosed; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateDate", function() { return d3_interpolate_src_date; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateDiscrete", function() { return src_discrete; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateHue", function() { return d3_interpolate_src_hue; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateNumber", function() { return node_modules_d3_interpolate_src_number; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateNumberArray", function() { return src_numberArray; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateObject", function() { return d3_interpolate_src_object; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateRound", function() { return d3_interpolate_src_round; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateString", function() { return d3_interpolate_src_string; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateTransformCss", function() { return transform_interpolateTransformCss; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateTransformSvg", function() { return transform_interpolateTransformSvg; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateZoom", function() { return src_zoom; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateRgb", function() { return d3_interpolate_src_rgb; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateRgbBasis", function() { return rgb_rgbBasis; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateRgbBasisClosed", function() { return rgb_rgbBasisClosed; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateHsl", function() { return d3_interpolate_src_hsl; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateHslLong", function() { return hsl_hslLong; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateLab", function() { return d3_interpolate_src_lab_lab; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateHcl", function() { return d3_interpolate_src_hcl; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateHclLong", function() { return hcl_hclLong; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateCubehelix", function() { return d3_interpolate_src_cubehelix; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "interpolateCubehelixLong", function() { return cubehelix_cubehelixLong; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "piecewise", function() { return src_piecewise_piecewise; });
-__webpack_require__.d(node_modules_d3_interpolate_src_namespaceObject, "quantize", function() { return d3_interpolate_src_quantize; });
+var d3_interpolate_src_namespaceObject = {};
+__webpack_require__.r(d3_interpolate_src_namespaceObject);
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolate", function() { return d3_interpolate_src_value; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateArray", function() { return node_modules_d3_interpolate_src_array; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateBasis", function() { return d3_interpolate_src_basis; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateBasisClosed", function() { return d3_interpolate_src_basisClosed; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateDate", function() { return d3_interpolate_src_date; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateDiscrete", function() { return src_discrete; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHue", function() { return d3_interpolate_src_hue; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateNumber", function() { return d3_interpolate_src_number; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateNumberArray", function() { return src_numberArray; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateObject", function() { return d3_interpolate_src_object; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRound", function() { return d3_interpolate_src_round; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateString", function() { return d3_interpolate_src_string; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateTransformCss", function() { return transform_interpolateTransformCss; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateTransformSvg", function() { return transform_interpolateTransformSvg; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateZoom", function() { return src_zoom; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRgb", function() { return d3_interpolate_src_rgb; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRgbBasis", function() { return rgb_rgbBasis; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateRgbBasisClosed", function() { return rgb_rgbBasisClosed; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHsl", function() { return d3_interpolate_src_hsl; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHslLong", function() { return hsl_hslLong; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateLab", function() { return d3_interpolate_src_lab_lab; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHcl", function() { return d3_interpolate_src_hcl; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateHclLong", function() { return hcl_hclLong; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateCubehelix", function() { return d3_interpolate_src_cubehelix; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "interpolateCubehelixLong", function() { return cubehelix_cubehelixLong; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "piecewise", function() { return src_piecewise_piecewise; });
+__webpack_require__.d(d3_interpolate_src_namespaceObject, "quantize", function() { return d3_interpolate_src_quantize; });
 
 // NAMESPACE OBJECT: ./node_modules/vega-lite/build/src/log/message.js
 var message_namespaceObject = {};
@@ -15372,7 +19178,7 @@ var web_dom_collections_for_each = __webpack_require__("159b");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.keys.js
 var es_object_keys = __webpack_require__("b64b");
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"5bb13f77-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./src/components/VegaEmbed/template.html?vue&type=template&id=48d93c13&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"34b6a564-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./src/components/VegaEmbed/template.html?vue&type=template&id=48d93c13&
 var templatevue_type_template_id_48d93c13_render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div')}
 var staticRenderFns = []
 
@@ -16241,3236 +20047,11 @@ var semver = __webpack_require__("ddc3");
 // EXTERNAL MODULE: ./node_modules/vega-util/build/vega-util.module.js
 var vega_util_module = __webpack_require__("fc17");
 
-// CONCATENATED MODULE: ./node_modules/vega-loader/src/loader.js
-
-
-// Matches absolute URLs with optional protocol
-//   https://...    file://...    //...
-const protocol_re = /^([A-Za-z]+:)?\/\//;
-
-// Matches allowed URIs. From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js with added file://
-const allowed_re = /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|file|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i; // eslint-disable-line no-useless-escape
-const whitespace_re = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g; // eslint-disable-line no-control-regex
-
-
-// Special treatment in node.js for the file: protocol
-const fileProtocol = 'file://';
-
-/**
- * Factory for a loader constructor that provides methods for requesting
- * files from either the network or disk, and for sanitizing request URIs.
- * @param {function} fetch - The Fetch API for HTTP network requests.
- *   If null or undefined, HTTP loading will be disabled.
- * @param {object} fs - The file system interface for file loading.
- *   If null or undefined, local file loading will be disabled.
- * @return {function} A loader constructor with the following signature:
- *   param {object} [options] - Optional default loading options to use.
- *   return {object} - A new loader instance.
- */
-/* harmony default export */ var src_loader = (function(fetch, fs) {
-  return options => ({
-    options: options || {},
-    sanitize: sanitize,
-    load: load,
-    fileAccess: !!fs,
-    file: fileLoader(fs),
-    http: httpLoader(fetch)
-  });
-});
-
-/**
- * Load an external resource, typically either from the web or from the local
- * filesystem. This function uses {@link sanitize} to first sanitize the uri,
- * then calls either {@link http} (for web requests) or {@link file} (for
- * filesystem loading).
- * @param {string} uri - The resource indicator (e.g., URL or filename).
- * @param {object} [options] - Optional loading options. These options will
- *   override any existing default options.
- * @return {Promise} - A promise that resolves to the loaded content.
- */
-async function load(uri, options) {
-  const opt = await this.sanitize(uri, options),
-        url = opt.href;
-
-  return opt.localFile
-    ? this.file(url)
-    : this.http(url, options);
-}
-
-/**
- * URI sanitizer function.
- * @param {string} uri - The uri (url or filename) to sanity check.
- * @param {object} options - An options hash.
- * @return {Promise} - A promise that resolves to an object containing
- *  sanitized uri data, or rejects it the input uri is deemed invalid.
- *  The properties of the resolved object are assumed to be
- *  valid attributes for an HTML 'a' tag. The sanitized uri *must* be
- *  provided by the 'href' property of the returned object.
- */
-async function sanitize(uri, options) {
-  options = Object(vega_util_module["p" /* extend */])({}, this.options, options);
-
-  const fileAccess = this.fileAccess,
-        result = {href: null};
-
-  let isFile, loadFile, base;
-
-  const isAllowed = allowed_re.test(uri.replace(whitespace_re, ''));
-
-  if (uri == null || typeof uri !== 'string' || !isAllowed) {
-    Object(vega_util_module["o" /* error */])('Sanitize failure, invalid URI: ' + Object(vega_util_module["bb" /* stringValue */])(uri));
-  }
-
-  const hasProtocol = protocol_re.test(uri);
-
-  // if relative url (no protocol/host), prepend baseURL
-  if ((base = options.baseURL) && !hasProtocol) {
-    // Ensure that there is a slash between the baseURL (e.g. hostname) and url
-    if (!uri.startsWith('/') && base[base.length-1] !== '/') {
-      uri = '/' + uri;
-    }
-    uri = base + uri;
-  }
-
-  // should we load from file system?
-  loadFile = (isFile = uri.startsWith(fileProtocol))
-    || options.mode === 'file'
-    || options.mode !== 'http' && !hasProtocol && fileAccess;
-
-  if (isFile) {
-    // strip file protocol
-    uri = uri.slice(fileProtocol.length);
-  } else if (uri.startsWith('//')) {
-    if (options.defaultProtocol === 'file') {
-      // if is file, strip protocol and set loadFile flag
-      uri = uri.slice(2);
-      loadFile = true;
-    } else {
-      // if relative protocol (starts with '//'), prepend default protocol
-      uri = (options.defaultProtocol || 'http') + ':' + uri;
-    }
-  }
-
-  // set non-enumerable mode flag to indicate local file load
-  Object.defineProperty(result, 'localFile', {value: !!loadFile});
-
-  // set uri
-  result.href = uri;
-
-  // set default result target, if specified
-  if (options.target) {
-    result.target = options.target + '';
-  }
-
-  // set default result rel, if specified (#1542)
-  if (options.rel) {
-    result.rel = options.rel + '';
-  }
-
-  // provide control over cross-origin image handling (#2238)
-  // https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
-  if (options.context === 'image' && options.crossOrigin) {
-    result.crossOrigin = options.crossOrigin + '';
-  }
-
-  // return
-  return result;
-}
-
-/**
- * File system loader factory.
- * @param {object} fs - The file system interface.
- * @return {function} - A file loader with the following signature:
- *   param {string} filename - The file system path to load.
- *   param {string} filename - The file system path to load.
- *   return {Promise} A promise that resolves to the file contents.
- */
-function fileLoader(fs) {
-  return fs
-    ? filename => new Promise((accept, reject) => {
-        fs.readFile(filename, (error, data) => {
-          if (error) reject(error);
-          else accept(data);
-        });
-      })
-    : fileReject;
-}
-
-/**
- * Default file system loader that simply rejects.
- */
-async function fileReject() {
-  Object(vega_util_module["o" /* error */])('No file system access.');
-}
-
-/**
- * HTTP request handler factory.
- * @param {function} fetch - The Fetch API method.
- * @return {function} - An http loader with the following signature:
- *   param {string} url - The url to request.
- *   param {object} options - An options hash.
- *   return {Promise} - A promise that resolves to the file contents.
- */
-function httpLoader(fetch) {
-  return fetch
-    ? async function(url, options) {
-        const opt = Object(vega_util_module["p" /* extend */])({}, this.options.http, options),
-              type = options && options.response,
-              response = await fetch(url, opt);
-
-        return !response.ok
-          ? Object(vega_util_module["o" /* error */])(response.status + '' + response.statusText)
-          : Object(vega_util_module["E" /* isFunction */])(response[type]) ? response[type]()
-          : response.text();
-      }
-    : httpReject;
-}
-
-/**
- * Default http request handler that simply rejects.
- */
-async function httpReject() {
-  Object(vega_util_module["o" /* error */])('No HTTP fetch method available.');
-}
-
-// CONCATENATED MODULE: ./node_modules/vega-loader/src/type.js
-
-
-const isValid = _ => _ != null && _ === _;
-
-const isBoolean = _ => _ === 'true'
-  || _ === 'false'
-  || _ === true
-  || _ === false;
-
-const isDate = _ => !Number.isNaN(Date.parse(_));
-
-const isNumber = _ => !Number.isNaN(+_) && !(_ instanceof Date);
-
-const type_isInteger = _ => isNumber(_) && Number.isInteger(+_);
-
-const typeParsers = {
-  boolean: vega_util_module["cb" /* toBoolean */],
-  integer: vega_util_module["eb" /* toNumber */],
-  number:  vega_util_module["eb" /* toNumber */],
-  date:    vega_util_module["db" /* toDate */],
-  string:  vega_util_module["gb" /* toString */],
-  unknown: vega_util_module["y" /* identity */]
-};
-
-const typeTests = [
-  isBoolean,
-  type_isInteger,
-  isNumber,
-  isDate
-];
-
-const typeList = [
-  'boolean',
-  'integer',
-  'number',
-  'date'
-];
-
-function inferType(values, field) {
-  if (!values || !values.length) return 'unknown';
-
-  const n = values.length,
-        m = typeTests.length,
-        a = typeTests.map((_, i) => i + 1);
-
-  for (let i = 0, t = 0, j, value; i < n; ++i) {
-    value = field ? values[i][field] : values[i];
-    for (j = 0; j < m; ++j) {
-      if (a[j] && isValid(value) && !typeTests[j](value)) {
-        a[j] = 0;
-        ++t;
-        if (t === typeTests.length) return 'string';
-      }
-    }
-  }
-
-  return typeList[
-    a.reduce((u, v) => u === 0 ? v : u, 0) - 1
-  ];
-}
-
-function inferTypes(data, fields) {
-  return fields.reduce((types, field) => {
-    types[field] = inferType(data, field);
-    return types;
-  }, {});
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-dsv/src/dsv.js
-var EOL = {},
-    EOF = {},
-    QUOTE = 34,
-    NEWLINE = 10,
-    RETURN = 13;
-
-function objectConverter(columns) {
-  return new Function("d", "return {" + columns.map(function(name, i) {
-    return JSON.stringify(name) + ": d[" + i + "] || \"\"";
-  }).join(",") + "}");
-}
-
-function customConverter(columns, f) {
-  var object = objectConverter(columns);
-  return function(row, i) {
-    return f(object(row), i, columns);
-  };
-}
-
-// Compute unique columns in order of discovery.
-function inferColumns(rows) {
-  var columnSet = Object.create(null),
-      columns = [];
-
-  rows.forEach(function(row) {
-    for (var column in row) {
-      if (!(column in columnSet)) {
-        columns.push(columnSet[column] = column);
-      }
-    }
-  });
-
-  return columns;
-}
-
-function dsv_pad(value, width) {
-  var s = value + "", length = s.length;
-  return length < width ? new Array(width - length + 1).join(0) + s : s;
-}
-
-function dsv_formatYear(year) {
-  return year < 0 ? "-" + dsv_pad(-year, 6)
-    : year > 9999 ? "+" + dsv_pad(year, 6)
-    : dsv_pad(year, 4);
-}
-
-function formatDate(date) {
-  var hours = date.getUTCHours(),
-      minutes = date.getUTCMinutes(),
-      seconds = date.getUTCSeconds(),
-      milliseconds = date.getUTCMilliseconds();
-  return isNaN(date) ? "Invalid Date"
-      : dsv_formatYear(date.getUTCFullYear(), 4) + "-" + dsv_pad(date.getUTCMonth() + 1, 2) + "-" + dsv_pad(date.getUTCDate(), 2)
-      + (milliseconds ? "T" + dsv_pad(hours, 2) + ":" + dsv_pad(minutes, 2) + ":" + dsv_pad(seconds, 2) + "." + dsv_pad(milliseconds, 3) + "Z"
-      : seconds ? "T" + dsv_pad(hours, 2) + ":" + dsv_pad(minutes, 2) + ":" + dsv_pad(seconds, 2) + "Z"
-      : minutes || hours ? "T" + dsv_pad(hours, 2) + ":" + dsv_pad(minutes, 2) + "Z"
-      : "");
-}
-
-/* harmony default export */ var dsv = (function(delimiter) {
-  var reFormat = new RegExp("[\"" + delimiter + "\n\r]"),
-      DELIMITER = delimiter.charCodeAt(0);
-
-  function parse(text, f) {
-    var convert, columns, rows = parseRows(text, function(row, i) {
-      if (convert) return convert(row, i - 1);
-      columns = row, convert = f ? customConverter(row, f) : objectConverter(row);
-    });
-    rows.columns = columns || [];
-    return rows;
-  }
-
-  function parseRows(text, f) {
-    var rows = [], // output rows
-        N = text.length,
-        I = 0, // current character index
-        n = 0, // current line number
-        t, // current token
-        eof = N <= 0, // current token followed by EOF?
-        eol = false; // current token followed by EOL?
-
-    // Strip the trailing newline.
-    if (text.charCodeAt(N - 1) === NEWLINE) --N;
-    if (text.charCodeAt(N - 1) === RETURN) --N;
-
-    function token() {
-      if (eof) return EOF;
-      if (eol) return eol = false, EOL;
-
-      // Unescape quotes.
-      var i, j = I, c;
-      if (text.charCodeAt(j) === QUOTE) {
-        while (I++ < N && text.charCodeAt(I) !== QUOTE || text.charCodeAt(++I) === QUOTE);
-        if ((i = I) >= N) eof = true;
-        else if ((c = text.charCodeAt(I++)) === NEWLINE) eol = true;
-        else if (c === RETURN) { eol = true; if (text.charCodeAt(I) === NEWLINE) ++I; }
-        return text.slice(j + 1, i - 1).replace(/""/g, "\"");
-      }
-
-      // Find next delimiter or newline.
-      while (I < N) {
-        if ((c = text.charCodeAt(i = I++)) === NEWLINE) eol = true;
-        else if (c === RETURN) { eol = true; if (text.charCodeAt(I) === NEWLINE) ++I; }
-        else if (c !== DELIMITER) continue;
-        return text.slice(j, i);
-      }
-
-      // Return last token before EOF.
-      return eof = true, text.slice(j, N);
-    }
-
-    while ((t = token()) !== EOF) {
-      var row = [];
-      while (t !== EOL && t !== EOF) row.push(t), t = token();
-      if (f && (row = f(row, n++)) == null) continue;
-      rows.push(row);
-    }
-
-    return rows;
-  }
-
-  function preformatBody(rows, columns) {
-    return rows.map(function(row) {
-      return columns.map(function(column) {
-        return formatValue(row[column]);
-      }).join(delimiter);
-    });
-  }
-
-  function format(rows, columns) {
-    if (columns == null) columns = inferColumns(rows);
-    return [columns.map(formatValue).join(delimiter)].concat(preformatBody(rows, columns)).join("\n");
-  }
-
-  function formatBody(rows, columns) {
-    if (columns == null) columns = inferColumns(rows);
-    return preformatBody(rows, columns).join("\n");
-  }
-
-  function formatRows(rows) {
-    return rows.map(formatRow).join("\n");
-  }
-
-  function formatRow(row) {
-    return row.map(formatValue).join(delimiter);
-  }
-
-  function formatValue(value) {
-    return value == null ? ""
-        : value instanceof Date ? formatDate(value)
-        : reFormat.test(value += "") ? "\"" + value.replace(/"/g, "\"\"") + "\""
-        : value;
-  }
-
-  return {
-    parse: parse,
-    parseRows: parseRows,
-    format: format,
-    formatBody: formatBody,
-    formatRows: formatRows,
-    formatRow: formatRow,
-    formatValue: formatValue
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/vega-loader/src/formats/dsv.js
-
-
-
-function delimitedFormat(delimiter) {
-  const parse = function(data, format) {
-    const delim = {delimiter: delimiter};
-    return dsv_dsv(data, format ? Object(vega_util_module["p" /* extend */])(format, delim) : delim);
-  };
-
-  parse.responseType = 'text';
-
-  return parse;
-}
-
-function dsv_dsv(data, format) {
-  if (format.header) {
-    data = format.header
-      .map(vega_util_module["bb" /* stringValue */])
-      .join(format.delimiter) + '\n' + data;
-  }
-  return dsv(format.delimiter).parse(data + '');
-}
-
-dsv_dsv.responseType = 'text';
-
-// EXTERNAL MODULE: ./node_modules/vega-loader/src/formats/json.js
-var json = __webpack_require__("9b0d");
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/identity.js
-/* harmony default export */ var identity = (function(x) {
-  return x;
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/transform.js
-
-
-/* harmony default export */ var src_transform = (function(transform) {
-  if (transform == null) return identity;
-  var x0,
-      y0,
-      kx = transform.scale[0],
-      ky = transform.scale[1],
-      dx = transform.translate[0],
-      dy = transform.translate[1];
-  return function(input, i) {
-    if (!i) x0 = y0 = 0;
-    var j = 2, n = input.length, output = new Array(n);
-    output[0] = (x0 += input[0]) * kx + dx;
-    output[1] = (y0 += input[1]) * ky + dy;
-    while (j < n) output[j] = input[j], ++j;
-    return output;
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/bbox.js
-
-
-/* harmony default export */ var bbox = (function(topology) {
-  var t = src_transform(topology.transform), key,
-      x0 = Infinity, y0 = x0, x1 = -x0, y1 = -x0;
-
-  function bboxPoint(p) {
-    p = t(p);
-    if (p[0] < x0) x0 = p[0];
-    if (p[0] > x1) x1 = p[0];
-    if (p[1] < y0) y0 = p[1];
-    if (p[1] > y1) y1 = p[1];
-  }
-
-  function bboxGeometry(o) {
-    switch (o.type) {
-      case "GeometryCollection": o.geometries.forEach(bboxGeometry); break;
-      case "Point": bboxPoint(o.coordinates); break;
-      case "MultiPoint": o.coordinates.forEach(bboxPoint); break;
-    }
-  }
-
-  topology.arcs.forEach(function(arc) {
-    var i = -1, n = arc.length, p;
-    while (++i < n) {
-      p = t(arc[i], i);
-      if (p[0] < x0) x0 = p[0];
-      if (p[0] > x1) x1 = p[0];
-      if (p[1] < y0) y0 = p[1];
-      if (p[1] > y1) y1 = p[1];
-    }
-  });
-
-  for (key in topology.objects) {
-    bboxGeometry(topology.objects[key]);
-  }
-
-  return [x0, y0, x1, y1];
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/reverse.js
-/* harmony default export */ var src_reverse = (function(array, n) {
-  var t, j = array.length, i = j - n;
-  while (i < --j) t = array[i], array[i++] = array[j], array[j] = t;
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/feature.js
-
-
-
-/* harmony default export */ var src_feature = (function(topology, o) {
-  if (typeof o === "string") o = topology.objects[o];
-  return o.type === "GeometryCollection"
-      ? {type: "FeatureCollection", features: o.geometries.map(function(o) { return feature_feature(topology, o); })}
-      : feature_feature(topology, o);
-});
-
-function feature_feature(topology, o) {
-  var id = o.id,
-      bbox = o.bbox,
-      properties = o.properties == null ? {} : o.properties,
-      geometry = feature_object(topology, o);
-  return id == null && bbox == null ? {type: "Feature", properties: properties, geometry: geometry}
-      : bbox == null ? {type: "Feature", id: id, properties: properties, geometry: geometry}
-      : {type: "Feature", id: id, bbox: bbox, properties: properties, geometry: geometry};
-}
-
-function feature_object(topology, o) {
-  var transformPoint = src_transform(topology.transform),
-      arcs = topology.arcs;
-
-  function arc(i, points) {
-    if (points.length) points.pop();
-    for (var a = arcs[i < 0 ? ~i : i], k = 0, n = a.length; k < n; ++k) {
-      points.push(transformPoint(a[k], k));
-    }
-    if (i < 0) src_reverse(points, n);
-  }
-
-  function point(p) {
-    return transformPoint(p);
-  }
-
-  function line(arcs) {
-    var points = [];
-    for (var i = 0, n = arcs.length; i < n; ++i) arc(arcs[i], points);
-    if (points.length < 2) points.push(points[0]); // This should never happen per the specification.
-    return points;
-  }
-
-  function ring(arcs) {
-    var points = line(arcs);
-    while (points.length < 4) points.push(points[0]); // This may happen if an arc has only two points.
-    return points;
-  }
-
-  function polygon(arcs) {
-    return arcs.map(ring);
-  }
-
-  function geometry(o) {
-    var type = o.type, coordinates;
-    switch (type) {
-      case "GeometryCollection": return {type: type, geometries: o.geometries.map(geometry)};
-      case "Point": coordinates = point(o.coordinates); break;
-      case "MultiPoint": coordinates = o.coordinates.map(point); break;
-      case "LineString": coordinates = line(o.arcs); break;
-      case "MultiLineString": coordinates = o.arcs.map(line); break;
-      case "Polygon": coordinates = polygon(o.arcs); break;
-      case "MultiPolygon": coordinates = o.arcs.map(polygon); break;
-      default: return null;
-    }
-    return {type: type, coordinates: coordinates};
-  }
-
-  return geometry(o);
-}
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/stitch.js
-/* harmony default export */ var stitch = (function(topology, arcs) {
-  var stitchedArcs = {},
-      fragmentByStart = {},
-      fragmentByEnd = {},
-      fragments = [],
-      emptyIndex = -1;
-
-  // Stitch empty arcs first, since they may be subsumed by other arcs.
-  arcs.forEach(function(i, j) {
-    var arc = topology.arcs[i < 0 ? ~i : i], t;
-    if (arc.length < 3 && !arc[1][0] && !arc[1][1]) {
-      t = arcs[++emptyIndex], arcs[emptyIndex] = i, arcs[j] = t;
-    }
-  });
-
-  arcs.forEach(function(i) {
-    var e = ends(i),
-        start = e[0],
-        end = e[1],
-        f, g;
-
-    if (f = fragmentByEnd[start]) {
-      delete fragmentByEnd[f.end];
-      f.push(i);
-      f.end = end;
-      if (g = fragmentByStart[end]) {
-        delete fragmentByStart[g.start];
-        var fg = g === f ? f : f.concat(g);
-        fragmentByStart[fg.start = f.start] = fragmentByEnd[fg.end = g.end] = fg;
-      } else {
-        fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
-      }
-    } else if (f = fragmentByStart[end]) {
-      delete fragmentByStart[f.start];
-      f.unshift(i);
-      f.start = start;
-      if (g = fragmentByEnd[start]) {
-        delete fragmentByEnd[g.end];
-        var gf = g === f ? f : g.concat(f);
-        fragmentByStart[gf.start = g.start] = fragmentByEnd[gf.end = f.end] = gf;
-      } else {
-        fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
-      }
-    } else {
-      f = [i];
-      fragmentByStart[f.start = start] = fragmentByEnd[f.end = end] = f;
-    }
-  });
-
-  function ends(i) {
-    var arc = topology.arcs[i < 0 ? ~i : i], p0 = arc[0], p1;
-    if (topology.transform) p1 = [0, 0], arc.forEach(function(dp) { p1[0] += dp[0], p1[1] += dp[1]; });
-    else p1 = arc[arc.length - 1];
-    return i < 0 ? [p1, p0] : [p0, p1];
-  }
-
-  function flush(fragmentByEnd, fragmentByStart) {
-    for (var k in fragmentByEnd) {
-      var f = fragmentByEnd[k];
-      delete fragmentByStart[f.start];
-      delete f.start;
-      delete f.end;
-      f.forEach(function(i) { stitchedArcs[i < 0 ? ~i : i] = 1; });
-      fragments.push(f);
-    }
-  }
-
-  flush(fragmentByEnd, fragmentByStart);
-  flush(fragmentByStart, fragmentByEnd);
-  arcs.forEach(function(i) { if (!stitchedArcs[i < 0 ? ~i : i]) fragments.push([i]); });
-
-  return fragments;
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/mesh.js
-
-
-
-/* harmony default export */ var mesh = (function(topology) {
-  return feature_object(topology, meshArcs.apply(this, arguments));
-});
-
-function meshArcs(topology, object, filter) {
-  var arcs, i, n;
-  if (arguments.length > 1) arcs = extractArcs(topology, object, filter);
-  else for (i = 0, arcs = new Array(n = topology.arcs.length); i < n; ++i) arcs[i] = i;
-  return {type: "MultiLineString", arcs: stitch(topology, arcs)};
-}
-
-function extractArcs(topology, object, filter) {
-  var arcs = [],
-      geomsByArc = [],
-      geom;
-
-  function extract0(i) {
-    var j = i < 0 ? ~i : i;
-    (geomsByArc[j] || (geomsByArc[j] = [])).push({i: i, g: geom});
-  }
-
-  function extract1(arcs) {
-    arcs.forEach(extract0);
-  }
-
-  function extract2(arcs) {
-    arcs.forEach(extract1);
-  }
-
-  function extract3(arcs) {
-    arcs.forEach(extract2);
-  }
-
-  function geometry(o) {
-    switch (geom = o, o.type) {
-      case "GeometryCollection": o.geometries.forEach(geometry); break;
-      case "LineString": extract1(o.arcs); break;
-      case "MultiLineString": case "Polygon": extract2(o.arcs); break;
-      case "MultiPolygon": extract3(o.arcs); break;
-    }
-  }
-
-  geometry(object);
-
-  geomsByArc.forEach(filter == null
-      ? function(geoms) { arcs.push(geoms[0].i); }
-      : function(geoms) { if (filter(geoms[0].g, geoms[geoms.length - 1].g)) arcs.push(geoms[0].i); });
-
-  return arcs;
-}
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/merge.js
-
-
-
-function planarRingArea(ring) {
-  var i = -1, n = ring.length, a, b = ring[n - 1], area = 0;
-  while (++i < n) a = b, b = ring[i], area += a[0] * b[1] - a[1] * b[0];
-  return Math.abs(area); // Note: doubled area!
-}
-
-/* harmony default export */ var src_merge = (function(topology) {
-  return feature_object(topology, mergeArcs.apply(this, arguments));
-});
-
-function mergeArcs(topology, objects) {
-  var polygonsByArc = {},
-      polygons = [],
-      groups = [];
-
-  objects.forEach(geometry);
-
-  function geometry(o) {
-    switch (o.type) {
-      case "GeometryCollection": o.geometries.forEach(geometry); break;
-      case "Polygon": extract(o.arcs); break;
-      case "MultiPolygon": o.arcs.forEach(extract); break;
-    }
-  }
-
-  function extract(polygon) {
-    polygon.forEach(function(ring) {
-      ring.forEach(function(arc) {
-        (polygonsByArc[arc = arc < 0 ? ~arc : arc] || (polygonsByArc[arc] = [])).push(polygon);
-      });
-    });
-    polygons.push(polygon);
-  }
-
-  function area(ring) {
-    return planarRingArea(feature_object(topology, {type: "Polygon", arcs: [ring]}).coordinates[0]);
-  }
-
-  polygons.forEach(function(polygon) {
-    if (!polygon._) {
-      var group = [],
-          neighbors = [polygon];
-      polygon._ = 1;
-      groups.push(group);
-      while (polygon = neighbors.pop()) {
-        group.push(polygon);
-        polygon.forEach(function(ring) {
-          ring.forEach(function(arc) {
-            polygonsByArc[arc < 0 ? ~arc : arc].forEach(function(polygon) {
-              if (!polygon._) {
-                polygon._ = 1;
-                neighbors.push(polygon);
-              }
-            });
-          });
-        });
-      }
-    }
-  });
-
-  polygons.forEach(function(polygon) {
-    delete polygon._;
-  });
-
-  return {
-    type: "MultiPolygon",
-    arcs: groups.map(function(polygons) {
-      var arcs = [], n;
-
-      // Extract the exterior (unique) arcs.
-      polygons.forEach(function(polygon) {
-        polygon.forEach(function(ring) {
-          ring.forEach(function(arc) {
-            if (polygonsByArc[arc < 0 ? ~arc : arc].length < 2) {
-              arcs.push(arc);
-            }
-          });
-        });
-      });
-
-      // Stitch the arcs into one or more rings.
-      arcs = stitch(topology, arcs);
-
-      // If more than one ring is returned,
-      // at most one of these rings can be the exterior;
-      // choose the one with the greatest absolute area.
-      if ((n = arcs.length) > 1) {
-        for (var i = 1, k = area(arcs[0]), ki, t; i < n; ++i) {
-          if ((ki = area(arcs[i])) > k) {
-            t = arcs[0], arcs[0] = arcs[i], arcs[i] = t, k = ki;
-          }
-        }
-      }
-
-      return arcs;
-    }).filter(function(arcs) {
-      return arcs.length > 0;
-    })
-  };
-}
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/bisect.js
-/* harmony default export */ var src_bisect = (function(a, x) {
-  var lo = 0, hi = a.length;
-  while (lo < hi) {
-    var mid = lo + hi >>> 1;
-    if (a[mid] < x) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/neighbors.js
-
-
-/* harmony default export */ var src_neighbors = (function(objects) {
-  var indexesByArc = {}, // arc index -> array of object indexes
-      neighbors = objects.map(function() { return []; });
-
-  function line(arcs, i) {
-    arcs.forEach(function(a) {
-      if (a < 0) a = ~a;
-      var o = indexesByArc[a];
-      if (o) o.push(i);
-      else indexesByArc[a] = [i];
-    });
-  }
-
-  function polygon(arcs, i) {
-    arcs.forEach(function(arc) { line(arc, i); });
-  }
-
-  function geometry(o, i) {
-    if (o.type === "GeometryCollection") o.geometries.forEach(function(o) { geometry(o, i); });
-    else if (o.type in geometryType) geometryType[o.type](o.arcs, i);
-  }
-
-  var geometryType = {
-    LineString: line,
-    MultiLineString: polygon,
-    Polygon: polygon,
-    MultiPolygon: function(arcs, i) { arcs.forEach(function(arc) { polygon(arc, i); }); }
-  };
-
-  objects.forEach(geometry);
-
-  for (var i in indexesByArc) {
-    for (var indexes = indexesByArc[i], m = indexes.length, j = 0; j < m; ++j) {
-      for (var k = j + 1; k < m; ++k) {
-        var ij = indexes[j], ik = indexes[k], n;
-        if ((n = neighbors[ij])[i = src_bisect(n, ik)] !== ik) n.splice(i, 0, ik);
-        if ((n = neighbors[ik])[i = src_bisect(n, ij)] !== ij) n.splice(i, 0, ij);
-      }
-    }
-  }
-
-  return neighbors;
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/untransform.js
-
-
-/* harmony default export */ var src_untransform = (function(transform) {
-  if (transform == null) return identity;
-  var x0,
-      y0,
-      kx = transform.scale[0],
-      ky = transform.scale[1],
-      dx = transform.translate[0],
-      dy = transform.translate[1];
-  return function(input, i) {
-    if (!i) x0 = y0 = 0;
-    var j = 2,
-        n = input.length,
-        output = new Array(n),
-        x1 = Math.round((input[0] - dx) / kx),
-        y1 = Math.round((input[1] - dy) / ky);
-    output[0] = x1 - x0, x0 = x1;
-    output[1] = y1 - y0, y0 = y1;
-    while (j < n) output[j] = input[j], ++j;
-    return output;
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/quantize.js
-
-
-
-/* harmony default export */ var quantize = (function(topology, transform) {
-  if (topology.transform) throw new Error("already quantized");
-
-  if (!transform || !transform.scale) {
-    if (!((n = Math.floor(transform)) >= 2)) throw new Error("n must be ≥2");
-    box = topology.bbox || bbox(topology);
-    var x0 = box[0], y0 = box[1], x1 = box[2], y1 = box[3], n;
-    transform = {scale: [x1 - x0 ? (x1 - x0) / (n - 1) : 1, y1 - y0 ? (y1 - y0) / (n - 1) : 1], translate: [x0, y0]};
-  } else {
-    box = topology.bbox;
-  }
-
-  var t = src_untransform(transform), box, key, inputs = topology.objects, outputs = {};
-
-  function quantizePoint(point) {
-    return t(point);
-  }
-
-  function quantizeGeometry(input) {
-    var output;
-    switch (input.type) {
-      case "GeometryCollection": output = {type: "GeometryCollection", geometries: input.geometries.map(quantizeGeometry)}; break;
-      case "Point": output = {type: "Point", coordinates: quantizePoint(input.coordinates)}; break;
-      case "MultiPoint": output = {type: "MultiPoint", coordinates: input.coordinates.map(quantizePoint)}; break;
-      default: return input;
-    }
-    if (input.id != null) output.id = input.id;
-    if (input.bbox != null) output.bbox = input.bbox;
-    if (input.properties != null) output.properties = input.properties;
-    return output;
-  }
-
-  function quantizeArc(input) {
-    var i = 0, j = 1, n = input.length, p, output = new Array(n); // pessimistic
-    output[0] = t(input[0], 0);
-    while (++i < n) if ((p = t(input[i], i))[0] || p[1]) output[j++] = p; // non-coincident points
-    if (j === 1) output[j++] = [0, 0]; // an arc must have at least two points
-    output.length = j;
-    return output;
-  }
-
-  for (key in inputs) outputs[key] = quantizeGeometry(inputs[key]);
-
-  return {
-    type: "Topology",
-    bbox: box,
-    transform: transform,
-    objects: outputs,
-    arcs: topology.arcs.map(quantizeArc)
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/topojson-client/src/index.js
-
-
-
-
-
-
-
-
-
-// CONCATENATED MODULE: ./node_modules/vega-loader/src/formats/topojson.js
-
-
-
-
-const topojson_filters = {
-  interior: (a, b) => a !== b,
-  exterior: (a, b) => a === b
-};
-
-function topojson(data, format) {
-  let method, object, property, filter;
-  data = Object(json["a" /* default */])(data, format);
-
-  if (format && format.feature) {
-    method = src_feature;
-    property = format.feature;
-  } else if (format && format.mesh) {
-    method = mesh;
-    property = format.mesh;
-    filter = topojson_filters[format.filter];
-  } else {
-    Object(vega_util_module["o" /* error */])('Missing TopoJSON feature or mesh parameter.');
-  }
-
-  object = (object = data.objects[property])
-    ? method(data, object, filter)
-    : Object(vega_util_module["o" /* error */])('Invalid TopoJSON object: ' + property);
-
-  return object && object.features || [object];
-}
-
-topojson.responseType = 'json';
-
-// CONCATENATED MODULE: ./node_modules/vega-loader/src/formats/index.js
-
-
-
-
-
-const formats_format = {
-  dsv: dsv_dsv,
-  csv: delimitedFormat(','),
-  tsv: delimitedFormat('\t'),
-  json: json["a" /* default */],
-  topojson: topojson
-};
-
-function formats_formats(name, reader) {
-  if (arguments.length > 1) {
-    formats_format[name] = reader;
-    return this;
-  } else {
-    return Object(vega_util_module["w" /* hasOwnProperty */])(formats_format, name) ? formats_format[name] : null;
-  }
-}
-
-function responseType(type) {
-  const f = formats_formats(type);
-  return f && f.responseType || 'text';
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-array/src/ticks.js
-var e10 = Math.sqrt(50),
-    e5 = Math.sqrt(10),
-    e2 = Math.sqrt(2);
-
-/* harmony default export */ var src_ticks = (function(start, stop, count) {
-  var reverse,
-      i = -1,
-      n,
-      ticks,
-      step;
-
-  stop = +stop, start = +start, count = +count;
-  if (start === stop && count > 0) return [start];
-  if (reverse = stop < start) n = start, start = stop, stop = n;
-  if ((step = tickIncrement(start, stop, count)) === 0 || !isFinite(step)) return [];
-
-  if (step > 0) {
-    let r0 = Math.round(start / step), r1 = Math.round(stop / step);
-    if (r0 * step < start) ++r0;
-    if (r1 * step > stop) --r1;
-    ticks = new Array(n = r1 - r0 + 1);
-    while (++i < n) ticks[i] = (r0 + i) * step;
-  } else {
-    step = -step;
-    let r0 = Math.round(start * step), r1 = Math.round(stop * step);
-    if (r0 / step < start) ++r0;
-    if (r1 / step > stop) --r1;
-    ticks = new Array(n = r1 - r0 + 1);
-    while (++i < n) ticks[i] = (r0 + i) / step;
-  }
-
-  if (reverse) ticks.reverse();
-
-  return ticks;
-});
-
-function tickIncrement(start, stop, count) {
-  var step = (stop - start) / Math.max(0, count),
-      power = Math.floor(Math.log(step) / Math.LN10),
-      error = step / Math.pow(10, power);
-  return power >= 0
-      ? (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1) * Math.pow(10, power)
-      : -Math.pow(10, -power) / (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1);
-}
-
-function tickStep(start, stop, count) {
-  var step0 = Math.abs(stop - start) / Math.max(0, count),
-      step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10)),
-      error = step0 / step1;
-  if (error >= e10) step1 *= 10;
-  else if (error >= e5) step1 *= 5;
-  else if (error >= e2) step1 *= 2;
-  return stop < start ? -step1 : step1;
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatSpecifier.js
-// [[fill]align][sign][symbol][0][width][,][.precision][~][type]
-var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
-
-function formatSpecifier(specifier) {
-  if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
-  var match;
-  return new FormatSpecifier({
-    fill: match[1],
-    align: match[2],
-    sign: match[3],
-    symbol: match[4],
-    zero: match[5],
-    width: match[6],
-    comma: match[7],
-    precision: match[8] && match[8].slice(1),
-    trim: match[9],
-    type: match[10]
-  });
-}
-
-formatSpecifier.prototype = FormatSpecifier.prototype; // instanceof
-
-function FormatSpecifier(specifier) {
-  this.fill = specifier.fill === undefined ? " " : specifier.fill + "";
-  this.align = specifier.align === undefined ? ">" : specifier.align + "";
-  this.sign = specifier.sign === undefined ? "-" : specifier.sign + "";
-  this.symbol = specifier.symbol === undefined ? "" : specifier.symbol + "";
-  this.zero = !!specifier.zero;
-  this.width = specifier.width === undefined ? undefined : +specifier.width;
-  this.comma = !!specifier.comma;
-  this.precision = specifier.precision === undefined ? undefined : +specifier.precision;
-  this.trim = !!specifier.trim;
-  this.type = specifier.type === undefined ? "" : specifier.type + "";
-}
-
-FormatSpecifier.prototype.toString = function() {
-  return this.fill
-      + this.align
-      + this.sign
-      + this.symbol
-      + (this.zero ? "0" : "")
-      + (this.width === undefined ? "" : Math.max(1, this.width | 0))
-      + (this.comma ? "," : "")
-      + (this.precision === undefined ? "" : "." + Math.max(0, this.precision | 0))
-      + (this.trim ? "~" : "")
-      + this.type;
-};
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatDecimal.js
-/* harmony default export */ var formatDecimal = (function(x) {
-  return Math.abs(x = Math.round(x)) >= 1e21
-      ? x.toLocaleString("en").replace(/,/g, "")
-      : x.toString(10);
-});
-
-// Computes the decimal coefficient and exponent of the specified number x with
-// significant digits p, where x is positive and p is in [1, 21] or undefined.
-// For example, formatDecimalParts(1.23) returns ["123", 0].
-function formatDecimalParts(x, p) {
-  if ((i = (x = p ? x.toExponential(p - 1) : x.toExponential()).indexOf("e")) < 0) return null; // NaN, ±Infinity
-  var i, coefficient = x.slice(0, i);
-
-  // The string returned by toExponential either has the form \d\.\d+e[-+]\d+
-  // (e.g., 1.2e+3) or the form \de[-+]\d+ (e.g., 1e+3).
-  return [
-    coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
-    +x.slice(i + 1)
-  ];
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/exponent.js
-
-
-/* harmony default export */ var src_exponent = (function(x) {
-  return x = formatDecimalParts(Math.abs(x)), x ? x[1] : NaN;
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/precisionPrefix.js
-
-
-/* harmony default export */ var precisionPrefix = (function(step, value) {
-  return Math.max(0, Math.max(-8, Math.min(8, Math.floor(src_exponent(value) / 3))) * 3 - src_exponent(Math.abs(step)));
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/precisionRound.js
-
-
-/* harmony default export */ var precisionRound = (function(step, max) {
-  step = Math.abs(step), max = Math.abs(max) - step;
-  return Math.max(0, src_exponent(max) - src_exponent(step)) + 1;
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/precisionFixed.js
-
-
-/* harmony default export */ var precisionFixed = (function(step) {
-  return Math.max(0, -src_exponent(Math.abs(step)));
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatGroup.js
-/* harmony default export */ var formatGroup = (function(grouping, thousands) {
-  return function(value, width) {
-    var i = value.length,
-        t = [],
-        j = 0,
-        g = grouping[0],
-        length = 0;
-
-    while (i > 0 && g > 0) {
-      if (length + g + 1 > width) g = Math.max(1, width - length);
-      t.push(value.substring(i -= g, i + g));
-      if ((length += g + 1) > width) break;
-      g = grouping[j = (j + 1) % grouping.length];
-    }
-
-    return t.reverse().join(thousands);
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatNumerals.js
-/* harmony default export */ var formatNumerals = (function(numerals) {
-  return function(value) {
-    return value.replace(/[0-9]/g, function(i) {
-      return numerals[+i];
-    });
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatTrim.js
-// Trims insignificant zeros, e.g., replaces 1.2000k with 1.2k.
-/* harmony default export */ var formatTrim = (function(s) {
-  out: for (var n = s.length, i = 1, i0 = -1, i1; i < n; ++i) {
-    switch (s[i]) {
-      case ".": i0 = i1 = i; break;
-      case "0": if (i0 === 0) i0 = i; i1 = i; break;
-      default: if (!+s[i]) break out; if (i0 > 0) i0 = 0; break;
-    }
-  }
-  return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatPrefixAuto.js
-
-
-var prefixExponent;
-
-/* harmony default export */ var formatPrefixAuto = (function(x, p) {
-  var d = formatDecimalParts(x, p);
-  if (!d) return x + "";
-  var coefficient = d[0],
-      exponent = d[1],
-      i = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1,
-      n = coefficient.length;
-  return i === n ? coefficient
-      : i > n ? coefficient + new Array(i - n + 1).join("0")
-      : i > 0 ? coefficient.slice(0, i) + "." + coefficient.slice(i)
-      : "0." + new Array(1 - i).join("0") + formatDecimalParts(x, Math.max(0, p + i - 1))[0]; // less than 1y!
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatRounded.js
-
-
-/* harmony default export */ var formatRounded = (function(x, p) {
-  var d = formatDecimalParts(x, p);
-  if (!d) return x + "";
-  var coefficient = d[0],
-      exponent = d[1];
-  return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient
-      : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1)
-      : coefficient + new Array(exponent - coefficient.length + 2).join("0");
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/formatTypes.js
-
-
-
-
-/* harmony default export */ var formatTypes = ({
-  "%": (x, p) => (x * 100).toFixed(p),
-  "b": (x) => Math.round(x).toString(2),
-  "c": (x) => x + "",
-  "d": formatDecimal,
-  "e": (x, p) => x.toExponential(p),
-  "f": (x, p) => x.toFixed(p),
-  "g": (x, p) => x.toPrecision(p),
-  "o": (x) => Math.round(x).toString(8),
-  "p": (x, p) => formatRounded(x * 100, p),
-  "r": formatRounded,
-  "s": formatPrefixAuto,
-  "X": (x) => Math.round(x).toString(16).toUpperCase(),
-  "x": (x) => Math.round(x).toString(16)
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/identity.js
-/* harmony default export */ var src_identity = (function(x) {
-  return x;
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/locale.js
-
-
-
-
-
-
-
-
-
-var locale_map = Array.prototype.map,
-    locale_prefixes = ["y","z","a","f","p","n","µ","m","","k","M","G","T","P","E","Z","Y"];
-
-/* harmony default export */ var src_locale = (function(locale) {
-  var group = locale.grouping === undefined || locale.thousands === undefined ? src_identity : formatGroup(locale_map.call(locale.grouping, Number), locale.thousands + ""),
-      currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "",
-      currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "",
-      decimal = locale.decimal === undefined ? "." : locale.decimal + "",
-      numerals = locale.numerals === undefined ? src_identity : formatNumerals(locale_map.call(locale.numerals, String)),
-      percent = locale.percent === undefined ? "%" : locale.percent + "",
-      minus = locale.minus === undefined ? "−" : locale.minus + "",
-      nan = locale.nan === undefined ? "NaN" : locale.nan + "";
-
-  function newFormat(specifier) {
-    specifier = formatSpecifier(specifier);
-
-    var fill = specifier.fill,
-        align = specifier.align,
-        sign = specifier.sign,
-        symbol = specifier.symbol,
-        zero = specifier.zero,
-        width = specifier.width,
-        comma = specifier.comma,
-        precision = specifier.precision,
-        trim = specifier.trim,
-        type = specifier.type;
-
-    // The "n" type is an alias for ",g".
-    if (type === "n") comma = true, type = "g";
-
-    // The "" type, and any invalid type, is an alias for ".12~g".
-    else if (!formatTypes[type]) precision === undefined && (precision = 12), trim = true, type = "g";
-
-    // If zero fill is specified, padding goes after sign and before digits.
-    if (zero || (fill === "0" && align === "=")) zero = true, fill = "0", align = "=";
-
-    // Compute the prefix and suffix.
-    // For SI-prefix, the suffix is lazily computed.
-    var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type) ? "0" + type.toLowerCase() : "",
-        suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type) ? percent : "";
-
-    // What format function should we use?
-    // Is this an integer type?
-    // Can this type generate exponential notation?
-    var formatType = formatTypes[type],
-        maybeSuffix = /[defgprs%]/.test(type);
-
-    // Set the default precision if not specified,
-    // or clamp the specified precision to the supported range.
-    // For significant precision, it must be in [1, 21].
-    // For fixed precision, it must be in [0, 20].
-    precision = precision === undefined ? 6
-        : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision))
-        : Math.max(0, Math.min(20, precision));
-
-    function format(value) {
-      var valuePrefix = prefix,
-          valueSuffix = suffix,
-          i, n, c;
-
-      if (type === "c") {
-        valueSuffix = formatType(value) + valueSuffix;
-        value = "";
-      } else {
-        value = +value;
-
-        // Determine the sign. -0 is not less than 0, but 1 / -0 is!
-        var valueNegative = value < 0 || 1 / value < 0;
-
-        // Perform the initial formatting.
-        value = isNaN(value) ? nan : formatType(Math.abs(value), precision);
-
-        // Trim insignificant zeros.
-        if (trim) value = formatTrim(value);
-
-        // If a negative value rounds to zero after formatting, and no explicit positive sign is requested, hide the sign.
-        if (valueNegative && +value === 0 && sign !== "+") valueNegative = false;
-
-        // Compute the prefix and suffix.
-        valuePrefix = (valueNegative ? (sign === "(" ? sign : minus) : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
-        valueSuffix = (type === "s" ? locale_prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : "");
-
-        // Break the formatted value into the integer “value” part that can be
-        // grouped, and fractional or exponential “suffix” part that is not.
-        if (maybeSuffix) {
-          i = -1, n = value.length;
-          while (++i < n) {
-            if (c = value.charCodeAt(i), 48 > c || c > 57) {
-              valueSuffix = (c === 46 ? decimal + value.slice(i + 1) : value.slice(i)) + valueSuffix;
-              value = value.slice(0, i);
-              break;
-            }
-          }
-        }
-      }
-
-      // If the fill character is not "0", grouping is applied before padding.
-      if (comma && !zero) value = group(value, Infinity);
-
-      // Compute the padding.
-      var length = valuePrefix.length + value.length + valueSuffix.length,
-          padding = length < width ? new Array(width - length + 1).join(fill) : "";
-
-      // If the fill character is "0", grouping is applied after padding.
-      if (comma && zero) value = group(padding + value, padding.length ? width - valueSuffix.length : Infinity), padding = "";
-
-      // Reconstruct the final output based on the desired alignment.
-      switch (align) {
-        case "<": value = valuePrefix + value + valueSuffix + padding; break;
-        case "=": value = valuePrefix + padding + value + valueSuffix; break;
-        case "^": value = padding.slice(0, length = padding.length >> 1) + valuePrefix + value + valueSuffix + padding.slice(length); break;
-        default: value = padding + valuePrefix + value + valueSuffix; break;
-      }
-
-      return numerals(value);
-    }
-
-    format.toString = function() {
-      return specifier + "";
-    };
-
-    return format;
-  }
-
-  function formatPrefix(specifier, value) {
-    var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = "f", specifier)),
-        e = Math.max(-8, Math.min(8, Math.floor(src_exponent(value) / 3))) * 3,
-        k = Math.pow(10, -e),
-        prefix = locale_prefixes[8 + e / 3];
-    return function(value) {
-      return f(k * value) + prefix;
-    };
-  }
-
-  return {
-    format: newFormat,
-    formatPrefix: formatPrefix
-  };
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-format/src/defaultLocale.js
-
-
-var defaultLocale_locale;
-var defaultLocale_format;
-var defaultLocale_formatPrefix;
-
-defaultLocale({
-  thousands: ",",
-  grouping: [3],
-  currency: ["$", ""]
-});
-
-function defaultLocale(definition) {
-  defaultLocale_locale = src_locale(definition);
-  defaultLocale_format = defaultLocale_locale.format;
-  defaultLocale_formatPrefix = defaultLocale_locale.formatPrefix;
-  return defaultLocale_locale;
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/interval.js
-var interval_t0 = new Date,
-    interval_t1 = new Date;
-
-function newInterval(floori, offseti, count, field) {
-
-  function interval(date) {
-    return floori(date = arguments.length === 0 ? new Date : new Date(+date)), date;
-  }
-
-  interval.floor = function(date) {
-    return floori(date = new Date(+date)), date;
-  };
-
-  interval.ceil = function(date) {
-    return floori(date = new Date(date - 1)), offseti(date, 1), floori(date), date;
-  };
-
-  interval.round = function(date) {
-    var d0 = interval(date),
-        d1 = interval.ceil(date);
-    return date - d0 < d1 - date ? d0 : d1;
-  };
-
-  interval.offset = function(date, step) {
-    return offseti(date = new Date(+date), step == null ? 1 : Math.floor(step)), date;
-  };
-
-  interval.range = function(start, stop, step) {
-    var range = [], previous;
-    start = interval.ceil(start);
-    step = step == null ? 1 : Math.floor(step);
-    if (!(start < stop) || !(step > 0)) return range; // also handles Invalid Date
-    do range.push(previous = new Date(+start)), offseti(start, step), floori(start);
-    while (previous < start && start < stop);
-    return range;
-  };
-
-  interval.filter = function(test) {
-    return newInterval(function(date) {
-      if (date >= date) while (floori(date), !test(date)) date.setTime(date - 1);
-    }, function(date, step) {
-      if (date >= date) {
-        if (step < 0) while (++step <= 0) {
-          while (offseti(date, -1), !test(date)) {} // eslint-disable-line no-empty
-        } else while (--step >= 0) {
-          while (offseti(date, +1), !test(date)) {} // eslint-disable-line no-empty
-        }
-      }
-    });
-  };
-
-  if (count) {
-    interval.count = function(start, end) {
-      interval_t0.setTime(+start), interval_t1.setTime(+end);
-      floori(interval_t0), floori(interval_t1);
-      return Math.floor(count(interval_t0, interval_t1));
-    };
-
-    interval.every = function(step) {
-      step = Math.floor(step);
-      return !isFinite(step) || !(step > 0) ? null
-          : !(step > 1) ? interval
-          : interval.filter(field
-              ? function(d) { return field(d) % step === 0; }
-              : function(d) { return interval.count(0, d) % step === 0; });
-    };
-  }
-
-  return interval;
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/duration.js
-const durationSecond = 1000;
-const durationMinute = durationSecond * 60;
-const durationHour = durationMinute * 60;
-const durationDay = durationHour * 24;
-const durationWeek = durationDay * 7;
-const durationMonth = durationDay * 30;
-const durationYear = durationDay * 365;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/day.js
-
-
-
-var day_day = newInterval(
-  date => date.setHours(0, 0, 0, 0),
-  (date, step) => date.setDate(date.getDate() + step),
-  (start, end) => (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * durationMinute) / durationDay,
-  date => date.getDate() - 1
-);
-
-/* harmony default export */ var src_day = (day_day);
-var days = day_day.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/week.js
-
-
-
-function weekday(i) {
-  return newInterval(function(date) {
-    date.setDate(date.getDate() - (date.getDay() + 7 - i) % 7);
-    date.setHours(0, 0, 0, 0);
-  }, function(date, step) {
-    date.setDate(date.getDate() + step * 7);
-  }, function(start, end) {
-    return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * durationMinute) / durationWeek;
-  });
-}
-
-var sunday = weekday(0);
-var monday = weekday(1);
-var tuesday = weekday(2);
-var wednesday = weekday(3);
-var thursday = weekday(4);
-var friday = weekday(5);
-var saturday = weekday(6);
-
-var sundays = sunday.range;
-var mondays = monday.range;
-var tuesdays = tuesday.range;
-var wednesdays = wednesday.range;
-var thursdays = thursday.range;
-var fridays = friday.range;
-var saturdays = saturday.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/utcDay.js
-
-
-
-var utcDay = newInterval(function(date) {
-  date.setUTCHours(0, 0, 0, 0);
-}, function(date, step) {
-  date.setUTCDate(date.getUTCDate() + step);
-}, function(start, end) {
-  return (end - start) / durationDay;
-}, function(date) {
-  return date.getUTCDate() - 1;
-});
-
-/* harmony default export */ var src_utcDay = (utcDay);
-var utcDays = utcDay.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/utcWeek.js
-
-
-
-function utcWeekday(i) {
-  return newInterval(function(date) {
-    date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 7 - i) % 7);
-    date.setUTCHours(0, 0, 0, 0);
-  }, function(date, step) {
-    date.setUTCDate(date.getUTCDate() + step * 7);
-  }, function(start, end) {
-    return (end - start) / durationWeek;
-  });
-}
-
-var utcSunday = utcWeekday(0);
-var utcMonday = utcWeekday(1);
-var utcTuesday = utcWeekday(2);
-var utcWednesday = utcWeekday(3);
-var utcThursday = utcWeekday(4);
-var utcFriday = utcWeekday(5);
-var utcSaturday = utcWeekday(6);
-
-var utcSundays = utcSunday.range;
-var utcMondays = utcMonday.range;
-var utcTuesdays = utcTuesday.range;
-var utcWednesdays = utcWednesday.range;
-var utcThursdays = utcThursday.range;
-var utcFridays = utcFriday.range;
-var utcSaturdays = utcSaturday.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/year.js
-
-
-var year_year = newInterval(function(date) {
-  date.setMonth(0, 1);
-  date.setHours(0, 0, 0, 0);
-}, function(date, step) {
-  date.setFullYear(date.getFullYear() + step);
-}, function(start, end) {
-  return end.getFullYear() - start.getFullYear();
-}, function(date) {
-  return date.getFullYear();
-});
-
-// An optimized implementation for this simple case.
-year_year.every = function(k) {
-  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function(date) {
-    date.setFullYear(Math.floor(date.getFullYear() / k) * k);
-    date.setMonth(0, 1);
-    date.setHours(0, 0, 0, 0);
-  }, function(date, step) {
-    date.setFullYear(date.getFullYear() + step * k);
-  });
-};
-
-/* harmony default export */ var src_year = (year_year);
-var years = year_year.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/month.js
-
-
-var month_month = newInterval(function(date) {
-  date.setDate(1);
-  date.setHours(0, 0, 0, 0);
-}, function(date, step) {
-  date.setMonth(date.getMonth() + step);
-}, function(start, end) {
-  return end.getMonth() - start.getMonth() + (end.getFullYear() - start.getFullYear()) * 12;
-}, function(date) {
-  return date.getMonth();
-});
-
-/* harmony default export */ var src_month = (month_month);
-var months = month_month.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/hour.js
-
-
-
-var hour_hour = newInterval(function(date) {
-  date.setTime(date - date.getMilliseconds() - date.getSeconds() * durationSecond - date.getMinutes() * durationMinute);
-}, function(date, step) {
-  date.setTime(+date + step * durationHour);
-}, function(start, end) {
-  return (end - start) / durationHour;
-}, function(date) {
-  return date.getHours();
-});
-
-/* harmony default export */ var src_hour = (hour_hour);
-var hours = hour_hour.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/minute.js
-
-
-
-var minute_minute = newInterval(function(date) {
-  date.setTime(date - date.getMilliseconds() - date.getSeconds() * durationSecond);
-}, function(date, step) {
-  date.setTime(+date + step * durationMinute);
-}, function(start, end) {
-  return (end - start) / durationMinute;
-}, function(date) {
-  return date.getMinutes();
-});
-
-/* harmony default export */ var src_minute = (minute_minute);
-var minutes = minute_minute.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/second.js
-
-
-
-var second_second = newInterval(function(date) {
-  date.setTime(date - date.getMilliseconds());
-}, function(date, step) {
-  date.setTime(+date + step * durationSecond);
-}, function(start, end) {
-  return (end - start) / durationSecond;
-}, function(date) {
-  return date.getUTCSeconds();
-});
-
-/* harmony default export */ var src_second = (second_second);
-var seconds = second_second.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/millisecond.js
-
-
-var millisecond = newInterval(function() {
-  // noop
-}, function(date, step) {
-  date.setTime(+date + step);
-}, function(start, end) {
-  return end - start;
-});
-
-// An optimized implementation for this simple case.
-millisecond.every = function(k) {
-  k = Math.floor(k);
-  if (!isFinite(k) || !(k > 0)) return null;
-  if (!(k > 1)) return millisecond;
-  return newInterval(function(date) {
-    date.setTime(Math.floor(date / k) * k);
-  }, function(date, step) {
-    date.setTime(+date + step * k);
-  }, function(start, end) {
-    return (end - start) / k;
-  });
-};
-
-/* harmony default export */ var src_millisecond = (millisecond);
-var milliseconds = millisecond.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/utcYear.js
-
-
-var utcYear = newInterval(function(date) {
-  date.setUTCMonth(0, 1);
-  date.setUTCHours(0, 0, 0, 0);
-}, function(date, step) {
-  date.setUTCFullYear(date.getUTCFullYear() + step);
-}, function(start, end) {
-  return end.getUTCFullYear() - start.getUTCFullYear();
-}, function(date) {
-  return date.getUTCFullYear();
-});
-
-// An optimized implementation for this simple case.
-utcYear.every = function(k) {
-  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function(date) {
-    date.setUTCFullYear(Math.floor(date.getUTCFullYear() / k) * k);
-    date.setUTCMonth(0, 1);
-    date.setUTCHours(0, 0, 0, 0);
-  }, function(date, step) {
-    date.setUTCFullYear(date.getUTCFullYear() + step * k);
-  });
-};
-
-/* harmony default export */ var src_utcYear = (utcYear);
-var utcYears = utcYear.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/utcMonth.js
-
-
-var utcMonth = newInterval(function(date) {
-  date.setUTCDate(1);
-  date.setUTCHours(0, 0, 0, 0);
-}, function(date, step) {
-  date.setUTCMonth(date.getUTCMonth() + step);
-}, function(start, end) {
-  return end.getUTCMonth() - start.getUTCMonth() + (end.getUTCFullYear() - start.getUTCFullYear()) * 12;
-}, function(date) {
-  return date.getUTCMonth();
-});
-
-/* harmony default export */ var src_utcMonth = (utcMonth);
-var utcMonths = utcMonth.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/utcHour.js
-
-
-
-var utcHour = newInterval(function(date) {
-  date.setUTCMinutes(0, 0, 0);
-}, function(date, step) {
-  date.setTime(+date + step * durationHour);
-}, function(start, end) {
-  return (end - start) / durationHour;
-}, function(date) {
-  return date.getUTCHours();
-});
-
-/* harmony default export */ var src_utcHour = (utcHour);
-var utcHours = utcHour.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-time/src/utcMinute.js
-
-
-
-var utcMinute = newInterval(function(date) {
-  date.setUTCSeconds(0, 0);
-}, function(date, step) {
-  date.setTime(+date + step * durationMinute);
-}, function(start, end) {
-  return (end - start) / durationMinute;
-}, function(date) {
-  return date.getUTCMinutes();
-});
-
-/* harmony default export */ var src_utcMinute = (utcMinute);
-var utcMinutes = utcMinute.range;
-
-// CONCATENATED MODULE: ./node_modules/d3-array/src/ascending.js
-/* harmony default export */ var ascending = (function(a, b) {
-  return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
-});
-
-// CONCATENATED MODULE: ./node_modules/d3-array/src/bisector.js
-
-
-/* harmony default export */ var bisector = (function(f) {
-  let delta = f;
-  let compare = f;
-
-  if (f.length === 1) {
-    delta = (d, x) => f(d) - x;
-    compare = ascendingComparator(f);
-  }
-
-  function left(a, x, lo, hi) {
-    if (lo == null) lo = 0;
-    if (hi == null) hi = a.length;
-    while (lo < hi) {
-      const mid = (lo + hi) >>> 1;
-      if (compare(a[mid], x) < 0) lo = mid + 1;
-      else hi = mid;
-    }
-    return lo;
-  }
-
-  function right(a, x, lo, hi) {
-    if (lo == null) lo = 0;
-    if (hi == null) hi = a.length;
-    while (lo < hi) {
-      const mid = (lo + hi) >>> 1;
-      if (compare(a[mid], x) > 0) hi = mid;
-      else lo = mid + 1;
-    }
-    return lo;
-  }
-
-  function center(a, x, lo, hi) {
-    if (lo == null) lo = 0;
-    if (hi == null) hi = a.length;
-    const i = left(a, x, lo, hi - 1);
-    return i > lo && delta(a[i - 1], x) > -delta(a[i], x) ? i - 1 : i;
-  }
-
-  return {left, center, right};
-});
-
-function ascendingComparator(f) {
-  return (d, x) => ascending(f(d), x);
-}
-
-// CONCATENATED MODULE: ./node_modules/vega-time/build/vega-time.module.js
-
-
-
-
-const YEAR = 'year';
-const QUARTER = 'quarter';
-const MONTH = 'month';
-const WEEK = 'week';
-const vega_time_module_DATE = 'date';
-const DAY = 'day';
-const DAYOFYEAR = 'dayofyear';
-const HOURS = 'hours';
-const MINUTES = 'minutes';
-const SECONDS = 'seconds';
-const MILLISECONDS = 'milliseconds';
-const TIME_UNITS = [YEAR, QUARTER, MONTH, WEEK, vega_time_module_DATE, DAY, DAYOFYEAR, HOURS, MINUTES, SECONDS, MILLISECONDS];
-const UNITS = TIME_UNITS.reduce((o, u, i) => (o[u] = 1 + i, o), {});
-function vega_time_module_timeUnits(units) {
-  const u = Object(vega_util_module["i" /* array */])(units).slice(),
-        m = {}; // check validity
-
-  if (!u.length) Object(vega_util_module["o" /* error */])('Missing time unit.');
-  u.forEach(unit => {
-    if (Object(vega_util_module["w" /* hasOwnProperty */])(UNITS, unit)) {
-      m[unit] = 1;
-    } else {
-      Object(vega_util_module["o" /* error */])("Invalid time unit: ".concat(unit, "."));
-    }
-  });
-  const numTypes = (m[WEEK] || m[DAY] ? 1 : 0) + (m[QUARTER] || m[MONTH] || m[vega_time_module_DATE] ? 1 : 0) + (m[DAYOFYEAR] ? 1 : 0);
-
-  if (numTypes > 1) {
-    Object(vega_util_module["o" /* error */])("Incompatible time units: ".concat(units));
-  } // ensure proper sort order
-
-
-  u.sort((a, b) => UNITS[a] - UNITS[b]);
-  return u;
-}
-const defaultSpecifiers = {
-  [YEAR]: '%Y ',
-  [QUARTER]: 'Q%q ',
-  [MONTH]: '%b ',
-  [vega_time_module_DATE]: '%d ',
-  [WEEK]: 'W%U ',
-  [DAY]: '%a ',
-  [DAYOFYEAR]: '%j ',
-  [HOURS]: '%H:00',
-  [MINUTES]: '00:%M',
-  [SECONDS]: ':%S',
-  [MILLISECONDS]: '.%L',
-  ["".concat(YEAR, "-").concat(MONTH)]: '%Y-%m ',
-  ["".concat(YEAR, "-").concat(MONTH, "-").concat(vega_time_module_DATE)]: '%Y-%m-%d ',
-  ["".concat(HOURS, "-").concat(MINUTES)]: '%H:%M'
-};
-function timeUnitSpecifier(units, specifiers) {
-  const s = Object(vega_util_module["p" /* extend */])({}, defaultSpecifiers, specifiers),
-        u = vega_time_module_timeUnits(units),
-        n = u.length;
-  let fmt = '',
-      start = 0,
-      end,
-      key;
-
-  for (start = 0; start < n;) {
-    for (end = u.length; end > start; --end) {
-      key = u.slice(start, end).join('-');
-
-      if (s[key] != null) {
-        fmt += s[key];
-        start = end;
-        break;
-      }
-    }
-  }
-
-  return fmt.trim();
-}
-
-const vega_time_module_t0 = new Date();
-
-function localYear(y) {
-  vega_time_module_t0.setFullYear(y);
-  vega_time_module_t0.setMonth(0);
-  vega_time_module_t0.setDate(1);
-  vega_time_module_t0.setHours(0, 0, 0, 0);
-  return vega_time_module_t0;
-}
-
-function dayofyear(d) {
-  return localDayOfYear(new Date(d));
-}
-function vega_time_module_week(d) {
-  return localWeekNum(new Date(d));
-}
-function localDayOfYear(d) {
-  return src_day.count(localYear(d.getFullYear()) - 1, d);
-}
-function localWeekNum(d) {
-  return sunday.count(localYear(d.getFullYear()) - 1, d);
-}
-function localFirst(y) {
-  return localYear(y).getDay();
-}
-function localDate(y, m, d, H, M, S, L) {
-  if (0 <= y && y < 100) {
-    const date = new Date(-1, m, d, H, M, S, L);
-    date.setFullYear(y);
-    return date;
-  }
-
-  return new Date(y, m, d, H, M, S, L);
-}
-function utcdayofyear(d) {
-  return utcDayOfYear(new Date(d));
-}
-function utcweek(d) {
-  return utcWeekNum(new Date(d));
-}
-function utcDayOfYear(d) {
-  const y = Date.UTC(d.getUTCFullYear(), 0, 1);
-  return src_utcDay.count(y - 1, d);
-}
-function utcWeekNum(d) {
-  const y = Date.UTC(d.getUTCFullYear(), 0, 1);
-  return utcSunday.count(y - 1, d);
-}
-function utcFirst(y) {
-  vega_time_module_t0.setTime(Date.UTC(y, 0, 1));
-  return vega_time_module_t0.getUTCDay();
-}
-function utcDate(y, m, d, H, M, S, L) {
-  if (0 <= y && y < 100) {
-    const date = new Date(Date.UTC(-1, m, d, H, M, S, L));
-    date.setUTCFullYear(d.y);
-    return date;
-  }
-
-  return new Date(Date.UTC(y, m, d, H, M, S, L));
-}
-
-function vega_time_module_floor(units, step, get, inv, newDate) {
-  const s = step || 1,
-        b = Object(vega_util_module["W" /* peek */])(units),
-        _ = (unit, p, key) => {
-    key = key || unit;
-    return getUnit(get[key], inv[key], unit === b && s, p);
-  };
-
-  const t = new Date(),
-        u = Object(vega_util_module["fb" /* toSet */])(units),
-        y = u[YEAR] ? _(YEAR) : Object(vega_util_module["m" /* constant */])(2012),
-        m = u[MONTH] ? _(MONTH) : u[QUARTER] ? _(QUARTER) : vega_util_module["mb" /* zero */],
-        d = u[WEEK] && u[DAY] ? _(DAY, 1, WEEK + DAY) : u[WEEK] ? _(WEEK, 1) : u[DAY] ? _(DAY, 1) : u[vega_time_module_DATE] ? _(vega_time_module_DATE, 1) : u[DAYOFYEAR] ? _(DAYOFYEAR, 1) : vega_util_module["Q" /* one */],
-        H = u[HOURS] ? _(HOURS) : vega_util_module["mb" /* zero */],
-        M = u[MINUTES] ? _(MINUTES) : vega_util_module["mb" /* zero */],
-        S = u[SECONDS] ? _(SECONDS) : vega_util_module["mb" /* zero */],
-        L = u[MILLISECONDS] ? _(MILLISECONDS) : vega_util_module["mb" /* zero */];
-  return function (v) {
-    t.setTime(+v);
-    const year = y(t);
-    return newDate(year, m(t), d(t, year), H(t), M(t), S(t), L(t));
-  };
-}
-
-function getUnit(f, inv, step, phase) {
-  const u = step <= 1 ? f : phase ? (d, y) => phase + step * Math.floor((f(d, y) - phase) / step) : (d, y) => step * Math.floor(f(d, y) / step);
-  return inv ? (d, y) => inv(u(d, y), y) : u;
-} // returns the day of the year based on week number, day of week,
-// and the day of the week for the first day of the year
-
-
-function vega_time_module_weekday(week, day, firstDay) {
-  return day + week * 7 - (firstDay + 6) % 7;
-} // -- LOCAL TIME --
-
-
-const localGet = {
-  [YEAR]: d => d.getFullYear(),
-  [QUARTER]: d => Math.floor(d.getMonth() / 3),
-  [MONTH]: d => d.getMonth(),
-  [vega_time_module_DATE]: d => d.getDate(),
-  [HOURS]: d => d.getHours(),
-  [MINUTES]: d => d.getMinutes(),
-  [SECONDS]: d => d.getSeconds(),
-  [MILLISECONDS]: d => d.getMilliseconds(),
-  [DAYOFYEAR]: d => localDayOfYear(d),
-  [WEEK]: d => localWeekNum(d),
-  [WEEK + DAY]: (d, y) => vega_time_module_weekday(localWeekNum(d), d.getDay(), localFirst(y)),
-  [DAY]: (d, y) => vega_time_module_weekday(1, d.getDay(), localFirst(y))
-};
-const localInv = {
-  [QUARTER]: q => 3 * q,
-  [WEEK]: (w, y) => vega_time_module_weekday(w, 0, localFirst(y))
-};
-function timeFloor(units, step) {
-  return vega_time_module_floor(units, step || 1, localGet, localInv, localDate);
-} // -- UTC TIME --
-
-const utcGet = {
-  [YEAR]: d => d.getUTCFullYear(),
-  [QUARTER]: d => Math.floor(d.getUTCMonth() / 3),
-  [MONTH]: d => d.getUTCMonth(),
-  [vega_time_module_DATE]: d => d.getUTCDate(),
-  [HOURS]: d => d.getUTCHours(),
-  [MINUTES]: d => d.getUTCMinutes(),
-  [SECONDS]: d => d.getUTCSeconds(),
-  [MILLISECONDS]: d => d.getUTCMilliseconds(),
-  [DAYOFYEAR]: d => utcDayOfYear(d),
-  [WEEK]: d => utcWeekNum(d),
-  [DAY]: (d, y) => vega_time_module_weekday(1, d.getUTCDay(), utcFirst(y)),
-  [WEEK + DAY]: (d, y) => vega_time_module_weekday(utcWeekNum(d), d.getUTCDay(), utcFirst(y))
-};
-const utcInv = {
-  [QUARTER]: q => 3 * q,
-  [WEEK]: (w, y) => vega_time_module_weekday(w, 0, utcFirst(y))
-};
-function utcFloor(units, step) {
-  return vega_time_module_floor(units, step || 1, utcGet, utcInv, utcDate);
-}
-
-const timeIntervals = {
-  [YEAR]: src_year,
-  [QUARTER]: src_month.every(3),
-  [MONTH]: src_month,
-  [WEEK]: sunday,
-  [vega_time_module_DATE]: src_day,
-  [DAY]: src_day,
-  [DAYOFYEAR]: src_day,
-  [HOURS]: src_hour,
-  [MINUTES]: src_minute,
-  [SECONDS]: src_second,
-  [MILLISECONDS]: src_millisecond
-};
-const utcIntervals = {
-  [YEAR]: src_utcYear,
-  [QUARTER]: src_utcMonth.every(3),
-  [MONTH]: src_utcMonth,
-  [WEEK]: utcSunday,
-  [vega_time_module_DATE]: src_utcDay,
-  [DAY]: src_utcDay,
-  [DAYOFYEAR]: src_utcDay,
-  [HOURS]: src_utcHour,
-  [MINUTES]: src_utcMinute,
-  [SECONDS]: src_second,
-  [MILLISECONDS]: src_millisecond
-};
-function timeInterval(unit) {
-  return timeIntervals[unit];
-}
-function utcInterval(unit) {
-  return utcIntervals[unit];
-}
-
-function vega_time_module_offset(ival, date, step) {
-  return ival ? ival.offset(date, step) : undefined;
-}
-
-function timeOffset(unit, date, step) {
-  return vega_time_module_offset(timeInterval(unit), date, step);
-}
-function utcOffset(unit, date, step) {
-  return vega_time_module_offset(utcInterval(unit), date, step);
-}
-
-function vega_time_module_sequence(ival, start, stop, step) {
-  return ival ? ival.range(start, stop, step) : undefined;
-}
-
-function timeSequence(unit, start, stop, step) {
-  return vega_time_module_sequence(timeInterval(unit), start, stop, step);
-}
-function utcSequence(unit, start, stop, step) {
-  return vega_time_module_sequence(utcInterval(unit), start, stop, step);
-}
-
-const vega_time_module_durationSecond = 1000,
-      vega_time_module_durationMinute = vega_time_module_durationSecond * 60,
-      vega_time_module_durationHour = vega_time_module_durationMinute * 60,
-      vega_time_module_durationDay = vega_time_module_durationHour * 24,
-      vega_time_module_durationWeek = vega_time_module_durationDay * 7,
-      vega_time_module_durationMonth = vega_time_module_durationDay * 30,
-      vega_time_module_durationYear = vega_time_module_durationDay * 365;
-const Milli = [YEAR, MONTH, vega_time_module_DATE, HOURS, MINUTES, SECONDS, MILLISECONDS],
-      Seconds = Milli.slice(0, -1),
-      Minutes = Seconds.slice(0, -1),
-      Hours = Minutes.slice(0, -1),
-      Day = Hours.slice(0, -1),
-      Week = [YEAR, WEEK],
-      Month = [YEAR, MONTH],
-      Year = [YEAR];
-const intervals = [[Seconds, 1, vega_time_module_durationSecond], [Seconds, 5, 5 * vega_time_module_durationSecond], [Seconds, 15, 15 * vega_time_module_durationSecond], [Seconds, 30, 30 * vega_time_module_durationSecond], [Minutes, 1, vega_time_module_durationMinute], [Minutes, 5, 5 * vega_time_module_durationMinute], [Minutes, 15, 15 * vega_time_module_durationMinute], [Minutes, 30, 30 * vega_time_module_durationMinute], [Hours, 1, vega_time_module_durationHour], [Hours, 3, 3 * vega_time_module_durationHour], [Hours, 6, 6 * vega_time_module_durationHour], [Hours, 12, 12 * vega_time_module_durationHour], [Day, 1, vega_time_module_durationDay], [Week, 1, vega_time_module_durationWeek], [Month, 1, vega_time_module_durationMonth], [Month, 3, 3 * vega_time_module_durationMonth], [Year, 1, vega_time_module_durationYear]];
-function vega_time_module_bin (opt) {
-  const ext = opt.extent,
-        max = opt.maxbins || 40,
-        target = Math.abs(Object(vega_util_module["Z" /* span */])(ext)) / max;
-  let i = bisector(i => i[2]).right(intervals, target),
-      units,
-      step;
-
-  if (i === intervals.length) {
-    units = Year, step = tickStep(ext[0] / vega_time_module_durationYear, ext[1] / vega_time_module_durationYear, max);
-  } else if (i) {
-    i = intervals[target / intervals[i - 1][2] < intervals[i][2] / target ? i - 1 : i];
-    units = i[0];
-    step = i[1];
-  } else {
-    units = Milli;
-    step = Math.max(tickStep(ext[0], ext[1], max), 1);
-  }
-
-  return {
-    units,
-    step
-  };
-}
-
-
-
-// CONCATENATED MODULE: ./node_modules/d3-time-format/src/locale.js
-
-
-function locale_localDate(d) {
-  if (0 <= d.y && d.y < 100) {
-    var date = new Date(-1, d.m, d.d, d.H, d.M, d.S, d.L);
-    date.setFullYear(d.y);
-    return date;
-  }
-  return new Date(d.y, d.m, d.d, d.H, d.M, d.S, d.L);
-}
-
-function locale_utcDate(d) {
-  if (0 <= d.y && d.y < 100) {
-    var date = new Date(Date.UTC(-1, d.m, d.d, d.H, d.M, d.S, d.L));
-    date.setUTCFullYear(d.y);
-    return date;
-  }
-  return new Date(Date.UTC(d.y, d.m, d.d, d.H, d.M, d.S, d.L));
-}
-
-function locale_newDate(y, m, d) {
-  return {y: y, m: m, d: d, H: 0, M: 0, S: 0, L: 0};
-}
-
-function formatLocale(locale) {
-  var locale_dateTime = locale.dateTime,
-      locale_date = locale.date,
-      locale_time = locale.time,
-      locale_periods = locale.periods,
-      locale_weekdays = locale.days,
-      locale_shortWeekdays = locale.shortDays,
-      locale_months = locale.months,
-      locale_shortMonths = locale.shortMonths;
-
-  var periodRe = formatRe(locale_periods),
-      periodLookup = formatLookup(locale_periods),
-      weekdayRe = formatRe(locale_weekdays),
-      weekdayLookup = formatLookup(locale_weekdays),
-      shortWeekdayRe = formatRe(locale_shortWeekdays),
-      shortWeekdayLookup = formatLookup(locale_shortWeekdays),
-      monthRe = formatRe(locale_months),
-      monthLookup = formatLookup(locale_months),
-      shortMonthRe = formatRe(locale_shortMonths),
-      shortMonthLookup = formatLookup(locale_shortMonths);
-
-  var formats = {
-    "a": formatShortWeekday,
-    "A": formatWeekday,
-    "b": formatShortMonth,
-    "B": formatMonth,
-    "c": null,
-    "d": formatDayOfMonth,
-    "e": formatDayOfMonth,
-    "f": formatMicroseconds,
-    "g": formatYearISO,
-    "G": formatFullYearISO,
-    "H": formatHour24,
-    "I": formatHour12,
-    "j": formatDayOfYear,
-    "L": formatMilliseconds,
-    "m": formatMonthNumber,
-    "M": formatMinutes,
-    "p": formatPeriod,
-    "q": formatQuarter,
-    "Q": formatUnixTimestamp,
-    "s": formatUnixTimestampSeconds,
-    "S": formatSeconds,
-    "u": formatWeekdayNumberMonday,
-    "U": formatWeekNumberSunday,
-    "V": formatWeekNumberISO,
-    "w": formatWeekdayNumberSunday,
-    "W": formatWeekNumberMonday,
-    "x": null,
-    "X": null,
-    "y": locale_formatYear,
-    "Y": formatFullYear,
-    "Z": formatZone,
-    "%": formatLiteralPercent
-  };
-
-  var utcFormats = {
-    "a": formatUTCShortWeekday,
-    "A": formatUTCWeekday,
-    "b": formatUTCShortMonth,
-    "B": formatUTCMonth,
-    "c": null,
-    "d": formatUTCDayOfMonth,
-    "e": formatUTCDayOfMonth,
-    "f": formatUTCMicroseconds,
-    "g": formatUTCYearISO,
-    "G": formatUTCFullYearISO,
-    "H": formatUTCHour24,
-    "I": formatUTCHour12,
-    "j": formatUTCDayOfYear,
-    "L": formatUTCMilliseconds,
-    "m": formatUTCMonthNumber,
-    "M": formatUTCMinutes,
-    "p": formatUTCPeriod,
-    "q": formatUTCQuarter,
-    "Q": formatUnixTimestamp,
-    "s": formatUnixTimestampSeconds,
-    "S": formatUTCSeconds,
-    "u": formatUTCWeekdayNumberMonday,
-    "U": formatUTCWeekNumberSunday,
-    "V": formatUTCWeekNumberISO,
-    "w": formatUTCWeekdayNumberSunday,
-    "W": formatUTCWeekNumberMonday,
-    "x": null,
-    "X": null,
-    "y": formatUTCYear,
-    "Y": formatUTCFullYear,
-    "Z": formatUTCZone,
-    "%": formatLiteralPercent
-  };
-
-  var parses = {
-    "a": parseShortWeekday,
-    "A": parseWeekday,
-    "b": parseShortMonth,
-    "B": parseMonth,
-    "c": parseLocaleDateTime,
-    "d": parseDayOfMonth,
-    "e": parseDayOfMonth,
-    "f": parseMicroseconds,
-    "g": parseYear,
-    "G": parseFullYear,
-    "H": parseHour24,
-    "I": parseHour24,
-    "j": parseDayOfYear,
-    "L": parseMilliseconds,
-    "m": parseMonthNumber,
-    "M": parseMinutes,
-    "p": parsePeriod,
-    "q": parseQuarter,
-    "Q": parseUnixTimestamp,
-    "s": parseUnixTimestampSeconds,
-    "S": parseSeconds,
-    "u": parseWeekdayNumberMonday,
-    "U": parseWeekNumberSunday,
-    "V": parseWeekNumberISO,
-    "w": parseWeekdayNumberSunday,
-    "W": parseWeekNumberMonday,
-    "x": parseLocaleDate,
-    "X": parseLocaleTime,
-    "y": parseYear,
-    "Y": parseFullYear,
-    "Z": parseZone,
-    "%": parseLiteralPercent
-  };
-
-  // These recursive directive definitions must be deferred.
-  formats.x = newFormat(locale_date, formats);
-  formats.X = newFormat(locale_time, formats);
-  formats.c = newFormat(locale_dateTime, formats);
-  utcFormats.x = newFormat(locale_date, utcFormats);
-  utcFormats.X = newFormat(locale_time, utcFormats);
-  utcFormats.c = newFormat(locale_dateTime, utcFormats);
-
-  function newFormat(specifier, formats) {
-    return function(date) {
-      var string = [],
-          i = -1,
-          j = 0,
-          n = specifier.length,
-          c,
-          pad,
-          format;
-
-      if (!(date instanceof Date)) date = new Date(+date);
-
-      while (++i < n) {
-        if (specifier.charCodeAt(i) === 37) {
-          string.push(specifier.slice(j, i));
-          if ((pad = pads[c = specifier.charAt(++i)]) != null) c = specifier.charAt(++i);
-          else pad = c === "e" ? " " : "0";
-          if (format = formats[c]) c = format(date, pad);
-          string.push(c);
-          j = i + 1;
-        }
-      }
-
-      string.push(specifier.slice(j, i));
-      return string.join("");
-    };
-  }
-
-  function newParse(specifier, Z) {
-    return function(string) {
-      var d = locale_newDate(1900, undefined, 1),
-          i = parseSpecifier(d, specifier, string += "", 0),
-          week, day;
-      if (i != string.length) return null;
-
-      // If a UNIX timestamp is specified, return it.
-      if ("Q" in d) return new Date(d.Q);
-      if ("s" in d) return new Date(d.s * 1000 + ("L" in d ? d.L : 0));
-
-      // If this is utcParse, never use the local timezone.
-      if (Z && !("Z" in d)) d.Z = 0;
-
-      // The am-pm flag is 0 for AM, and 1 for PM.
-      if ("p" in d) d.H = d.H % 12 + d.p * 12;
-
-      // If the month was not specified, inherit from the quarter.
-      if (d.m === undefined) d.m = "q" in d ? d.q : 0;
-
-      // Convert day-of-week and week-of-year to day-of-year.
-      if ("V" in d) {
-        if (d.V < 1 || d.V > 53) return null;
-        if (!("w" in d)) d.w = 1;
-        if ("Z" in d) {
-          week = locale_utcDate(locale_newDate(d.y, 0, 1)), day = week.getUTCDay();
-          week = day > 4 || day === 0 ? utcMonday.ceil(week) : utcMonday(week);
-          week = src_utcDay.offset(week, (d.V - 1) * 7);
-          d.y = week.getUTCFullYear();
-          d.m = week.getUTCMonth();
-          d.d = week.getUTCDate() + (d.w + 6) % 7;
-        } else {
-          week = locale_localDate(locale_newDate(d.y, 0, 1)), day = week.getDay();
-          week = day > 4 || day === 0 ? monday.ceil(week) : monday(week);
-          week = src_day.offset(week, (d.V - 1) * 7);
-          d.y = week.getFullYear();
-          d.m = week.getMonth();
-          d.d = week.getDate() + (d.w + 6) % 7;
-        }
-      } else if ("W" in d || "U" in d) {
-        if (!("w" in d)) d.w = "u" in d ? d.u % 7 : "W" in d ? 1 : 0;
-        day = "Z" in d ? locale_utcDate(locale_newDate(d.y, 0, 1)).getUTCDay() : locale_localDate(locale_newDate(d.y, 0, 1)).getDay();
-        d.m = 0;
-        d.d = "W" in d ? (d.w + 6) % 7 + d.W * 7 - (day + 5) % 7 : d.w + d.U * 7 - (day + 6) % 7;
-      }
-
-      // If a time zone is specified, all fields are interpreted as UTC and then
-      // offset according to the specified time zone.
-      if ("Z" in d) {
-        d.H += d.Z / 100 | 0;
-        d.M += d.Z % 100;
-        return locale_utcDate(d);
-      }
-
-      // Otherwise, all fields are in local time.
-      return locale_localDate(d);
-    };
-  }
-
-  function parseSpecifier(d, specifier, string, j) {
-    var i = 0,
-        n = specifier.length,
-        m = string.length,
-        c,
-        parse;
-
-    while (i < n) {
-      if (j >= m) return -1;
-      c = specifier.charCodeAt(i++);
-      if (c === 37) {
-        c = specifier.charAt(i++);
-        parse = parses[c in pads ? specifier.charAt(i++) : c];
-        if (!parse || ((j = parse(d, string, j)) < 0)) return -1;
-      } else if (c != string.charCodeAt(j++)) {
-        return -1;
-      }
-    }
-
-    return j;
-  }
-
-  function parsePeriod(d, string, i) {
-    var n = periodRe.exec(string.slice(i));
-    return n ? (d.p = periodLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
-  }
-
-  function parseShortWeekday(d, string, i) {
-    var n = shortWeekdayRe.exec(string.slice(i));
-    return n ? (d.w = shortWeekdayLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
-  }
-
-  function parseWeekday(d, string, i) {
-    var n = weekdayRe.exec(string.slice(i));
-    return n ? (d.w = weekdayLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
-  }
-
-  function parseShortMonth(d, string, i) {
-    var n = shortMonthRe.exec(string.slice(i));
-    return n ? (d.m = shortMonthLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
-  }
-
-  function parseMonth(d, string, i) {
-    var n = monthRe.exec(string.slice(i));
-    return n ? (d.m = monthLookup.get(n[0].toLowerCase()), i + n[0].length) : -1;
-  }
-
-  function parseLocaleDateTime(d, string, i) {
-    return parseSpecifier(d, locale_dateTime, string, i);
-  }
-
-  function parseLocaleDate(d, string, i) {
-    return parseSpecifier(d, locale_date, string, i);
-  }
-
-  function parseLocaleTime(d, string, i) {
-    return parseSpecifier(d, locale_time, string, i);
-  }
-
-  function formatShortWeekday(d) {
-    return locale_shortWeekdays[d.getDay()];
-  }
-
-  function formatWeekday(d) {
-    return locale_weekdays[d.getDay()];
-  }
-
-  function formatShortMonth(d) {
-    return locale_shortMonths[d.getMonth()];
-  }
-
-  function formatMonth(d) {
-    return locale_months[d.getMonth()];
-  }
-
-  function formatPeriod(d) {
-    return locale_periods[+(d.getHours() >= 12)];
-  }
-
-  function formatQuarter(d) {
-    return 1 + ~~(d.getMonth() / 3);
-  }
-
-  function formatUTCShortWeekday(d) {
-    return locale_shortWeekdays[d.getUTCDay()];
-  }
-
-  function formatUTCWeekday(d) {
-    return locale_weekdays[d.getUTCDay()];
-  }
-
-  function formatUTCShortMonth(d) {
-    return locale_shortMonths[d.getUTCMonth()];
-  }
-
-  function formatUTCMonth(d) {
-    return locale_months[d.getUTCMonth()];
-  }
-
-  function formatUTCPeriod(d) {
-    return locale_periods[+(d.getUTCHours() >= 12)];
-  }
-
-  function formatUTCQuarter(d) {
-    return 1 + ~~(d.getUTCMonth() / 3);
-  }
-
-  return {
-    format: function(specifier) {
-      var f = newFormat(specifier += "", formats);
-      f.toString = function() { return specifier; };
-      return f;
-    },
-    parse: function(specifier) {
-      var p = newParse(specifier += "", false);
-      p.toString = function() { return specifier; };
-      return p;
-    },
-    utcFormat: function(specifier) {
-      var f = newFormat(specifier += "", utcFormats);
-      f.toString = function() { return specifier; };
-      return f;
-    },
-    utcParse: function(specifier) {
-      var p = newParse(specifier += "", true);
-      p.toString = function() { return specifier; };
-      return p;
-    }
-  };
-}
-
-var pads = {"-": "", "_": " ", "0": "0"},
-    numberRe = /^\s*\d+/, // note: ignores next directive
-    percentRe = /^%/,
-    requoteRe = /[\\^$*+?|[\]().{}]/g;
-
-function locale_pad(value, fill, width) {
-  var sign = value < 0 ? "-" : "",
-      string = (sign ? -value : value) + "",
-      length = string.length;
-  return sign + (length < width ? new Array(width - length + 1).join(fill) + string : string);
-}
-
-function requote(s) {
-  return s.replace(requoteRe, "\\$&");
-}
-
-function formatRe(names) {
-  return new RegExp("^(?:" + names.map(requote).join("|") + ")", "i");
-}
-
-function formatLookup(names) {
-  return new Map(names.map((name, i) => [name.toLowerCase(), i]));
-}
-
-function parseWeekdayNumberSunday(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 1));
-  return n ? (d.w = +n[0], i + n[0].length) : -1;
-}
-
-function parseWeekdayNumberMonday(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 1));
-  return n ? (d.u = +n[0], i + n[0].length) : -1;
-}
-
-function parseWeekNumberSunday(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.U = +n[0], i + n[0].length) : -1;
-}
-
-function parseWeekNumberISO(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.V = +n[0], i + n[0].length) : -1;
-}
-
-function parseWeekNumberMonday(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.W = +n[0], i + n[0].length) : -1;
-}
-
-function parseFullYear(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 4));
-  return n ? (d.y = +n[0], i + n[0].length) : -1;
-}
-
-function parseYear(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.y = +n[0] + (+n[0] > 68 ? 1900 : 2000), i + n[0].length) : -1;
-}
-
-function parseZone(d, string, i) {
-  var n = /^(Z)|([+-]\d\d)(?::?(\d\d))?/.exec(string.slice(i, i + 6));
-  return n ? (d.Z = n[1] ? 0 : -(n[2] + (n[3] || "00")), i + n[0].length) : -1;
-}
-
-function parseQuarter(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 1));
-  return n ? (d.q = n[0] * 3 - 3, i + n[0].length) : -1;
-}
-
-function parseMonthNumber(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.m = n[0] - 1, i + n[0].length) : -1;
-}
-
-function parseDayOfMonth(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.d = +n[0], i + n[0].length) : -1;
-}
-
-function parseDayOfYear(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 3));
-  return n ? (d.m = 0, d.d = +n[0], i + n[0].length) : -1;
-}
-
-function parseHour24(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.H = +n[0], i + n[0].length) : -1;
-}
-
-function parseMinutes(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.M = +n[0], i + n[0].length) : -1;
-}
-
-function parseSeconds(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 2));
-  return n ? (d.S = +n[0], i + n[0].length) : -1;
-}
-
-function parseMilliseconds(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 3));
-  return n ? (d.L = +n[0], i + n[0].length) : -1;
-}
-
-function parseMicroseconds(d, string, i) {
-  var n = numberRe.exec(string.slice(i, i + 6));
-  return n ? (d.L = Math.floor(n[0] / 1000), i + n[0].length) : -1;
-}
-
-function parseLiteralPercent(d, string, i) {
-  var n = percentRe.exec(string.slice(i, i + 1));
-  return n ? i + n[0].length : -1;
-}
-
-function parseUnixTimestamp(d, string, i) {
-  var n = numberRe.exec(string.slice(i));
-  return n ? (d.Q = +n[0], i + n[0].length) : -1;
-}
-
-function parseUnixTimestampSeconds(d, string, i) {
-  var n = numberRe.exec(string.slice(i));
-  return n ? (d.s = +n[0], i + n[0].length) : -1;
-}
-
-function formatDayOfMonth(d, p) {
-  return locale_pad(d.getDate(), p, 2);
-}
-
-function formatHour24(d, p) {
-  return locale_pad(d.getHours(), p, 2);
-}
-
-function formatHour12(d, p) {
-  return locale_pad(d.getHours() % 12 || 12, p, 2);
-}
-
-function formatDayOfYear(d, p) {
-  return locale_pad(1 + src_day.count(src_year(d), d), p, 3);
-}
-
-function formatMilliseconds(d, p) {
-  return locale_pad(d.getMilliseconds(), p, 3);
-}
-
-function formatMicroseconds(d, p) {
-  return formatMilliseconds(d, p) + "000";
-}
-
-function formatMonthNumber(d, p) {
-  return locale_pad(d.getMonth() + 1, p, 2);
-}
-
-function formatMinutes(d, p) {
-  return locale_pad(d.getMinutes(), p, 2);
-}
-
-function formatSeconds(d, p) {
-  return locale_pad(d.getSeconds(), p, 2);
-}
-
-function formatWeekdayNumberMonday(d) {
-  var day = d.getDay();
-  return day === 0 ? 7 : day;
-}
-
-function formatWeekNumberSunday(d, p) {
-  return locale_pad(sunday.count(src_year(d) - 1, d), p, 2);
-}
-
-function dISO(d) {
-  var day = d.getDay();
-  return (day >= 4 || day === 0) ? thursday(d) : thursday.ceil(d);
-}
-
-function formatWeekNumberISO(d, p) {
-  d = dISO(d);
-  return locale_pad(thursday.count(src_year(d), d) + (src_year(d).getDay() === 4), p, 2);
-}
-
-function formatWeekdayNumberSunday(d) {
-  return d.getDay();
-}
-
-function formatWeekNumberMonday(d, p) {
-  return locale_pad(monday.count(src_year(d) - 1, d), p, 2);
-}
-
-function locale_formatYear(d, p) {
-  return locale_pad(d.getFullYear() % 100, p, 2);
-}
-
-function formatYearISO(d, p) {
-  d = dISO(d);
-  return locale_pad(d.getFullYear() % 100, p, 2);
-}
-
-function formatFullYear(d, p) {
-  return locale_pad(d.getFullYear() % 10000, p, 4);
-}
-
-function formatFullYearISO(d, p) {
-  var day = d.getDay();
-  d = (day >= 4 || day === 0) ? thursday(d) : thursday.ceil(d);
-  return locale_pad(d.getFullYear() % 10000, p, 4);
-}
-
-function formatZone(d) {
-  var z = d.getTimezoneOffset();
-  return (z > 0 ? "-" : (z *= -1, "+"))
-      + locale_pad(z / 60 | 0, "0", 2)
-      + locale_pad(z % 60, "0", 2);
-}
-
-function formatUTCDayOfMonth(d, p) {
-  return locale_pad(d.getUTCDate(), p, 2);
-}
-
-function formatUTCHour24(d, p) {
-  return locale_pad(d.getUTCHours(), p, 2);
-}
-
-function formatUTCHour12(d, p) {
-  return locale_pad(d.getUTCHours() % 12 || 12, p, 2);
-}
-
-function formatUTCDayOfYear(d, p) {
-  return locale_pad(1 + src_utcDay.count(src_utcYear(d), d), p, 3);
-}
-
-function formatUTCMilliseconds(d, p) {
-  return locale_pad(d.getUTCMilliseconds(), p, 3);
-}
-
-function formatUTCMicroseconds(d, p) {
-  return formatUTCMilliseconds(d, p) + "000";
-}
-
-function formatUTCMonthNumber(d, p) {
-  return locale_pad(d.getUTCMonth() + 1, p, 2);
-}
-
-function formatUTCMinutes(d, p) {
-  return locale_pad(d.getUTCMinutes(), p, 2);
-}
-
-function formatUTCSeconds(d, p) {
-  return locale_pad(d.getUTCSeconds(), p, 2);
-}
-
-function formatUTCWeekdayNumberMonday(d) {
-  var dow = d.getUTCDay();
-  return dow === 0 ? 7 : dow;
-}
-
-function formatUTCWeekNumberSunday(d, p) {
-  return locale_pad(utcSunday.count(src_utcYear(d) - 1, d), p, 2);
-}
-
-function UTCdISO(d) {
-  var day = d.getUTCDay();
-  return (day >= 4 || day === 0) ? utcThursday(d) : utcThursday.ceil(d);
-}
-
-function formatUTCWeekNumberISO(d, p) {
-  d = UTCdISO(d);
-  return locale_pad(utcThursday.count(src_utcYear(d), d) + (src_utcYear(d).getUTCDay() === 4), p, 2);
-}
-
-function formatUTCWeekdayNumberSunday(d) {
-  return d.getUTCDay();
-}
-
-function formatUTCWeekNumberMonday(d, p) {
-  return locale_pad(utcMonday.count(src_utcYear(d) - 1, d), p, 2);
-}
-
-function formatUTCYear(d, p) {
-  return locale_pad(d.getUTCFullYear() % 100, p, 2);
-}
-
-function formatUTCYearISO(d, p) {
-  d = UTCdISO(d);
-  return locale_pad(d.getUTCFullYear() % 100, p, 2);
-}
-
-function formatUTCFullYear(d, p) {
-  return locale_pad(d.getUTCFullYear() % 10000, p, 4);
-}
-
-function formatUTCFullYearISO(d, p) {
-  var day = d.getUTCDay();
-  d = (day >= 4 || day === 0) ? utcThursday(d) : utcThursday.ceil(d);
-  return locale_pad(d.getUTCFullYear() % 10000, p, 4);
-}
-
-function formatUTCZone() {
-  return "+0000";
-}
-
-function formatLiteralPercent() {
-  return "%";
-}
-
-function formatUnixTimestamp(d) {
-  return +d;
-}
-
-function formatUnixTimestampSeconds(d) {
-  return Math.floor(+d / 1000);
-}
-
-// CONCATENATED MODULE: ./node_modules/d3-time-format/src/defaultLocale.js
-
-
-var src_defaultLocale_locale;
-var defaultLocale_timeFormat;
-var timeParse;
-var defaultLocale_utcFormat;
-var utcParse;
-
-defaultLocale_defaultLocale({
-  dateTime: "%x, %X",
-  date: "%-m/%-d/%Y",
-  time: "%-I:%M:%S %p",
-  periods: ["AM", "PM"],
-  days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-  shortDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-  months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-  shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-});
-
-function defaultLocale_defaultLocale(definition) {
-  src_defaultLocale_locale = formatLocale(definition);
-  defaultLocale_timeFormat = src_defaultLocale_locale.format;
-  timeParse = src_defaultLocale_locale.parse;
-  defaultLocale_utcFormat = src_defaultLocale_locale.utcFormat;
-  utcParse = src_defaultLocale_locale.utcParse;
-  return src_defaultLocale_locale;
-}
-
-// CONCATENATED MODULE: ./node_modules/vega-format/build/vega-format.module.js
-
-
-
-
-
-
-function memoize (method) {
-  const cache = {};
-  return spec => cache[spec] || (cache[spec] = method(spec));
-}
-
-function trimZeroes(numberFormat, decimalChar) {
-  return x => {
-    const str = numberFormat(x),
-          dec = str.indexOf(decimalChar);
-    if (dec < 0) return str;
-    let idx = rightmostDigit(str, dec);
-    const end = idx < str.length ? str.slice(idx) : '';
-
-    while (--idx > dec) if (str[idx] !== '0') {
-      ++idx;
-      break;
-    }
-
-    return str.slice(0, idx) + end;
-  };
-}
-
-function rightmostDigit(str, dec) {
-  let i = str.lastIndexOf('e'),
-      c;
-  if (i > 0) return i;
-
-  for (i = str.length; --i > dec;) {
-    c = str.charCodeAt(i);
-    if (c >= 48 && c <= 57) return i + 1; // is digit
-  }
-}
-
-function numberLocale(locale) {
-  const format = memoize(locale.format),
-        formatPrefix = locale.formatPrefix;
-  return {
-    format,
-    formatPrefix,
-
-    formatFloat(spec) {
-      const s = formatSpecifier(spec || ',');
-
-      if (s.precision == null) {
-        s.precision = 12;
-
-        switch (s.type) {
-          case '%':
-            s.precision -= 2;
-            break;
-
-          case 'e':
-            s.precision -= 1;
-            break;
-        }
-
-        return trimZeroes(format(s), // number format
-        format('.1f')(1)[1] // decimal point character
-        );
-      } else {
-        return format(s);
-      }
-    },
-
-    formatSpan(start, stop, count, specifier) {
-      specifier = formatSpecifier(specifier == null ? ',f' : specifier);
-      const step = tickStep(start, stop, count),
-            value = Math.max(Math.abs(start), Math.abs(stop));
-      let precision;
-
-      if (specifier.precision == null) {
-        switch (specifier.type) {
-          case 's':
-            {
-              if (!isNaN(precision = precisionPrefix(step, value))) {
-                specifier.precision = precision;
-              }
-
-              return formatPrefix(specifier, value);
-            }
-
-          case '':
-          case 'e':
-          case 'g':
-          case 'p':
-          case 'r':
-            {
-              if (!isNaN(precision = precisionRound(step, value))) {
-                specifier.precision = precision - (specifier.type === 'e');
-              }
-
-              break;
-            }
-
-          case 'f':
-          case '%':
-            {
-              if (!isNaN(precision = precisionFixed(step))) {
-                specifier.precision = precision - (specifier.type === '%') * 2;
-              }
-
-              break;
-            }
-        }
-      }
-
-      return format(specifier);
-    }
-
-  };
-}
-
-let defaultNumberLocale;
-resetNumberFormatDefaultLocale();
-function resetNumberFormatDefaultLocale() {
-  return defaultNumberLocale = numberLocale({
-    format: defaultLocale_format,
-    formatPrefix: defaultLocale_formatPrefix
-  });
-}
-function numberFormatLocale(definition) {
-  return numberLocale(src_locale(definition));
-}
-function numberFormatDefaultLocale(definition) {
-  return arguments.length ? defaultNumberLocale = numberFormatLocale(definition) : defaultNumberLocale;
-}
-
-function timeMultiFormat(format, interval, spec) {
-  spec = spec || {};
-
-  if (!Object(vega_util_module["H" /* isObject */])(spec)) {
-    Object(vega_util_module["o" /* error */])("Invalid time multi-format specifier: ".concat(spec));
-  }
-
-  const second = interval(SECONDS),
-        minute = interval(MINUTES),
-        hour = interval(HOURS),
-        day = interval(vega_time_module_DATE),
-        week = interval(WEEK),
-        month = interval(MONTH),
-        quarter = interval(QUARTER),
-        year = interval(YEAR),
-        L = format(spec[MILLISECONDS] || '.%L'),
-        S = format(spec[SECONDS] || ':%S'),
-        M = format(spec[MINUTES] || '%I:%M'),
-        H = format(spec[HOURS] || '%I %p'),
-        d = format(spec[vega_time_module_DATE] || spec[DAY] || '%a %d'),
-        w = format(spec[WEEK] || '%b %d'),
-        m = format(spec[MONTH] || '%B'),
-        q = format(spec[QUARTER] || '%B'),
-        y = format(spec[YEAR] || '%Y');
-  return date => (second(date) < date ? L : minute(date) < date ? S : hour(date) < date ? M : day(date) < date ? H : month(date) < date ? week(date) < date ? d : w : year(date) < date ? quarter(date) < date ? m : q : y)(date);
-}
-
-function timeLocale(locale) {
-  const timeFormat = memoize(locale.format),
-        utcFormat = memoize(locale.utcFormat);
-  return {
-    timeFormat: spec => Object(vega_util_module["J" /* isString */])(spec) ? timeFormat(spec) : timeMultiFormat(timeFormat, timeInterval, spec),
-    utcFormat: spec => Object(vega_util_module["J" /* isString */])(spec) ? utcFormat(spec) : timeMultiFormat(utcFormat, utcInterval, spec),
-    timeParse: memoize(locale.parse),
-    utcParse: memoize(locale.utcParse)
-  };
-}
-
-let defaultTimeLocale;
-resetTimeFormatDefaultLocale();
-function resetTimeFormatDefaultLocale() {
-  return defaultTimeLocale = timeLocale({
-    format: defaultLocale_timeFormat,
-    parse: timeParse,
-    utcFormat: defaultLocale_utcFormat,
-    utcParse: utcParse
-  });
-}
-function timeFormatLocale(definition) {
-  return timeLocale(formatLocale(definition));
-}
-function timeFormatDefaultLocale(definition) {
-  return arguments.length ? defaultTimeLocale = timeFormatLocale(definition) : defaultTimeLocale;
-}
-
-const createLocale = (number, time) => Object(vega_util_module["p" /* extend */])({}, number, time);
-
-function vega_format_module_locale(numberSpec, timeSpec) {
-  const number = numberSpec ? numberFormatLocale(numberSpec) : numberFormatDefaultLocale();
-  const time = timeSpec ? timeFormatLocale(timeSpec) : timeFormatDefaultLocale();
-  return createLocale(number, time);
-}
-function vega_format_module_defaultLocale(numberSpec, timeSpec) {
-  const args = arguments.length;
-
-  if (args && args !== 2) {
-    Object(vega_util_module["o" /* error */])('defaultLocale expects either zero or two arguments.');
-  }
-
-  return args ? createLocale(numberFormatDefaultLocale(numberSpec), timeFormatDefaultLocale(timeSpec)) : createLocale(numberFormatDefaultLocale(), timeFormatDefaultLocale());
-}
-function resetDefaultLocale() {
-  resetNumberFormatDefaultLocale();
-  resetTimeFormatDefaultLocale();
-  return vega_format_module_defaultLocale();
-}
-
-
-
-// CONCATENATED MODULE: ./node_modules/vega-loader/src/read.js
-
-
-
-
-
-/* harmony default export */ var read = (function(data, schema, timeParser, utcParser) {
-  schema = schema || {};
-
-  const reader = formats_formats(schema.type || 'json');
-  if (!reader) Object(vega_util_module["o" /* error */])('Unknown data format type: ' + schema.type);
-
-  data = reader(data, schema);
-  if (schema.parse) read_parse(data, schema.parse, timeParser, utcParser);
-
-  if (Object(vega_util_module["w" /* hasOwnProperty */])(data, 'columns')) delete data.columns;
-  return data;
-});
-
-function read_parse(data, types, timeParser, utcParser) {
-  if (!data.length) return; // early exit for empty data
-
-  const locale = timeFormatDefaultLocale();
-  timeParser = timeParser || locale.timeParse;
-  utcParser = utcParser || locale.utcParse;
-
-  let fields = data.columns || Object.keys(data[0]),
-      datum, field, i, j, n, m;
-
-  if (types === 'auto') types = inferTypes(data, fields);
-
-  fields = Object.keys(types);
-  const parsers = fields.map(field => {
-    const type = types[field];
-    let parts, pattern;
-
-    if (type && (type.startsWith('date:') || type.startsWith('utc:'))) {
-      parts = type.split(/:(.+)?/, 2);  // split on first :
-      pattern = parts[1];
-
-      if ((pattern[0] === '\'' && pattern[pattern.length-1] === '\'') ||
-          (pattern[0] === '"'  && pattern[pattern.length-1] === '"')) {
-        pattern = pattern.slice(1, -1);
-      }
-
-      const parse = parts[0] === 'utc' ? utcParser : timeParser;
-      return parse(pattern);
-    }
-
-    if (!typeParsers[type]) {
-      throw Error('Illegal format pattern: ' + field + ':' + type);
-    }
-
-    return typeParsers[type];
-  });
-
-  for (i=0, n=data.length, m=fields.length; i<n; ++i) {
-    datum = data[i];
-    for (j=0; j<m; ++j) {
-      field = fields[j];
-      datum[field] = parsers[j](datum[field]);
-    }
-  }
-}
-
-// CONCATENATED MODULE: ./node_modules/vega-loader/index.browser.js
-
-
-const index_browser_loader = src_loader(
-  typeof fetch !== 'undefined' && fetch, // use built-in fetch API
-  null // no file system access
-);
-
-
-
-
-
-
+// EXTERNAL MODULE: ./node_modules/vega-loader/build/vega-loader.browser.module.js
+var vega_loader_browser_module = __webpack_require__("7ba4");
+
+// EXTERNAL MODULE: ./node_modules/vega-format/build/vega-format.module.js
+var vega_format_module = __webpack_require__("c092");
 
 // CONCATENATED MODULE: ./node_modules/vega-dataflow/build/vega-dataflow.module.js
 
@@ -20380,7 +20961,7 @@ function vega_dataflow_module_events (source, type, filter, apply) {
 
 function vega_dataflow_module_parse(data, format) {
   const locale = this.locale();
-  return read(data, format, locale.timeParse, locale.utcParse);
+  return Object(vega_loader_browser_module["f" /* read */])(data, format, locale.timeParse, locale.utcParse);
 }
 /**
  * Ingests new data into the dataflow. First parses the data using the
@@ -20418,7 +20999,7 @@ async function request(url, format) {
   try {
     data = await df.loader().load(url, {
       context: 'dataflow',
-      response: responseType(format && format.type)
+      response: Object(vega_loader_browser_module["g" /* responseType */])(format && format.type)
     });
 
     try {
@@ -21549,10 +22130,10 @@ function Dataflow() {
   this.logLevel(vega_util_module["b" /* Error */]);
   this._clock = 0;
   this._rank = 0;
-  this._locale = vega_format_module_defaultLocale();
+  this._locale = Object(vega_format_module["a" /* defaultLocale */])();
 
   try {
-    this._loader = index_browser_loader();
+    this._loader = Object(vega_loader_browser_module["e" /* loader */])();
   } catch (e) {// do nothing if loader module is unavailable
   }
 
@@ -21786,6 +22367,9 @@ function vega_dataflow_module_transform(type) {
 
 
 
+// EXTERNAL MODULE: ./node_modules/d3-array/src/ascending.js
+var ascending = __webpack_require__("00fb");
+
 // CONCATENATED MODULE: ./node_modules/d3-array/src/max.js
 function max_max(values, valueof) {
   let max;
@@ -21835,7 +22419,7 @@ function min_min(values, valueof) {
 
 // Based on https://github.com/mourner/quickselect
 // ISC license, Copyright 2018 Vladimir Agafonkin.
-function quickselect(array, k, left = 0, right = array.length - 1, compare = ascending) {
+function quickselect(array, k, left = 0, right = array.length - 1, compare = ascending["a" /* default */]) {
   while (right > left) {
     if (right - left > 600) {
       const n = right - left + 1;
@@ -21877,7 +22461,7 @@ function swap(array, i, j) {
 }
 
 // CONCATENATED MODULE: ./node_modules/d3-array/src/number.js
-/* harmony default export */ var src_number = (function(x) {
+/* harmony default export */ var number = (function(x) {
   return x === null ? NaN : +x;
 });
 
@@ -21917,7 +22501,7 @@ function quantile_quantile(values, p, valueof) {
   return value0 + (value1 - value0) * (i - i0);
 }
 
-function quantileSorted(values, p, valueof = src_number) {
+function quantileSorted(values, p, valueof = number) {
   if (!(n = values.length)) return;
   if ((p = +p) <= 0 || n < 2) return +valueof(values[0], 0, values);
   if (p >= 1) return +valueof(values[n - 1], n - 1, values);
@@ -21998,7 +22582,7 @@ function quantiles (array, p, f) {
   const values = Float64Array.from(vega_statistics_module_numbers(array, f)); // don't depend on return value from typed array sort call
   // protects against undefined sort results in Safari (vega/vega-lite#4964)
 
-  values.sort(ascending);
+  values.sort(ascending["a" /* default */]);
   return p.map(_ => quantileSorted(values, _));
 }
 
@@ -22098,7 +22682,7 @@ function bootstrapCI (array, samples, alpha, f) {
     mu[j] = a / n;
   }
 
-  mu.sort(ascending);
+  mu.sort(ascending["a" /* default */]);
   return [quantile_quantile(mu, alpha / 2), quantile_quantile(mu, 1 - alpha / 2)];
 }
 
@@ -23155,8 +23739,8 @@ function vega_statistics_module_output(xv, yhat, ux, uy) {
   return out;
 }
 
-// subdivide up to accuracy of 0.1 degrees
-const MIN_RADIANS = 0.1 * Math.PI / 180; // Adaptively sample an interpolated function over a domain extent
+// subdivide up to accuracy of 0.5 degrees
+const MIN_RADIANS = 0.5 * Math.PI / 180; // Adaptively sample an interpolated function over a domain extent
 
 function sampleCurve (f, extent, minSteps, maxSteps) {
   minSteps = minSteps || 25;
@@ -23188,16 +23772,19 @@ function sampleCurve (f, extent, minSteps, maxSteps) {
     }
   }
 
-  let p0 = prev[0],
-      p1 = next[next.length - 1];
+  let p0 = prev[0];
+  let p1 = next[next.length - 1];
+  const sx = 1 / span;
+  const sy = scaleY(p0[1], next);
 
   while (p1) {
     // midpoint for potential curve subdivision
     const pm = point((p0[0] + p1[0]) / 2);
+    const dx = pm[0] - p0[0] >= stop;
 
-    if (pm[0] - p0[0] >= stop && angleDelta(p0, pm, p1) > MIN_RADIANS) {
+    if (dx && angleDelta(p0, pm, p1, sx, sy) > MIN_RADIANS) {
       // maximum resolution has not yet been met, and
-      // subdivision midpoint sufficiently different from endpoint
+      // subdivision midpoint is sufficiently different from endpoint
       // save subdivision, push midpoint onto the visitation stack
       next.push(pm);
     } else {
@@ -23214,9 +23801,23 @@ function sampleCurve (f, extent, minSteps, maxSteps) {
   return prev;
 }
 
-function angleDelta(p, q, r) {
-  const a0 = Math.atan2(r[1] - p[1], r[0] - p[0]),
-        a1 = Math.atan2(q[1] - p[1], q[0] - p[0]);
+function scaleY(init, points) {
+  let ymin = init;
+  let ymax = init;
+  const n = points.length;
+
+  for (let i = 0; i < n; ++i) {
+    const y = points[i][1];
+    if (y < ymin) ymin = y;
+    if (y > ymax) ymax = y;
+  }
+
+  return 1 / (ymax - ymin);
+}
+
+function angleDelta(p, q, r, sx, sy) {
+  const a0 = Math.atan2(sy * (r[1] - p[1]), sx * (r[0] - p[0])),
+        a1 = Math.atan2(sy * (q[1] - p[1]), sx * (q[0] - p[0]));
   return Math.abs(a0 - a1);
 }
 
@@ -23257,6 +23858,12 @@ function mean(values, valueof) {
 
   return range;
 });
+
+// EXTERNAL MODULE: ./node_modules/d3-array/src/bisector.js
+var bisector = __webpack_require__("2a2d");
+
+// EXTERNAL MODULE: ./node_modules/vega-time/build/vega-time.module.js
+var vega_time_module = __webpack_require__("de28");
 
 // CONCATENATED MODULE: ./node_modules/vega-transforms/build/vega-transforms.module.js
 
@@ -26730,7 +27337,7 @@ TimeUnit.Definition = {
   }, {
     'name': 'units',
     'type': 'enum',
-    'values': TIME_UNITS,
+    'values': vega_time_module["j" /* TIME_UNITS */],
     'array': true
   }, {
     'name': 'step',
@@ -26763,7 +27370,7 @@ Object(vega_util_module["z" /* inherits */])(TimeUnit, Transform, {
           band = _.interval !== false,
           utc = _.timezone === 'utc',
           floor = this._floor(_, pulse),
-          offset = (utc ? utcInterval : timeInterval)(floor.unit).offset,
+          offset = (utc ? vega_time_module["v" /* utcInterval */] : vega_time_module["p" /* timeInterval */])(floor.unit).offset,
           as = _.as || OUTPUT,
           u0 = as[0],
           u1 = as[1],
@@ -26808,14 +27415,14 @@ Object(vega_util_module["z" /* inherits */])(TimeUnit, Transform, {
     } = _.units ? {
       units: _.units,
       step: _.step || 1
-    } : vega_time_module_bin({
+    } : Object(vega_time_module["n" /* timeBin */])({
       extent: _.extent || Object(vega_util_module["q" /* extent */])(pulse.materialize(pulse.SOURCE).source, _.field),
       maxbins: _.maxbins
     }); // check / standardize time units
 
-    const tunits = vega_time_module_timeUnits(units),
+    const tunits = Object(vega_time_module["t" /* timeUnits */])(units),
           prev = this.value || {},
-          floor = (utc ? utcFloor : timeFloor)(tunits, step);
+          floor = (utc ? vega_time_module["u" /* utcFloor */] : vega_time_module["o" /* timeFloor */])(tunits, step);
     floor.unit = Object(vega_util_module["W" /* peek */])(tunits);
     floor.units = tunits;
     floor.step = step;
@@ -27305,7 +27912,7 @@ function processPartition(list, state, cmp, _) {
         data = list.data(cmp),
         // use cmp for stable sort
   n = data.length,
-        b = range ? bisector(sort) : null,
+        b = range ? Object(bisector["a" /* default */])(sort) : null,
         w = {
     i0: 0,
     i1: 0,
@@ -29058,11 +29665,11 @@ const domImage = () =>
 
 
 
-const ascendingBisect = bisector(ascending);
+const ascendingBisect = Object(bisector["a" /* default */])(ascending["a" /* default */]);
 const bisectRight = ascendingBisect.right;
 const bisectLeft = ascendingBisect.left;
-const bisectCenter = bisector(src_number).center;
-/* harmony default export */ var d3_array_src_bisect = (bisectRight);
+const bisectCenter = Object(bisector["a" /* default */])(number).center;
+/* harmony default export */ var src_bisect = (bisectRight);
 
 // CONCATENATED MODULE: ./node_modules/d3-scale/src/init.js
 function initRange(domain, range) {
@@ -29140,35 +29747,53 @@ function ordinal() {
   return scale;
 }
 
+// EXTERNAL MODULE: ./node_modules/d3-array/src/ticks.js
+var src_ticks = __webpack_require__("eecb");
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/formatSpecifier.js
+var formatSpecifier = __webpack_require__("09b8");
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/precisionPrefix.js
+var precisionPrefix = __webpack_require__("d933");
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/defaultLocale.js
+var defaultLocale = __webpack_require__("1231");
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/precisionRound.js
+var precisionRound = __webpack_require__("d989");
+
+// EXTERNAL MODULE: ./node_modules/d3-format/src/precisionFixed.js
+var precisionFixed = __webpack_require__("dad1");
+
 // CONCATENATED MODULE: ./node_modules/d3-scale/src/tickFormat.js
 
 
 
 function tickFormat_tickFormat(start, stop, count, specifier) {
-  var step = tickStep(start, stop, count),
+  var step = Object(src_ticks["c" /* tickStep */])(start, stop, count),
       precision;
-  specifier = formatSpecifier(specifier == null ? ",f" : specifier);
+  specifier = Object(formatSpecifier["a" /* default */])(specifier == null ? ",f" : specifier);
   switch (specifier.type) {
     case "s": {
       var value = Math.max(Math.abs(start), Math.abs(stop));
-      if (specifier.precision == null && !isNaN(precision = precisionPrefix(step, value))) specifier.precision = precision;
-      return defaultLocale_formatPrefix(specifier, value);
+      if (specifier.precision == null && !isNaN(precision = Object(precisionPrefix["a" /* default */])(step, value))) specifier.precision = precision;
+      return Object(defaultLocale["b" /* formatPrefix */])(specifier, value);
     }
     case "":
     case "e":
     case "g":
     case "p":
     case "r": {
-      if (specifier.precision == null && !isNaN(precision = precisionRound(step, Math.max(Math.abs(start), Math.abs(stop))))) specifier.precision = precision - (specifier.type === "e");
+      if (specifier.precision == null && !isNaN(precision = Object(precisionRound["a" /* default */])(step, Math.max(Math.abs(start), Math.abs(stop))))) specifier.precision = precision - (specifier.type === "e");
       break;
     }
     case "f":
     case "%": {
-      if (specifier.precision == null && !isNaN(precision = precisionFixed(step))) specifier.precision = precision - (specifier.type === "%") * 2;
+      if (specifier.precision == null && !isNaN(precision = Object(precisionFixed["a" /* default */])(step))) specifier.precision = precision - (specifier.type === "%") * 2;
       break;
     }
   }
-  return defaultLocale_format(specifier);
+  return Object(defaultLocale["a" /* format */])(specifier);
 }
 
 // CONCATENATED MODULE: ./node_modules/d3-color/src/define.js
@@ -29732,7 +30357,7 @@ function genericArray(a, b) {
 });
 
 // CONCATENATED MODULE: ./node_modules/d3-interpolate/src/number.js
-/* harmony default export */ var d3_interpolate_src_number = (function(a, b) {
+/* harmony default export */ var src_number = (function(a, b) {
   return a = +a, b = +b, function(t) {
     return a * (1 - t) + b * t;
   };
@@ -29806,7 +30431,7 @@ function one(b) {
       else s[++i] = bm;
     } else { // interpolate non-matching numbers
       s[++i] = null;
-      q.push({i: i, x: d3_interpolate_src_number(am, bm)});
+      q.push({i: i, x: src_number(am, bm)});
     }
     bi = reB.lastIndex;
   }
@@ -29843,14 +30468,14 @@ function one(b) {
 /* harmony default export */ var src_value = (function(a, b) {
   var t = typeof b, c;
   return b == null || t === "boolean" ? d3_interpolate_src_constant(b)
-      : (t === "number" ? d3_interpolate_src_number
+      : (t === "number" ? src_number
       : t === "string" ? ((c = color_color(b)) ? (b = c, src_rgb) : src_string)
       : b instanceof color_color ? src_rgb
       : b instanceof Date ? src_date
       : isNumberArray(b) ? numberArray
       : Array.isArray(b) ? genericArray
       : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? src_object
-      : d3_interpolate_src_number)(a, b);
+      : src_number)(a, b);
 });
 
 // CONCATENATED MODULE: ./node_modules/d3-interpolate/src/round.js
@@ -29880,7 +30505,7 @@ function number_number(x) {
 
 var continuous_unit = [0, 1];
 
-function continuous_identity(x) {
+function identity(x) {
   return x;
 }
 
@@ -29923,7 +30548,7 @@ function polymap(domain, range, interpolate) {
   }
 
   return function(x) {
-    var i = d3_array_src_bisect(domain, x, 1, j) - 1;
+    var i = src_bisect(domain, x, 1, j) - 1;
     return r[i](d[i](x));
   };
 }
@@ -29944,14 +30569,14 @@ function transformer() {
       transform,
       untransform,
       unknown,
-      clamp = continuous_identity,
+      clamp = identity,
       piecewise,
       output,
       input;
 
   function rescale() {
     var n = Math.min(domain.length, range.length);
-    if (clamp !== continuous_identity) clamp = clamper(domain[0], domain[n - 1]);
+    if (clamp !== identity) clamp = clamper(domain[0], domain[n - 1]);
     piecewise = n > 2 ? polymap : bimap;
     output = input = null;
     return scale;
@@ -29962,7 +30587,7 @@ function transformer() {
   }
 
   scale.invert = function(y) {
-    return clamp(untransform((input || (input = piecewise(range, domain.map(transform), d3_interpolate_src_number)))(y)));
+    return clamp(untransform((input || (input = piecewise(range, domain.map(transform), src_number)))(y)));
   };
 
   scale.domain = function(_) {
@@ -29978,7 +30603,7 @@ function transformer() {
   };
 
   scale.clamp = function(_) {
-    return arguments.length ? (clamp = _ ? true : continuous_identity, rescale()) : clamp !== continuous_identity;
+    return arguments.length ? (clamp = _ ? true : identity, rescale()) : clamp !== identity;
   };
 
   scale.interpolate = function(_) {
@@ -29996,7 +30621,7 @@ function transformer() {
 }
 
 function continuous() {
-  return transformer()(continuous_identity, continuous_identity);
+  return transformer()(identity, identity);
 }
 
 // CONCATENATED MODULE: ./node_modules/d3-scale/src/linear.js
@@ -30010,7 +30635,7 @@ function linearish(scale) {
 
   scale.ticks = function(count) {
     var d = domain();
-    return src_ticks(d[0], d[d.length - 1], count == null ? 10 : count);
+    return Object(src_ticks["a" /* default */])(d[0], d[d.length - 1], count == null ? 10 : count);
   };
 
   scale.tickFormat = function(count, specifier) {
@@ -30036,7 +30661,7 @@ function linearish(scale) {
     }
     
     while (maxIter-- > 0) {
-      step = tickIncrement(start, stop, count);
+      step = Object(src_ticks["b" /* tickIncrement */])(start, stop, count);
       if (step === prestep) {
         d[i0] = start
         d[i1] = stop
@@ -30226,9 +30851,9 @@ function loggish(transform) {
           z.push(t);
         }
       }
-      if (z.length * 2 < n) z = src_ticks(u, v, n);
+      if (z.length * 2 < n) z = Object(src_ticks["a" /* default */])(u, v, n);
     } else {
-      z = src_ticks(i, j, Math.min(j - i, n)).map(pows);
+      z = Object(src_ticks["a" /* default */])(i, j, Math.min(j - i, n)).map(pows);
     }
 
     return r ? z.reverse() : z;
@@ -30236,7 +30861,7 @@ function loggish(transform) {
 
   scale.tickFormat = function(count, specifier) {
     if (specifier == null) specifier = base === 10 ? ".0e" : ",";
-    if (typeof specifier !== "function") specifier = defaultLocale_format(specifier);
+    if (typeof specifier !== "function") specifier = Object(defaultLocale["a" /* format */])(specifier);
     if (count === Infinity) return specifier;
     if (count == null) count = 10;
     var k = Math.max(1, base * count / scale.ticks().length); // TODO fast estimate?
@@ -30289,11 +30914,11 @@ function transformSquare(x) {
 }
 
 function powish(transform) {
-  var scale = transform(continuous_identity, continuous_identity),
+  var scale = transform(identity, identity),
       exponent = 1;
 
   function rescale() {
-    return exponent === 1 ? transform(continuous_identity, continuous_identity)
+    return exponent === 1 ? transform(identity, identity)
         : exponent === 0.5 ? transform(transformSqrt, transformSquare)
         : transform(transformPow(exponent), transformPow(1 / exponent));
   }
@@ -30358,6 +30983,51 @@ function symlog() {
   return initRange.apply(scale, arguments);
 }
 
+// EXTERNAL MODULE: ./node_modules/d3-time/src/duration.js
+var duration = __webpack_require__("1738");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/millisecond.js
+var millisecond = __webpack_require__("1809");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/second.js
+var src_second = __webpack_require__("5edf");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/minute.js
+var src_minute = __webpack_require__("2c38");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/hour.js
+var src_hour = __webpack_require__("b3c3");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/day.js
+var src_day = __webpack_require__("742c");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/week.js
+var src_week = __webpack_require__("b14c");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/month.js
+var src_month = __webpack_require__("9603");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/year.js
+var src_year = __webpack_require__("a15a");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/utcMinute.js
+var utcMinute = __webpack_require__("f8ee");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/utcHour.js
+var utcHour = __webpack_require__("f623");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/utcDay.js
+var utcDay = __webpack_require__("6eb2");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/utcWeek.js
+var utcWeek = __webpack_require__("2739");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/utcMonth.js
+var utcMonth = __webpack_require__("55f8");
+
+// EXTERNAL MODULE: ./node_modules/d3-time/src/utcYear.js
+var utcYear = __webpack_require__("77ae");
+
 // CONCATENATED MODULE: ./node_modules/d3-time/src/ticks.js
 
 
@@ -30379,24 +31049,24 @@ function symlog() {
 function ticker(year, month, week, day, hour, minute) {
 
   const tickIntervals = [
-    [src_second,  1,      durationSecond],
-    [src_second,  5,  5 * durationSecond],
-    [src_second, 15, 15 * durationSecond],
-    [src_second, 30, 30 * durationSecond],
-    [minute,  1,      durationMinute],
-    [minute,  5,  5 * durationMinute],
-    [minute, 15, 15 * durationMinute],
-    [minute, 30, 30 * durationMinute],
-    [  hour,  1,      durationHour  ],
-    [  hour,  3,  3 * durationHour  ],
-    [  hour,  6,  6 * durationHour  ],
-    [  hour, 12, 12 * durationHour  ],
-    [   day,  1,      durationDay   ],
-    [   day,  2,  2 * durationDay   ],
-    [  week,  1,      durationWeek  ],
-    [ month,  1,      durationMonth ],
-    [ month,  3,  3 * durationMonth ],
-    [  year,  1,      durationYear  ]
+    [src_second["a" /* default */],  1,      duration["e" /* durationSecond */]],
+    [src_second["a" /* default */],  5,  5 * duration["e" /* durationSecond */]],
+    [src_second["a" /* default */], 15, 15 * duration["e" /* durationSecond */]],
+    [src_second["a" /* default */], 30, 30 * duration["e" /* durationSecond */]],
+    [minute,  1,      duration["c" /* durationMinute */]],
+    [minute,  5,  5 * duration["c" /* durationMinute */]],
+    [minute, 15, 15 * duration["c" /* durationMinute */]],
+    [minute, 30, 30 * duration["c" /* durationMinute */]],
+    [  hour,  1,      duration["b" /* durationHour */]  ],
+    [  hour,  3,  3 * duration["b" /* durationHour */]  ],
+    [  hour,  6,  6 * duration["b" /* durationHour */]  ],
+    [  hour, 12, 12 * duration["b" /* durationHour */]  ],
+    [   day,  1,      duration["a" /* durationDay */]   ],
+    [   day,  2,  2 * duration["a" /* durationDay */]   ],
+    [  week,  1,      duration["f" /* durationWeek */]  ],
+    [ month,  1,      duration["d" /* durationMonth */] ],
+    [ month,  3,  3 * duration["d" /* durationMonth */] ],
+    [  year,  1,      duration["g" /* durationYear */]  ]
   ];
 
   function ticks(start, stop, count) {
@@ -30409,9 +31079,9 @@ function ticker(year, month, week, day, hour, minute) {
 
   function tickInterval(start, stop, count) {
     const target = Math.abs(stop - start) / count;
-    const i = bisector(([,, step]) => step).right(tickIntervals, target);
-    if (i === tickIntervals.length) return year.every(tickStep(start / durationYear, stop / durationYear, count));
-    if (i === 0) return src_millisecond.every(Math.max(tickStep(start, stop, count), 1));
+    const i = Object(bisector["a" /* default */])(([,, step]) => step).right(tickIntervals, target);
+    if (i === tickIntervals.length) return year.every(Object(src_ticks["c" /* tickStep */])(start / duration["g" /* durationYear */], stop / duration["g" /* durationYear */], count));
+    if (i === 0) return millisecond["a" /* default */].every(Math.max(Object(src_ticks["c" /* tickStep */])(start, stop, count), 1));
     const [t, step] = tickIntervals[target / tickIntervals[i - 1][2] < tickIntervals[i][2] / target ? i - 1 : i];
     return t.every(step);
   }
@@ -30419,10 +31089,13 @@ function ticker(year, month, week, day, hour, minute) {
   return [ticks, tickInterval];
 }
 
-const [utcTicks, utcTickInterval] = ticker(src_utcYear, src_utcMonth, utcSunday, src_utcDay, src_utcHour, src_utcMinute);
-const [timeTicks, timeTickInterval] = ticker(src_year, src_month, sunday, src_day, src_hour, src_minute);
+const [utcTicks, utcTickInterval] = ticker(utcYear["a" /* default */], utcMonth["a" /* default */], utcWeek["b" /* utcSunday */], utcDay["a" /* default */], utcHour["a" /* default */], utcMinute["a" /* default */]);
+const [timeTicks, timeTickInterval] = ticker(src_year["a" /* default */], src_month["a" /* default */], src_week["b" /* sunday */], src_day["a" /* default */], src_hour["a" /* default */], src_minute["a" /* default */]);
 
 
+
+// EXTERNAL MODULE: ./node_modules/d3-time-format/src/defaultLocale.js
+var src_defaultLocale = __webpack_require__("4c23");
 
 // CONCATENATED MODULE: ./node_modules/d3-scale/src/time.js
 
@@ -30494,7 +31167,7 @@ function calendar(ticks, tickInterval, year, month, week, day, hour, minute, sec
 }
 
 function time_time() {
-  return initRange.apply(calendar(timeTicks, timeTickInterval, src_year, src_month, sunday, src_day, src_hour, src_minute, src_second, defaultLocale_timeFormat).domain([new Date(2000, 0, 1), new Date(2000, 0, 2)]), arguments);
+  return initRange.apply(calendar(timeTicks, timeTickInterval, src_year["a" /* default */], src_month["a" /* default */], src_week["b" /* sunday */], src_day["a" /* default */], src_hour["a" /* default */], src_minute["a" /* default */], src_second["a" /* default */], src_defaultLocale["a" /* timeFormat */]).domain([new Date(2000, 0, 1), new Date(2000, 0, 2)]), arguments);
 }
 
 // CONCATENATED MODULE: ./node_modules/d3-scale/src/utcTime.js
@@ -30504,7 +31177,7 @@ function time_time() {
 
 
 function utcTime() {
-  return initRange.apply(calendar(utcTicks, utcTickInterval, src_utcYear, src_utcMonth, utcSunday, src_utcDay, src_utcHour, src_utcMinute, src_second, defaultLocale_utcFormat).domain([Date.UTC(2000, 0, 1), Date.UTC(2000, 0, 2)]), arguments);
+  return initRange.apply(calendar(utcTicks, utcTickInterval, utcYear["a" /* default */], utcMonth["a" /* default */], utcWeek["b" /* utcSunday */], utcDay["a" /* default */], utcHour["a" /* default */], utcMinute["a" /* default */], src_second["a" /* default */], src_defaultLocale["c" /* utcFormat */]).domain([Date.UTC(2000, 0, 1), Date.UTC(2000, 0, 2)]), arguments);
 }
 
 // CONCATENATED MODULE: ./node_modules/d3-scale/src/sequential.js
@@ -30523,7 +31196,7 @@ function sequential_transformer() {
       t1,
       k10,
       transform,
-      interpolator = continuous_identity,
+      interpolator = identity,
       clamp = false,
       unknown;
 
@@ -30573,7 +31246,7 @@ function sequential_copy(source, target) {
 }
 
 function sequential() {
-  var scale = linearish(sequential_transformer()(continuous_identity));
+  var scale = linearish(sequential_transformer()(identity));
 
   scale.copy = function() {
     return sequential_copy(scale, sequential());
@@ -30649,7 +31322,7 @@ function diverging_transformer() {
       t2,
       k10,
       k21,
-      interpolator = continuous_identity,
+      interpolator = identity,
       transform,
       clamp = false,
       unknown;
@@ -30692,7 +31365,7 @@ function diverging_transformer() {
 }
 
 function diverging() {
-  var scale = linearish(diverging_transformer()(continuous_identity));
+  var scale = linearish(diverging_transformer()(identity));
 
   scale.copy = function() {
     return sequential_copy(scale, diverging());
@@ -30753,7 +31426,7 @@ function src_quantile_quantile() {
   }
 
   function scale(x) {
-    return x == null || isNaN(x = +x) ? unknown : range[d3_array_src_bisect(thresholds, x)];
+    return x == null || isNaN(x = +x) ? unknown : range[src_bisect(thresholds, x)];
   }
 
   scale.invertExtent = function(y) {
@@ -30768,7 +31441,7 @@ function src_quantile_quantile() {
     if (!arguments.length) return domain.slice();
     domain = [];
     for (let d of _) if (d != null && !isNaN(d = +d)) domain.push(d);
-    domain.sort(ascending);
+    domain.sort(ascending["a" /* default */]);
     return rescale();
   };
 
@@ -30799,7 +31472,7 @@ function src_quantile_quantile() {
 
 
 
-function quantize_quantize() {
+function quantize() {
   var x0 = 0,
       x1 = 1,
       n = 1,
@@ -30808,7 +31481,7 @@ function quantize_quantize() {
       unknown;
 
   function scale(x) {
-    return x != null && x <= x ? range[d3_array_src_bisect(domain, x, 0, n)] : unknown;
+    return x != null && x <= x ? range[src_bisect(domain, x, 0, n)] : unknown;
   }
 
   function rescale() {
@@ -30843,7 +31516,7 @@ function quantize_quantize() {
   };
 
   scale.copy = function() {
-    return quantize_quantize()
+    return quantize()
         .domain([x0, x1])
         .range(range)
         .unknown(unknown);
@@ -30863,7 +31536,7 @@ function threshold_threshold() {
       n = 1;
 
   function scale(x) {
-    return x != null && x <= x ? range[d3_array_src_bisect(domain, x, 0, n)] : unknown;
+    return x != null && x <= x ? range[src_bisect(domain, x, 0, n)] : unknown;
   }
 
   scale.domain = function(_) {
@@ -30973,7 +31646,7 @@ function interpolateTransform(parse, pxComma, pxParen, degParen) {
   function translate(xa, ya, xb, yb, s, q) {
     if (xa !== xb || ya !== yb) {
       var i = s.push("translate(", null, pxComma, null, pxParen);
-      q.push({i: i - 4, x: d3_interpolate_src_number(xa, xb)}, {i: i - 2, x: d3_interpolate_src_number(ya, yb)});
+      q.push({i: i - 4, x: src_number(xa, xb)}, {i: i - 2, x: src_number(ya, yb)});
     } else if (xb || yb) {
       s.push("translate(" + xb + pxComma + yb + pxParen);
     }
@@ -30982,7 +31655,7 @@ function interpolateTransform(parse, pxComma, pxParen, degParen) {
   function rotate(a, b, s, q) {
     if (a !== b) {
       if (a - b > 180) b += 360; else if (b - a > 180) a += 360; // shortest path
-      q.push({i: s.push(pop(s) + "rotate(", null, degParen) - 2, x: d3_interpolate_src_number(a, b)});
+      q.push({i: s.push(pop(s) + "rotate(", null, degParen) - 2, x: src_number(a, b)});
     } else if (b) {
       s.push(pop(s) + "rotate(" + b + degParen);
     }
@@ -30990,7 +31663,7 @@ function interpolateTransform(parse, pxComma, pxParen, degParen) {
 
   function skewX(a, b, s, q) {
     if (a !== b) {
-      q.push({i: s.push(pop(s) + "skewX(", null, degParen) - 2, x: d3_interpolate_src_number(a, b)});
+      q.push({i: s.push(pop(s) + "skewX(", null, degParen) - 2, x: src_number(a, b)});
     } else if (b) {
       s.push(pop(s) + "skewX(" + b + degParen);
     }
@@ -30999,7 +31672,7 @@ function interpolateTransform(parse, pxComma, pxParen, degParen) {
   function scale(xa, ya, xb, yb, s, q) {
     if (xa !== xb || ya !== yb) {
       var i = s.push(pop(s) + "scale(", null, ",", null, ")");
-      q.push({i: i - 4, x: d3_interpolate_src_number(xa, xb)}, {i: i - 2, x: d3_interpolate_src_number(ya, yb)});
+      q.push({i: i - 4, x: src_number(xa, xb)}, {i: i - 2, x: src_number(ya, yb)});
     } else if (xb !== 1 || yb !== 1) {
       s.push(pop(s) + "scale(" + xb + "," + yb + ")");
     }
@@ -31692,7 +32365,7 @@ function scaleBinOrdinal() {
       range = [];
 
   function scale(x) {
-    return x == null || x !== x ? undefined : range[(d3_array_src_bisect(domain, x) - 1) % range.length];
+    return x == null || x !== x ? undefined : range[(src_bisect(domain, x) - 1) % range.length];
   }
 
   scale.domain = function (_) {
@@ -31779,7 +32452,7 @@ vega_scale_module_scale("".concat(Diverging, "-").concat(Sqrt), divergingSqrt, [
 vega_scale_module_scale("".concat(Diverging, "-").concat(Symlog), divergingSymlog, [Continuous, Interpolating]); // discretizing scales
 
 vega_scale_module_scale(vega_scale_module_Quantile, src_quantile_quantile, [Discretizing, vega_scale_module_Quantile]);
-vega_scale_module_scale(Quantize, quantize_quantize, Discretizing);
+vega_scale_module_scale(Quantize, quantize, Discretizing);
 vega_scale_module_scale(Threshold, threshold_threshold, Discretizing); // discrete scales
 
 vega_scale_module_scale(BinOrdinal, scaleBinOrdinal, [Discrete, Discretizing]);
@@ -31857,7 +32530,7 @@ function scaleFraction(scale$1, min, max) {
   }
 }
 function vega_scale_module_interpolate(type, gamma) {
-  const interp = d3_interpolate_src_namespaceObject[vega_scale_module_method(type)];
+  const interp = src_namespaceObject[vega_scale_module_method(type)];
   return gamma != null && interp && interp.gamma ? interp.gamma(gamma) : interp;
 }
 
@@ -32003,7 +32676,7 @@ function tickCount(scale, count, minStep) {
   }
 
   if (Object(vega_util_module["J" /* isString */])(count)) {
-    count = scale.type === Time ? timeInterval(count) : scale.type == UTC ? utcInterval(count) : Object(vega_util_module["o" /* error */])('Only time and utc scales accept interval strings.');
+    count = scale.type === Time ? Object(vega_time_module["p" /* timeInterval */])(count) : scale.type == UTC ? Object(vega_time_module["v" /* utcInterval */])(count) : Object(vega_util_module["o" /* error */])('Only time and utc scales accept interval strings.');
     if (step) count = count.every(step);
   }
 
@@ -33461,7 +34134,7 @@ Object(vega_util_module["z" /* inherits */])(GroupItem, Item);
 
 function ResourceLoader(customLoader) {
   this._pending = 0;
-  this._loader = customLoader || index_browser_loader();
+  this._loader = customLoader || Object(vega_loader_browser_module["e" /* loader */])();
 }
 
 function increment(loader) {
@@ -35197,7 +35870,7 @@ function resolveItem (item, event, el, origin) {
 function vega_scenegraph_module_Handler(customLoader, customTooltip) {
   this._active = null;
   this._handlers = {};
-  this._loader = customLoader || index_browser_loader();
+  this._loader = customLoader || Object(vega_loader_browser_module["e" /* loader */])();
   this._tooltip = customTooltip || defaultTooltip;
 } // The default tooltip display handler.
 // Sets the HTML title attribute on the visualization container.
@@ -39901,7 +40574,7 @@ function vega_encode_module_partition(data, groupby, sort, field) {
 
 
 // CONCATENATED MODULE: ./node_modules/d3-geo/src/identity.js
-/* harmony default export */ var d3_geo_src_identity = (x => x);
+/* harmony default export */ var src_identity = (x => x);
 
 // CONCATENATED MODULE: ./node_modules/d3-geo/src/stream.js
 function streamGeometry(geometry, stream) {
@@ -40469,7 +41142,7 @@ function string_circle(radius) {
   };
 
   path.projection = function(_) {
-    return arguments.length ? (projectionStream = _ == null ? (projection = null, d3_geo_src_identity) : (projection = _).stream, path) : projection;
+    return arguments.length ? (projectionStream = _ == null ? (projection = null, src_identity) : (projection = _).stream, path) : projection;
   };
 
   path.context = function(_) {
@@ -41562,7 +42235,7 @@ function clipRectangle(x0, y0, x1, y1) {
 }
 
 // CONCATENATED MODULE: ./node_modules/d3-geo/src/transform.js
-/* harmony default export */ var d3_geo_src_transform = (function(methods) {
+/* harmony default export */ var src_transform = (function(methods) {
   return {
     stream: transform_transformer(methods)
   };
@@ -41814,7 +42487,7 @@ function projectionMutator(projectAt) {
       sx = 1, // reflectX
       sy = 1, // reflectX
       theta = null, preclip = clip_antimeridian, // pre-clip angle
-      x0 = null, y0, x1, y1, postclip = d3_geo_src_identity, // post-clip extent
+      x0 = null, y0, x1, y1, postclip = src_identity, // post-clip extent
       delta2 = 0.5, // precision
       projectResample,
       projectTransform,
@@ -41848,7 +42521,7 @@ function projectionMutator(projectAt) {
   };
 
   projection.clipExtent = function(_) {
-    return arguments.length ? (postclip = _ == null ? (x0 = y0 = x1 = y1 = null, d3_geo_src_identity) : clipRectangle(x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1]), reset()) : x0 == null ? null : [[x0, y0], [x1, y1]];
+    return arguments.length ? (postclip = _ == null ? (x0 = y0 = x1 = y1 = null, src_identity) : clipRectangle(x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1]), reset()) : x0 == null ? null : [[x0, y0], [x1, y1]];
   };
 
   projection.scale = function(_) {
@@ -42398,7 +43071,7 @@ gnomonicRaw.invert = azimuthalInvert(atan);
           this.stream.point(p[0], p[1]);
         }
       }),
-      postclip = d3_geo_src_identity,
+      postclip = src_identity,
       cache,
       cacheStream;
 
@@ -42434,7 +43107,7 @@ gnomonicRaw.invert = azimuthalInvert(atan);
     return arguments.length ? (postclip = _, x0 = y0 = x1 = y1 = null, reset()) : postclip;
   };
   projection.clipExtent = function(_) {
-    return arguments.length ? (postclip = _ == null ? (x0 = y0 = x1 = y1 = null, d3_geo_src_identity) : clipRectangle(x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1]), reset()) : x0 == null ? null : [[x0, y0], [x1, y1]];
+    return arguments.length ? (postclip = _ == null ? (x0 = y0 = x1 = y1 = null, src_identity) : clipRectangle(x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1]), reset()) : x0 == null ? null : [[x0, y0], [x1, y1]];
   };
   projection.scale = function(_) {
     return arguments.length ? (k = +_, reset()) : k;
@@ -43099,7 +43772,7 @@ function vega_geo_module_quantize (k, nice, zero) {
         start = zero ? Math.min(ex[0], 0) : ex[0],
         stop = ex[1],
         span = stop - start,
-        step = nice ? tickStep(start, stop, k) : span / (k + 1);
+        step = nice ? Object(src_ticks["c" /* tickStep */])(start, stop, k) : span / (k + 1);
     return src_range(start + step, stop, step);
   };
 }
@@ -51584,7 +52257,7 @@ Object(vega_util_module["z" /* inherits */])(ResolveFilter, Transform, {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vega-expression/build/vega-expression.module.js
+// CONCATENATED MODULE: ./node_modules/vega-functions/node_modules/vega-expression/build/vega-expression.module.js
 
 
 const RawCode = 'RawCode';
@@ -51765,20 +52438,11 @@ function isLineTerminator(ch) {
 
 
 function isIdentifierStart(ch) {
-  return ch === 0x24 || ch === 0x5F || // $ (dollar) and _ (underscore)
-  ch >= 0x41 && ch <= 0x5A || // A..Z
-  ch >= 0x61 && ch <= 0x7A || // a..z
-  ch === 0x5C || // \ (backslash)
-  ch >= 0x80 && RegexNonAsciiIdentifierStart.test(String.fromCharCode(ch));
+  return ch === 0x24 || ch === 0x5F || ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A || ch === 0x5C || ch >= 0x80 && RegexNonAsciiIdentifierStart.test(String.fromCharCode(ch));
 }
 
 function isIdentifierPart(ch) {
-  return ch === 0x24 || ch === 0x5F || // $ (dollar) and _ (underscore)
-  ch >= 0x41 && ch <= 0x5A || // A..Z
-  ch >= 0x61 && ch <= 0x7A || // a..z
-  ch >= 0x30 && ch <= 0x39 || // 0..9
-  ch === 0x5C || // \ (backslash)
-  ch >= 0x80 && RegexNonAsciiIdentifierPart.test(String.fromCharCode(ch));
+  return ch === 0x24 || ch === 0x5F || ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A || ch >= 0x30 && ch <= 0x39 || ch === 0x5C || ch >= 0x80 && RegexNonAsciiIdentifierPart.test(String.fromCharCode(ch));
 } // 7.6.1.1 Keywords
 
 
@@ -53268,7 +53932,7 @@ function vega_expression_module_codegen (opt) {
         functions = (opt.functions || Functions)(visit),
         globalvar = opt.globalvar,
         fieldvar = opt.fieldvar,
-        outputGlobal = Object(vega_util_module["E" /* isFunction */])(globalvar) ? globalvar : id => "".concat(globalvar, "[\"").concat(id, "\"]");
+        outputGlobal = Object(vega_util_module["E" /* isFunction */])(globalvar) ? globalvar : id => `${globalvar}["${id}"]`;
   let globals = {},
       fields = {},
       memberDepth = 0;
@@ -53759,6 +54423,1768 @@ function centroidRingPoint(lambda, phi) {
   return [math_atan2(y, x) * src_math_degrees, math_asin(z / m) * src_math_degrees];
 });
 
+// CONCATENATED MODULE: ./node_modules/vega-selections/node_modules/vega-expression/build/vega-expression.module.js
+
+
+const vega_expression_module_RawCode = 'RawCode';
+const vega_expression_module_Literal = 'Literal';
+const vega_expression_module_Property = 'Property';
+const build_vega_expression_module_Identifier = 'Identifier';
+const vega_expression_module_ArrayExpression = 'ArrayExpression';
+const vega_expression_module_BinaryExpression = 'BinaryExpression';
+const build_vega_expression_module_CallExpression = 'CallExpression';
+const vega_expression_module_ConditionalExpression = 'ConditionalExpression';
+const vega_expression_module_LogicalExpression = 'LogicalExpression';
+const vega_expression_module_MemberExpression = 'MemberExpression';
+const vega_expression_module_ObjectExpression = 'ObjectExpression';
+const vega_expression_module_UnaryExpression = 'UnaryExpression';
+function vega_expression_module_ASTNode(type) {
+  this.type = type;
+}
+
+vega_expression_module_ASTNode.prototype.visit = function (visitor) {
+  let c, i, n;
+  if (visitor(this)) return 1;
+
+  for (c = build_vega_expression_module_children(this), i = 0, n = c.length; i < n; ++i) {
+    if (c[i].visit(visitor)) return 1;
+  }
+};
+
+function build_vega_expression_module_children(node) {
+  switch (node.type) {
+    case vega_expression_module_ArrayExpression:
+      return node.elements;
+
+    case vega_expression_module_BinaryExpression:
+    case vega_expression_module_LogicalExpression:
+      return [node.left, node.right];
+
+    case build_vega_expression_module_CallExpression:
+      return [node.callee].concat(node.arguments);
+
+    case vega_expression_module_ConditionalExpression:
+      return [node.test, node.consequent, node.alternate];
+
+    case vega_expression_module_MemberExpression:
+      return [node.object, node.property];
+
+    case vega_expression_module_ObjectExpression:
+      return node.properties;
+
+    case vega_expression_module_Property:
+      return [node.key, node.value];
+
+    case vega_expression_module_UnaryExpression:
+      return [node.argument];
+
+    case build_vega_expression_module_Identifier:
+    case vega_expression_module_Literal:
+    case vega_expression_module_RawCode:
+    default:
+      return [];
+  }
+}
+
+/*
+  The following expression parser is based on Esprima (http://esprima.org/).
+  Original header comment and license for Esprima is included here:
+
+  Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
+  Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
+  Copyright (C) 2013 Mathias Bynens <mathias@qiwi.be>
+  Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
+  Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
+  Copyright (C) 2012 Joost-Wim Boekesteijn <joost-wim@boekesteijn.nl>
+  Copyright (C) 2012 Kris Kowal <kris.kowal@cixar.com>
+  Copyright (C) 2012 Yusuke Suzuki <utatane.tea@gmail.com>
+  Copyright (C) 2012 Arpad Borsos <arpad.borsos@googlemail.com>
+  Copyright (C) 2011 Ariya Hidayat <ariya.hidayat@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+var vega_expression_module_TokenName, build_vega_expression_module_source, build_vega_expression_module_index, build_vega_expression_module_length, vega_expression_module_lookahead;
+var vega_expression_module_TokenBooleanLiteral = 1,
+    vega_expression_module_TokenEOF = 2,
+    vega_expression_module_TokenIdentifier = 3,
+    vega_expression_module_TokenKeyword = 4,
+    vega_expression_module_TokenNullLiteral = 5,
+    vega_expression_module_TokenNumericLiteral = 6,
+    vega_expression_module_TokenPunctuator = 7,
+    vega_expression_module_TokenStringLiteral = 8,
+    vega_expression_module_TokenRegularExpression = 9;
+vega_expression_module_TokenName = {};
+vega_expression_module_TokenName[vega_expression_module_TokenBooleanLiteral] = 'Boolean';
+vega_expression_module_TokenName[vega_expression_module_TokenEOF] = '<end>';
+vega_expression_module_TokenName[vega_expression_module_TokenIdentifier] = 'Identifier';
+vega_expression_module_TokenName[vega_expression_module_TokenKeyword] = 'Keyword';
+vega_expression_module_TokenName[vega_expression_module_TokenNullLiteral] = 'Null';
+vega_expression_module_TokenName[vega_expression_module_TokenNumericLiteral] = 'Numeric';
+vega_expression_module_TokenName[vega_expression_module_TokenPunctuator] = 'Punctuator';
+vega_expression_module_TokenName[vega_expression_module_TokenStringLiteral] = 'String';
+vega_expression_module_TokenName[vega_expression_module_TokenRegularExpression] = 'RegularExpression';
+var vega_expression_module_SyntaxArrayExpression = 'ArrayExpression',
+    vega_expression_module_SyntaxBinaryExpression = 'BinaryExpression',
+    vega_expression_module_SyntaxCallExpression = 'CallExpression',
+    vega_expression_module_SyntaxConditionalExpression = 'ConditionalExpression',
+    vega_expression_module_SyntaxIdentifier = 'Identifier',
+    vega_expression_module_SyntaxLiteral = 'Literal',
+    vega_expression_module_SyntaxLogicalExpression = 'LogicalExpression',
+    vega_expression_module_SyntaxMemberExpression = 'MemberExpression',
+    vega_expression_module_SyntaxObjectExpression = 'ObjectExpression',
+    vega_expression_module_SyntaxProperty = 'Property',
+    vega_expression_module_SyntaxUnaryExpression = 'UnaryExpression'; // Error messages should be identical to V8.
+
+var vega_expression_module_MessageUnexpectedToken = 'Unexpected token %0',
+    vega_expression_module_MessageUnexpectedNumber = 'Unexpected number',
+    vega_expression_module_MessageUnexpectedString = 'Unexpected string',
+    vega_expression_module_MessageUnexpectedIdentifier = 'Unexpected identifier',
+    vega_expression_module_MessageUnexpectedReserved = 'Unexpected reserved word',
+    vega_expression_module_MessageUnexpectedEOS = 'Unexpected end of input',
+    vega_expression_module_MessageInvalidRegExp = 'Invalid regular expression',
+    vega_expression_module_MessageUnterminatedRegExp = 'Invalid regular expression: missing /',
+    vega_expression_module_MessageStrictOctalLiteral = 'Octal literals are not allowed in strict mode.',
+    vega_expression_module_MessageStrictDuplicateProperty = 'Duplicate data property in object literal not allowed in strict mode';
+var vega_expression_module_ILLEGAL = 'ILLEGAL',
+    vega_expression_module_DISABLED = 'Disabled.'; // See also tools/generate-unicode-regex.py.
+
+var vega_expression_module_RegexNonAsciiIdentifierStart = new RegExp('[\\xAA\\xB5\\xBA\\xC0-\\xD6\\xD8-\\xF6\\xF8-\\u02C1\\u02C6-\\u02D1\\u02E0-\\u02E4\\u02EC\\u02EE\\u0370-\\u0374\\u0376\\u0377\\u037A-\\u037D\\u037F\\u0386\\u0388-\\u038A\\u038C\\u038E-\\u03A1\\u03A3-\\u03F5\\u03F7-\\u0481\\u048A-\\u052F\\u0531-\\u0556\\u0559\\u0561-\\u0587\\u05D0-\\u05EA\\u05F0-\\u05F2\\u0620-\\u064A\\u066E\\u066F\\u0671-\\u06D3\\u06D5\\u06E5\\u06E6\\u06EE\\u06EF\\u06FA-\\u06FC\\u06FF\\u0710\\u0712-\\u072F\\u074D-\\u07A5\\u07B1\\u07CA-\\u07EA\\u07F4\\u07F5\\u07FA\\u0800-\\u0815\\u081A\\u0824\\u0828\\u0840-\\u0858\\u08A0-\\u08B2\\u0904-\\u0939\\u093D\\u0950\\u0958-\\u0961\\u0971-\\u0980\\u0985-\\u098C\\u098F\\u0990\\u0993-\\u09A8\\u09AA-\\u09B0\\u09B2\\u09B6-\\u09B9\\u09BD\\u09CE\\u09DC\\u09DD\\u09DF-\\u09E1\\u09F0\\u09F1\\u0A05-\\u0A0A\\u0A0F\\u0A10\\u0A13-\\u0A28\\u0A2A-\\u0A30\\u0A32\\u0A33\\u0A35\\u0A36\\u0A38\\u0A39\\u0A59-\\u0A5C\\u0A5E\\u0A72-\\u0A74\\u0A85-\\u0A8D\\u0A8F-\\u0A91\\u0A93-\\u0AA8\\u0AAA-\\u0AB0\\u0AB2\\u0AB3\\u0AB5-\\u0AB9\\u0ABD\\u0AD0\\u0AE0\\u0AE1\\u0B05-\\u0B0C\\u0B0F\\u0B10\\u0B13-\\u0B28\\u0B2A-\\u0B30\\u0B32\\u0B33\\u0B35-\\u0B39\\u0B3D\\u0B5C\\u0B5D\\u0B5F-\\u0B61\\u0B71\\u0B83\\u0B85-\\u0B8A\\u0B8E-\\u0B90\\u0B92-\\u0B95\\u0B99\\u0B9A\\u0B9C\\u0B9E\\u0B9F\\u0BA3\\u0BA4\\u0BA8-\\u0BAA\\u0BAE-\\u0BB9\\u0BD0\\u0C05-\\u0C0C\\u0C0E-\\u0C10\\u0C12-\\u0C28\\u0C2A-\\u0C39\\u0C3D\\u0C58\\u0C59\\u0C60\\u0C61\\u0C85-\\u0C8C\\u0C8E-\\u0C90\\u0C92-\\u0CA8\\u0CAA-\\u0CB3\\u0CB5-\\u0CB9\\u0CBD\\u0CDE\\u0CE0\\u0CE1\\u0CF1\\u0CF2\\u0D05-\\u0D0C\\u0D0E-\\u0D10\\u0D12-\\u0D3A\\u0D3D\\u0D4E\\u0D60\\u0D61\\u0D7A-\\u0D7F\\u0D85-\\u0D96\\u0D9A-\\u0DB1\\u0DB3-\\u0DBB\\u0DBD\\u0DC0-\\u0DC6\\u0E01-\\u0E30\\u0E32\\u0E33\\u0E40-\\u0E46\\u0E81\\u0E82\\u0E84\\u0E87\\u0E88\\u0E8A\\u0E8D\\u0E94-\\u0E97\\u0E99-\\u0E9F\\u0EA1-\\u0EA3\\u0EA5\\u0EA7\\u0EAA\\u0EAB\\u0EAD-\\u0EB0\\u0EB2\\u0EB3\\u0EBD\\u0EC0-\\u0EC4\\u0EC6\\u0EDC-\\u0EDF\\u0F00\\u0F40-\\u0F47\\u0F49-\\u0F6C\\u0F88-\\u0F8C\\u1000-\\u102A\\u103F\\u1050-\\u1055\\u105A-\\u105D\\u1061\\u1065\\u1066\\u106E-\\u1070\\u1075-\\u1081\\u108E\\u10A0-\\u10C5\\u10C7\\u10CD\\u10D0-\\u10FA\\u10FC-\\u1248\\u124A-\\u124D\\u1250-\\u1256\\u1258\\u125A-\\u125D\\u1260-\\u1288\\u128A-\\u128D\\u1290-\\u12B0\\u12B2-\\u12B5\\u12B8-\\u12BE\\u12C0\\u12C2-\\u12C5\\u12C8-\\u12D6\\u12D8-\\u1310\\u1312-\\u1315\\u1318-\\u135A\\u1380-\\u138F\\u13A0-\\u13F4\\u1401-\\u166C\\u166F-\\u167F\\u1681-\\u169A\\u16A0-\\u16EA\\u16EE-\\u16F8\\u1700-\\u170C\\u170E-\\u1711\\u1720-\\u1731\\u1740-\\u1751\\u1760-\\u176C\\u176E-\\u1770\\u1780-\\u17B3\\u17D7\\u17DC\\u1820-\\u1877\\u1880-\\u18A8\\u18AA\\u18B0-\\u18F5\\u1900-\\u191E\\u1950-\\u196D\\u1970-\\u1974\\u1980-\\u19AB\\u19C1-\\u19C7\\u1A00-\\u1A16\\u1A20-\\u1A54\\u1AA7\\u1B05-\\u1B33\\u1B45-\\u1B4B\\u1B83-\\u1BA0\\u1BAE\\u1BAF\\u1BBA-\\u1BE5\\u1C00-\\u1C23\\u1C4D-\\u1C4F\\u1C5A-\\u1C7D\\u1CE9-\\u1CEC\\u1CEE-\\u1CF1\\u1CF5\\u1CF6\\u1D00-\\u1DBF\\u1E00-\\u1F15\\u1F18-\\u1F1D\\u1F20-\\u1F45\\u1F48-\\u1F4D\\u1F50-\\u1F57\\u1F59\\u1F5B\\u1F5D\\u1F5F-\\u1F7D\\u1F80-\\u1FB4\\u1FB6-\\u1FBC\\u1FBE\\u1FC2-\\u1FC4\\u1FC6-\\u1FCC\\u1FD0-\\u1FD3\\u1FD6-\\u1FDB\\u1FE0-\\u1FEC\\u1FF2-\\u1FF4\\u1FF6-\\u1FFC\\u2071\\u207F\\u2090-\\u209C\\u2102\\u2107\\u210A-\\u2113\\u2115\\u2119-\\u211D\\u2124\\u2126\\u2128\\u212A-\\u212D\\u212F-\\u2139\\u213C-\\u213F\\u2145-\\u2149\\u214E\\u2160-\\u2188\\u2C00-\\u2C2E\\u2C30-\\u2C5E\\u2C60-\\u2CE4\\u2CEB-\\u2CEE\\u2CF2\\u2CF3\\u2D00-\\u2D25\\u2D27\\u2D2D\\u2D30-\\u2D67\\u2D6F\\u2D80-\\u2D96\\u2DA0-\\u2DA6\\u2DA8-\\u2DAE\\u2DB0-\\u2DB6\\u2DB8-\\u2DBE\\u2DC0-\\u2DC6\\u2DC8-\\u2DCE\\u2DD0-\\u2DD6\\u2DD8-\\u2DDE\\u2E2F\\u3005-\\u3007\\u3021-\\u3029\\u3031-\\u3035\\u3038-\\u303C\\u3041-\\u3096\\u309D-\\u309F\\u30A1-\\u30FA\\u30FC-\\u30FF\\u3105-\\u312D\\u3131-\\u318E\\u31A0-\\u31BA\\u31F0-\\u31FF\\u3400-\\u4DB5\\u4E00-\\u9FCC\\uA000-\\uA48C\\uA4D0-\\uA4FD\\uA500-\\uA60C\\uA610-\\uA61F\\uA62A\\uA62B\\uA640-\\uA66E\\uA67F-\\uA69D\\uA6A0-\\uA6EF\\uA717-\\uA71F\\uA722-\\uA788\\uA78B-\\uA78E\\uA790-\\uA7AD\\uA7B0\\uA7B1\\uA7F7-\\uA801\\uA803-\\uA805\\uA807-\\uA80A\\uA80C-\\uA822\\uA840-\\uA873\\uA882-\\uA8B3\\uA8F2-\\uA8F7\\uA8FB\\uA90A-\\uA925\\uA930-\\uA946\\uA960-\\uA97C\\uA984-\\uA9B2\\uA9CF\\uA9E0-\\uA9E4\\uA9E6-\\uA9EF\\uA9FA-\\uA9FE\\uAA00-\\uAA28\\uAA40-\\uAA42\\uAA44-\\uAA4B\\uAA60-\\uAA76\\uAA7A\\uAA7E-\\uAAAF\\uAAB1\\uAAB5\\uAAB6\\uAAB9-\\uAABD\\uAAC0\\uAAC2\\uAADB-\\uAADD\\uAAE0-\\uAAEA\\uAAF2-\\uAAF4\\uAB01-\\uAB06\\uAB09-\\uAB0E\\uAB11-\\uAB16\\uAB20-\\uAB26\\uAB28-\\uAB2E\\uAB30-\\uAB5A\\uAB5C-\\uAB5F\\uAB64\\uAB65\\uABC0-\\uABE2\\uAC00-\\uD7A3\\uD7B0-\\uD7C6\\uD7CB-\\uD7FB\\uF900-\\uFA6D\\uFA70-\\uFAD9\\uFB00-\\uFB06\\uFB13-\\uFB17\\uFB1D\\uFB1F-\\uFB28\\uFB2A-\\uFB36\\uFB38-\\uFB3C\\uFB3E\\uFB40\\uFB41\\uFB43\\uFB44\\uFB46-\\uFBB1\\uFBD3-\\uFD3D\\uFD50-\\uFD8F\\uFD92-\\uFDC7\\uFDF0-\\uFDFB\\uFE70-\\uFE74\\uFE76-\\uFEFC\\uFF21-\\uFF3A\\uFF41-\\uFF5A\\uFF66-\\uFFBE\\uFFC2-\\uFFC7\\uFFCA-\\uFFCF\\uFFD2-\\uFFD7\\uFFDA-\\uFFDC]'),
+    // eslint-disable-next-line no-misleading-character-class
+vega_expression_module_RegexNonAsciiIdentifierPart = new RegExp('[\\xAA\\xB5\\xBA\\xC0-\\xD6\\xD8-\\xF6\\xF8-\\u02C1\\u02C6-\\u02D1\\u02E0-\\u02E4\\u02EC\\u02EE\\u0300-\\u0374\\u0376\\u0377\\u037A-\\u037D\\u037F\\u0386\\u0388-\\u038A\\u038C\\u038E-\\u03A1\\u03A3-\\u03F5\\u03F7-\\u0481\\u0483-\\u0487\\u048A-\\u052F\\u0531-\\u0556\\u0559\\u0561-\\u0587\\u0591-\\u05BD\\u05BF\\u05C1\\u05C2\\u05C4\\u05C5\\u05C7\\u05D0-\\u05EA\\u05F0-\\u05F2\\u0610-\\u061A\\u0620-\\u0669\\u066E-\\u06D3\\u06D5-\\u06DC\\u06DF-\\u06E8\\u06EA-\\u06FC\\u06FF\\u0710-\\u074A\\u074D-\\u07B1\\u07C0-\\u07F5\\u07FA\\u0800-\\u082D\\u0840-\\u085B\\u08A0-\\u08B2\\u08E4-\\u0963\\u0966-\\u096F\\u0971-\\u0983\\u0985-\\u098C\\u098F\\u0990\\u0993-\\u09A8\\u09AA-\\u09B0\\u09B2\\u09B6-\\u09B9\\u09BC-\\u09C4\\u09C7\\u09C8\\u09CB-\\u09CE\\u09D7\\u09DC\\u09DD\\u09DF-\\u09E3\\u09E6-\\u09F1\\u0A01-\\u0A03\\u0A05-\\u0A0A\\u0A0F\\u0A10\\u0A13-\\u0A28\\u0A2A-\\u0A30\\u0A32\\u0A33\\u0A35\\u0A36\\u0A38\\u0A39\\u0A3C\\u0A3E-\\u0A42\\u0A47\\u0A48\\u0A4B-\\u0A4D\\u0A51\\u0A59-\\u0A5C\\u0A5E\\u0A66-\\u0A75\\u0A81-\\u0A83\\u0A85-\\u0A8D\\u0A8F-\\u0A91\\u0A93-\\u0AA8\\u0AAA-\\u0AB0\\u0AB2\\u0AB3\\u0AB5-\\u0AB9\\u0ABC-\\u0AC5\\u0AC7-\\u0AC9\\u0ACB-\\u0ACD\\u0AD0\\u0AE0-\\u0AE3\\u0AE6-\\u0AEF\\u0B01-\\u0B03\\u0B05-\\u0B0C\\u0B0F\\u0B10\\u0B13-\\u0B28\\u0B2A-\\u0B30\\u0B32\\u0B33\\u0B35-\\u0B39\\u0B3C-\\u0B44\\u0B47\\u0B48\\u0B4B-\\u0B4D\\u0B56\\u0B57\\u0B5C\\u0B5D\\u0B5F-\\u0B63\\u0B66-\\u0B6F\\u0B71\\u0B82\\u0B83\\u0B85-\\u0B8A\\u0B8E-\\u0B90\\u0B92-\\u0B95\\u0B99\\u0B9A\\u0B9C\\u0B9E\\u0B9F\\u0BA3\\u0BA4\\u0BA8-\\u0BAA\\u0BAE-\\u0BB9\\u0BBE-\\u0BC2\\u0BC6-\\u0BC8\\u0BCA-\\u0BCD\\u0BD0\\u0BD7\\u0BE6-\\u0BEF\\u0C00-\\u0C03\\u0C05-\\u0C0C\\u0C0E-\\u0C10\\u0C12-\\u0C28\\u0C2A-\\u0C39\\u0C3D-\\u0C44\\u0C46-\\u0C48\\u0C4A-\\u0C4D\\u0C55\\u0C56\\u0C58\\u0C59\\u0C60-\\u0C63\\u0C66-\\u0C6F\\u0C81-\\u0C83\\u0C85-\\u0C8C\\u0C8E-\\u0C90\\u0C92-\\u0CA8\\u0CAA-\\u0CB3\\u0CB5-\\u0CB9\\u0CBC-\\u0CC4\\u0CC6-\\u0CC8\\u0CCA-\\u0CCD\\u0CD5\\u0CD6\\u0CDE\\u0CE0-\\u0CE3\\u0CE6-\\u0CEF\\u0CF1\\u0CF2\\u0D01-\\u0D03\\u0D05-\\u0D0C\\u0D0E-\\u0D10\\u0D12-\\u0D3A\\u0D3D-\\u0D44\\u0D46-\\u0D48\\u0D4A-\\u0D4E\\u0D57\\u0D60-\\u0D63\\u0D66-\\u0D6F\\u0D7A-\\u0D7F\\u0D82\\u0D83\\u0D85-\\u0D96\\u0D9A-\\u0DB1\\u0DB3-\\u0DBB\\u0DBD\\u0DC0-\\u0DC6\\u0DCA\\u0DCF-\\u0DD4\\u0DD6\\u0DD8-\\u0DDF\\u0DE6-\\u0DEF\\u0DF2\\u0DF3\\u0E01-\\u0E3A\\u0E40-\\u0E4E\\u0E50-\\u0E59\\u0E81\\u0E82\\u0E84\\u0E87\\u0E88\\u0E8A\\u0E8D\\u0E94-\\u0E97\\u0E99-\\u0E9F\\u0EA1-\\u0EA3\\u0EA5\\u0EA7\\u0EAA\\u0EAB\\u0EAD-\\u0EB9\\u0EBB-\\u0EBD\\u0EC0-\\u0EC4\\u0EC6\\u0EC8-\\u0ECD\\u0ED0-\\u0ED9\\u0EDC-\\u0EDF\\u0F00\\u0F18\\u0F19\\u0F20-\\u0F29\\u0F35\\u0F37\\u0F39\\u0F3E-\\u0F47\\u0F49-\\u0F6C\\u0F71-\\u0F84\\u0F86-\\u0F97\\u0F99-\\u0FBC\\u0FC6\\u1000-\\u1049\\u1050-\\u109D\\u10A0-\\u10C5\\u10C7\\u10CD\\u10D0-\\u10FA\\u10FC-\\u1248\\u124A-\\u124D\\u1250-\\u1256\\u1258\\u125A-\\u125D\\u1260-\\u1288\\u128A-\\u128D\\u1290-\\u12B0\\u12B2-\\u12B5\\u12B8-\\u12BE\\u12C0\\u12C2-\\u12C5\\u12C8-\\u12D6\\u12D8-\\u1310\\u1312-\\u1315\\u1318-\\u135A\\u135D-\\u135F\\u1380-\\u138F\\u13A0-\\u13F4\\u1401-\\u166C\\u166F-\\u167F\\u1681-\\u169A\\u16A0-\\u16EA\\u16EE-\\u16F8\\u1700-\\u170C\\u170E-\\u1714\\u1720-\\u1734\\u1740-\\u1753\\u1760-\\u176C\\u176E-\\u1770\\u1772\\u1773\\u1780-\\u17D3\\u17D7\\u17DC\\u17DD\\u17E0-\\u17E9\\u180B-\\u180D\\u1810-\\u1819\\u1820-\\u1877\\u1880-\\u18AA\\u18B0-\\u18F5\\u1900-\\u191E\\u1920-\\u192B\\u1930-\\u193B\\u1946-\\u196D\\u1970-\\u1974\\u1980-\\u19AB\\u19B0-\\u19C9\\u19D0-\\u19D9\\u1A00-\\u1A1B\\u1A20-\\u1A5E\\u1A60-\\u1A7C\\u1A7F-\\u1A89\\u1A90-\\u1A99\\u1AA7\\u1AB0-\\u1ABD\\u1B00-\\u1B4B\\u1B50-\\u1B59\\u1B6B-\\u1B73\\u1B80-\\u1BF3\\u1C00-\\u1C37\\u1C40-\\u1C49\\u1C4D-\\u1C7D\\u1CD0-\\u1CD2\\u1CD4-\\u1CF6\\u1CF8\\u1CF9\\u1D00-\\u1DF5\\u1DFC-\\u1F15\\u1F18-\\u1F1D\\u1F20-\\u1F45\\u1F48-\\u1F4D\\u1F50-\\u1F57\\u1F59\\u1F5B\\u1F5D\\u1F5F-\\u1F7D\\u1F80-\\u1FB4\\u1FB6-\\u1FBC\\u1FBE\\u1FC2-\\u1FC4\\u1FC6-\\u1FCC\\u1FD0-\\u1FD3\\u1FD6-\\u1FDB\\u1FE0-\\u1FEC\\u1FF2-\\u1FF4\\u1FF6-\\u1FFC\\u200C\\u200D\\u203F\\u2040\\u2054\\u2071\\u207F\\u2090-\\u209C\\u20D0-\\u20DC\\u20E1\\u20E5-\\u20F0\\u2102\\u2107\\u210A-\\u2113\\u2115\\u2119-\\u211D\\u2124\\u2126\\u2128\\u212A-\\u212D\\u212F-\\u2139\\u213C-\\u213F\\u2145-\\u2149\\u214E\\u2160-\\u2188\\u2C00-\\u2C2E\\u2C30-\\u2C5E\\u2C60-\\u2CE4\\u2CEB-\\u2CF3\\u2D00-\\u2D25\\u2D27\\u2D2D\\u2D30-\\u2D67\\u2D6F\\u2D7F-\\u2D96\\u2DA0-\\u2DA6\\u2DA8-\\u2DAE\\u2DB0-\\u2DB6\\u2DB8-\\u2DBE\\u2DC0-\\u2DC6\\u2DC8-\\u2DCE\\u2DD0-\\u2DD6\\u2DD8-\\u2DDE\\u2DE0-\\u2DFF\\u2E2F\\u3005-\\u3007\\u3021-\\u302F\\u3031-\\u3035\\u3038-\\u303C\\u3041-\\u3096\\u3099\\u309A\\u309D-\\u309F\\u30A1-\\u30FA\\u30FC-\\u30FF\\u3105-\\u312D\\u3131-\\u318E\\u31A0-\\u31BA\\u31F0-\\u31FF\\u3400-\\u4DB5\\u4E00-\\u9FCC\\uA000-\\uA48C\\uA4D0-\\uA4FD\\uA500-\\uA60C\\uA610-\\uA62B\\uA640-\\uA66F\\uA674-\\uA67D\\uA67F-\\uA69D\\uA69F-\\uA6F1\\uA717-\\uA71F\\uA722-\\uA788\\uA78B-\\uA78E\\uA790-\\uA7AD\\uA7B0\\uA7B1\\uA7F7-\\uA827\\uA840-\\uA873\\uA880-\\uA8C4\\uA8D0-\\uA8D9\\uA8E0-\\uA8F7\\uA8FB\\uA900-\\uA92D\\uA930-\\uA953\\uA960-\\uA97C\\uA980-\\uA9C0\\uA9CF-\\uA9D9\\uA9E0-\\uA9FE\\uAA00-\\uAA36\\uAA40-\\uAA4D\\uAA50-\\uAA59\\uAA60-\\uAA76\\uAA7A-\\uAAC2\\uAADB-\\uAADD\\uAAE0-\\uAAEF\\uAAF2-\\uAAF6\\uAB01-\\uAB06\\uAB09-\\uAB0E\\uAB11-\\uAB16\\uAB20-\\uAB26\\uAB28-\\uAB2E\\uAB30-\\uAB5A\\uAB5C-\\uAB5F\\uAB64\\uAB65\\uABC0-\\uABEA\\uABEC\\uABED\\uABF0-\\uABF9\\uAC00-\\uD7A3\\uD7B0-\\uD7C6\\uD7CB-\\uD7FB\\uF900-\\uFA6D\\uFA70-\\uFAD9\\uFB00-\\uFB06\\uFB13-\\uFB17\\uFB1D-\\uFB28\\uFB2A-\\uFB36\\uFB38-\\uFB3C\\uFB3E\\uFB40\\uFB41\\uFB43\\uFB44\\uFB46-\\uFBB1\\uFBD3-\\uFD3D\\uFD50-\\uFD8F\\uFD92-\\uFDC7\\uFDF0-\\uFDFB\\uFE00-\\uFE0F\\uFE20-\\uFE2D\\uFE33\\uFE34\\uFE4D-\\uFE4F\\uFE70-\\uFE74\\uFE76-\\uFEFC\\uFF10-\\uFF19\\uFF21-\\uFF3A\\uFF3F\\uFF41-\\uFF5A\\uFF66-\\uFFBE\\uFFC2-\\uFFC7\\uFFCA-\\uFFCF\\uFFD2-\\uFFD7\\uFFDA-\\uFFDC]'); // Ensure the condition is true, otherwise throw an error.
+// This is only to have a better contract semantic, i.e. another safety net
+// to catch a logic error. The condition shall be fulfilled in normal case.
+// Do NOT use this to enforce a certain condition on any user input.
+
+function vega_expression_module_assert(condition, message) {
+  /* istanbul ignore next */
+  if (!condition) {
+    throw new Error('ASSERT: ' + message);
+  }
+}
+
+function vega_expression_module_isDecimalDigit(ch) {
+  return ch >= 0x30 && ch <= 0x39; // 0..9
+}
+
+function vega_expression_module_isHexDigit(ch) {
+  return '0123456789abcdefABCDEF'.indexOf(ch) >= 0;
+}
+
+function vega_expression_module_isOctalDigit(ch) {
+  return '01234567'.indexOf(ch) >= 0;
+} // 7.2 White Space
+
+
+function vega_expression_module_isWhiteSpace(ch) {
+  return ch === 0x20 || ch === 0x09 || ch === 0x0B || ch === 0x0C || ch === 0xA0 || ch >= 0x1680 && [0x1680, 0x180E, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000, 0xFEFF].indexOf(ch) >= 0;
+} // 7.3 Line Terminators
+
+
+function vega_expression_module_isLineTerminator(ch) {
+  return ch === 0x0A || ch === 0x0D || ch === 0x2028 || ch === 0x2029;
+} // 7.6 Identifier Names and Identifiers
+
+
+function vega_expression_module_isIdentifierStart(ch) {
+  return ch === 0x24 || ch === 0x5F || ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A || ch === 0x5C || ch >= 0x80 && vega_expression_module_RegexNonAsciiIdentifierStart.test(String.fromCharCode(ch));
+}
+
+function vega_expression_module_isIdentifierPart(ch) {
+  return ch === 0x24 || ch === 0x5F || ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A || ch >= 0x30 && ch <= 0x39 || ch === 0x5C || ch >= 0x80 && vega_expression_module_RegexNonAsciiIdentifierPart.test(String.fromCharCode(ch));
+} // 7.6.1.1 Keywords
+
+
+const vega_expression_module_keywords = {
+  'if': 1,
+  'in': 1,
+  'do': 1,
+  'var': 1,
+  'for': 1,
+  'new': 1,
+  'try': 1,
+  'let': 1,
+  'this': 1,
+  'else': 1,
+  'case': 1,
+  'void': 1,
+  'with': 1,
+  'enum': 1,
+  'while': 1,
+  'break': 1,
+  'catch': 1,
+  'throw': 1,
+  'const': 1,
+  'yield': 1,
+  'class': 1,
+  'super': 1,
+  'return': 1,
+  'typeof': 1,
+  'delete': 1,
+  'switch': 1,
+  'export': 1,
+  'import': 1,
+  'public': 1,
+  'static': 1,
+  'default': 1,
+  'finally': 1,
+  'extends': 1,
+  'package': 1,
+  'private': 1,
+  'function': 1,
+  'continue': 1,
+  'debugger': 1,
+  'interface': 1,
+  'protected': 1,
+  'instanceof': 1,
+  'implements': 1
+};
+
+function vega_expression_module_skipComment() {
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    const ch = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index);
+
+    if (vega_expression_module_isWhiteSpace(ch) || vega_expression_module_isLineTerminator(ch)) {
+      ++build_vega_expression_module_index;
+    } else {
+      break;
+    }
+  }
+}
+
+function vega_expression_module_scanHexEscape(prefix) {
+  var i,
+      len,
+      ch,
+      code = 0;
+  len = prefix === 'u' ? 4 : 2;
+
+  for (i = 0; i < len; ++i) {
+    if (build_vega_expression_module_index < build_vega_expression_module_length && vega_expression_module_isHexDigit(build_vega_expression_module_source[build_vega_expression_module_index])) {
+      ch = build_vega_expression_module_source[build_vega_expression_module_index++];
+      code = code * 16 + '0123456789abcdef'.indexOf(ch.toLowerCase());
+    } else {
+      vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+    }
+  }
+
+  return String.fromCharCode(code);
+}
+
+function vega_expression_module_scanUnicodeCodePointEscape() {
+  var ch, code, cu1, cu2;
+  ch = build_vega_expression_module_source[build_vega_expression_module_index];
+  code = 0; // At least, one hex digit is required.
+
+  if (ch === '}') {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  }
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    ch = build_vega_expression_module_source[build_vega_expression_module_index++];
+
+    if (!vega_expression_module_isHexDigit(ch)) {
+      break;
+    }
+
+    code = code * 16 + '0123456789abcdef'.indexOf(ch.toLowerCase());
+  }
+
+  if (code > 0x10FFFF || ch !== '}') {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  } // UTF-16 Encoding
+
+
+  if (code <= 0xFFFF) {
+    return String.fromCharCode(code);
+  }
+
+  cu1 = (code - 0x10000 >> 10) + 0xD800;
+  cu2 = (code - 0x10000 & 1023) + 0xDC00;
+  return String.fromCharCode(cu1, cu2);
+}
+
+function vega_expression_module_getEscapedIdentifier() {
+  var ch, id;
+  ch = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index++);
+  id = String.fromCharCode(ch); // '\u' (U+005C, U+0075) denotes an escaped character.
+
+  if (ch === 0x5C) {
+    if (build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index) !== 0x75) {
+      vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+    }
+
+    ++build_vega_expression_module_index;
+    ch = vega_expression_module_scanHexEscape('u');
+
+    if (!ch || ch === '\\' || !vega_expression_module_isIdentifierStart(ch.charCodeAt(0))) {
+      vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+    }
+
+    id = ch;
+  }
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    ch = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index);
+
+    if (!vega_expression_module_isIdentifierPart(ch)) {
+      break;
+    }
+
+    ++build_vega_expression_module_index;
+    id += String.fromCharCode(ch); // '\u' (U+005C, U+0075) denotes an escaped character.
+
+    if (ch === 0x5C) {
+      id = id.substr(0, id.length - 1);
+
+      if (build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index) !== 0x75) {
+        vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+      }
+
+      ++build_vega_expression_module_index;
+      ch = vega_expression_module_scanHexEscape('u');
+
+      if (!ch || ch === '\\' || !vega_expression_module_isIdentifierPart(ch.charCodeAt(0))) {
+        vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+      }
+
+      id += ch;
+    }
+  }
+
+  return id;
+}
+
+function vega_expression_module_getIdentifier() {
+  var start, ch;
+  start = build_vega_expression_module_index++;
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    ch = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index);
+
+    if (ch === 0x5C) {
+      // Blackslash (U+005C) marks Unicode escape sequence.
+      build_vega_expression_module_index = start;
+      return vega_expression_module_getEscapedIdentifier();
+    }
+
+    if (vega_expression_module_isIdentifierPart(ch)) {
+      ++build_vega_expression_module_index;
+    } else {
+      break;
+    }
+  }
+
+  return build_vega_expression_module_source.slice(start, build_vega_expression_module_index);
+}
+
+function vega_expression_module_scanIdentifier() {
+  var start, id, type;
+  start = build_vega_expression_module_index; // Backslash (U+005C) starts an escaped character.
+
+  id = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index) === 0x5C ? vega_expression_module_getEscapedIdentifier() : vega_expression_module_getIdentifier(); // There is no keyword or literal with only one character.
+  // Thus, it must be an identifier.
+
+  if (id.length === 1) {
+    type = vega_expression_module_TokenIdentifier;
+  } else if (vega_expression_module_keywords.hasOwnProperty(id)) {
+    // eslint-disable-line no-prototype-builtins
+    type = vega_expression_module_TokenKeyword;
+  } else if (id === 'null') {
+    type = vega_expression_module_TokenNullLiteral;
+  } else if (id === 'true' || id === 'false') {
+    type = vega_expression_module_TokenBooleanLiteral;
+  } else {
+    type = vega_expression_module_TokenIdentifier;
+  }
+
+  return {
+    type: type,
+    value: id,
+    start: start,
+    end: build_vega_expression_module_index
+  };
+} // 7.7 Punctuators
+
+
+function vega_expression_module_scanPunctuator() {
+  var start = build_vega_expression_module_index,
+      code = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index),
+      code2,
+      ch1 = build_vega_expression_module_source[build_vega_expression_module_index],
+      ch2,
+      ch3,
+      ch4;
+
+  switch (code) {
+    // Check for most common single-character punctuators.
+    case 0x2E: // . dot
+
+    case 0x28: // ( open bracket
+
+    case 0x29: // ) close bracket
+
+    case 0x3B: // ; semicolon
+
+    case 0x2C: // , comma
+
+    case 0x7B: // { open curly brace
+
+    case 0x7D: // } close curly brace
+
+    case 0x5B: // [
+
+    case 0x5D: // ]
+
+    case 0x3A: // :
+
+    case 0x3F: // ?
+
+    case 0x7E:
+      // ~
+      ++build_vega_expression_module_index;
+      return {
+        type: vega_expression_module_TokenPunctuator,
+        value: String.fromCharCode(code),
+        start: start,
+        end: build_vega_expression_module_index
+      };
+
+    default:
+      code2 = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index + 1); // '=' (U+003D) marks an assignment or comparison operator.
+
+      if (code2 === 0x3D) {
+        switch (code) {
+          case 0x2B: // +
+
+          case 0x2D: // -
+
+          case 0x2F: // /
+
+          case 0x3C: // <
+
+          case 0x3E: // >
+
+          case 0x5E: // ^
+
+          case 0x7C: // |
+
+          case 0x25: // %
+
+          case 0x26: // &
+
+          case 0x2A:
+            // *
+            build_vega_expression_module_index += 2;
+            return {
+              type: vega_expression_module_TokenPunctuator,
+              value: String.fromCharCode(code) + String.fromCharCode(code2),
+              start: start,
+              end: build_vega_expression_module_index
+            };
+
+          case 0x21: // !
+
+          case 0x3D:
+            // =
+            build_vega_expression_module_index += 2; // !== and ===
+
+            if (build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index) === 0x3D) {
+              ++build_vega_expression_module_index;
+            }
+
+            return {
+              type: vega_expression_module_TokenPunctuator,
+              value: build_vega_expression_module_source.slice(start, build_vega_expression_module_index),
+              start: start,
+              end: build_vega_expression_module_index
+            };
+        }
+      }
+
+  } // 4-character punctuator: >>>=
+
+
+  ch4 = build_vega_expression_module_source.substr(build_vega_expression_module_index, 4);
+
+  if (ch4 === '>>>=') {
+    build_vega_expression_module_index += 4;
+    return {
+      type: vega_expression_module_TokenPunctuator,
+      value: ch4,
+      start: start,
+      end: build_vega_expression_module_index
+    };
+  } // 3-character punctuators: === !== >>> <<= >>=
+
+
+  ch3 = ch4.substr(0, 3);
+
+  if (ch3 === '>>>' || ch3 === '<<=' || ch3 === '>>=') {
+    build_vega_expression_module_index += 3;
+    return {
+      type: vega_expression_module_TokenPunctuator,
+      value: ch3,
+      start: start,
+      end: build_vega_expression_module_index
+    };
+  } // Other 2-character punctuators: ++ -- << >> && ||
+
+
+  ch2 = ch3.substr(0, 2);
+
+  if (ch1 === ch2[1] && '+-<>&|'.indexOf(ch1) >= 0 || ch2 === '=>') {
+    build_vega_expression_module_index += 2;
+    return {
+      type: vega_expression_module_TokenPunctuator,
+      value: ch2,
+      start: start,
+      end: build_vega_expression_module_index
+    };
+  }
+
+  if (ch2 === '//') {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  } // 1-character punctuators: < > = ! + - * % & | ^ /
+
+
+  if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
+    ++build_vega_expression_module_index;
+    return {
+      type: vega_expression_module_TokenPunctuator,
+      value: ch1,
+      start: start,
+      end: build_vega_expression_module_index
+    };
+  }
+
+  vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+} // 7.8.3 Numeric Literals
+
+
+function vega_expression_module_scanHexLiteral(start) {
+  let number = '';
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    if (!vega_expression_module_isHexDigit(build_vega_expression_module_source[build_vega_expression_module_index])) {
+      break;
+    }
+
+    number += build_vega_expression_module_source[build_vega_expression_module_index++];
+  }
+
+  if (number.length === 0) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  }
+
+  if (vega_expression_module_isIdentifierStart(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: vega_expression_module_TokenNumericLiteral,
+    value: parseInt('0x' + number, 16),
+    start: start,
+    end: build_vega_expression_module_index
+  };
+}
+
+function vega_expression_module_scanOctalLiteral(start) {
+  let number = '0' + build_vega_expression_module_source[build_vega_expression_module_index++];
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    if (!vega_expression_module_isOctalDigit(build_vega_expression_module_source[build_vega_expression_module_index])) {
+      break;
+    }
+
+    number += build_vega_expression_module_source[build_vega_expression_module_index++];
+  }
+
+  if (vega_expression_module_isIdentifierStart(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index)) || vega_expression_module_isDecimalDigit(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: vega_expression_module_TokenNumericLiteral,
+    value: parseInt(number, 8),
+    octal: true,
+    start: start,
+    end: build_vega_expression_module_index
+  };
+}
+
+function vega_expression_module_scanNumericLiteral() {
+  var number, start, ch;
+  ch = build_vega_expression_module_source[build_vega_expression_module_index];
+  vega_expression_module_assert(vega_expression_module_isDecimalDigit(ch.charCodeAt(0)) || ch === '.', 'Numeric literal must start with a decimal digit or a decimal point');
+  start = build_vega_expression_module_index;
+  number = '';
+
+  if (ch !== '.') {
+    number = build_vega_expression_module_source[build_vega_expression_module_index++];
+    ch = build_vega_expression_module_source[build_vega_expression_module_index]; // Hex number starts with '0x'.
+    // Octal number starts with '0'.
+
+    if (number === '0') {
+      if (ch === 'x' || ch === 'X') {
+        ++build_vega_expression_module_index;
+        return vega_expression_module_scanHexLiteral(start);
+      }
+
+      if (vega_expression_module_isOctalDigit(ch)) {
+        return vega_expression_module_scanOctalLiteral(start);
+      } // decimal number starts with '0' such as '09' is illegal.
+
+
+      if (ch && vega_expression_module_isDecimalDigit(ch.charCodeAt(0))) {
+        vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+      }
+    }
+
+    while (vega_expression_module_isDecimalDigit(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+      number += build_vega_expression_module_source[build_vega_expression_module_index++];
+    }
+
+    ch = build_vega_expression_module_source[build_vega_expression_module_index];
+  }
+
+  if (ch === '.') {
+    number += build_vega_expression_module_source[build_vega_expression_module_index++];
+
+    while (vega_expression_module_isDecimalDigit(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+      number += build_vega_expression_module_source[build_vega_expression_module_index++];
+    }
+
+    ch = build_vega_expression_module_source[build_vega_expression_module_index];
+  }
+
+  if (ch === 'e' || ch === 'E') {
+    number += build_vega_expression_module_source[build_vega_expression_module_index++];
+    ch = build_vega_expression_module_source[build_vega_expression_module_index];
+
+    if (ch === '+' || ch === '-') {
+      number += build_vega_expression_module_source[build_vega_expression_module_index++];
+    }
+
+    if (vega_expression_module_isDecimalDigit(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+      while (vega_expression_module_isDecimalDigit(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+        number += build_vega_expression_module_source[build_vega_expression_module_index++];
+      }
+    } else {
+      vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+    }
+  }
+
+  if (vega_expression_module_isIdentifierStart(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index))) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: vega_expression_module_TokenNumericLiteral,
+    value: parseFloat(number),
+    start: start,
+    end: build_vega_expression_module_index
+  };
+} // 7.8.4 String Literals
+
+
+function vega_expression_module_scanStringLiteral() {
+  var str = '',
+      quote,
+      start,
+      ch,
+      code,
+      octal = false;
+  quote = build_vega_expression_module_source[build_vega_expression_module_index];
+  vega_expression_module_assert(quote === '\'' || quote === '"', 'String literal must starts with a quote');
+  start = build_vega_expression_module_index;
+  ++build_vega_expression_module_index;
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    ch = build_vega_expression_module_source[build_vega_expression_module_index++];
+
+    if (ch === quote) {
+      quote = '';
+      break;
+    } else if (ch === '\\') {
+      ch = build_vega_expression_module_source[build_vega_expression_module_index++];
+
+      if (!ch || !vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+        switch (ch) {
+          case 'u':
+          case 'x':
+            if (build_vega_expression_module_source[build_vega_expression_module_index] === '{') {
+              ++build_vega_expression_module_index;
+              str += vega_expression_module_scanUnicodeCodePointEscape();
+            } else {
+              str += vega_expression_module_scanHexEscape(ch);
+            }
+
+            break;
+
+          case 'n':
+            str += '\n';
+            break;
+
+          case 'r':
+            str += '\r';
+            break;
+
+          case 't':
+            str += '\t';
+            break;
+
+          case 'b':
+            str += '\b';
+            break;
+
+          case 'f':
+            str += '\f';
+            break;
+
+          case 'v':
+            str += '\x0B';
+            break;
+
+          default:
+            if (vega_expression_module_isOctalDigit(ch)) {
+              code = '01234567'.indexOf(ch); // \0 is not octal escape sequence
+
+              if (code !== 0) {
+                octal = true;
+              }
+
+              if (build_vega_expression_module_index < build_vega_expression_module_length && vega_expression_module_isOctalDigit(build_vega_expression_module_source[build_vega_expression_module_index])) {
+                octal = true;
+                code = code * 8 + '01234567'.indexOf(build_vega_expression_module_source[build_vega_expression_module_index++]); // 3 digits are only allowed when string starts
+                // with 0, 1, 2, 3
+
+                if ('0123'.indexOf(ch) >= 0 && build_vega_expression_module_index < build_vega_expression_module_length && vega_expression_module_isOctalDigit(build_vega_expression_module_source[build_vega_expression_module_index])) {
+                  code = code * 8 + '01234567'.indexOf(build_vega_expression_module_source[build_vega_expression_module_index++]);
+                }
+              }
+
+              str += String.fromCharCode(code);
+            } else {
+              str += ch;
+            }
+
+            break;
+        }
+      } else {
+        if (ch === '\r' && build_vega_expression_module_source[build_vega_expression_module_index] === '\n') {
+          ++build_vega_expression_module_index;
+        }
+      }
+    } else if (vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+      break;
+    } else {
+      str += ch;
+    }
+  }
+
+  if (quote !== '') {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: vega_expression_module_TokenStringLiteral,
+    value: str,
+    octal: octal,
+    start: start,
+    end: build_vega_expression_module_index
+  };
+}
+
+function vega_expression_module_testRegExp(pattern, flags) {
+  let tmp = pattern;
+
+  if (flags.indexOf('u') >= 0) {
+    // Replace each astral symbol and every Unicode code point
+    // escape sequence with a single ASCII symbol to avoid throwing on
+    // regular expressions that are only valid in combination with the
+    // `/u` flag.
+    // Note: replacing with the ASCII symbol `x` might cause false
+    // negatives in unlikely scenarios. For example, `[\u{61}-b]` is a
+    // perfectly valid pattern that is equivalent to `[a-b]`, but it
+    // would be replaced by `[x-b]` which throws an error.
+    tmp = tmp.replace(/\\u\{([0-9a-fA-F]+)\}/g, ($0, $1) => {
+      if (parseInt($1, 16) <= 0x10FFFF) {
+        return 'x';
+      }
+
+      vega_expression_module_throwError({}, vega_expression_module_MessageInvalidRegExp);
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, 'x');
+  } // First, detect invalid regular expressions.
+
+
+  try {
+    new RegExp(tmp);
+  } catch (e) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageInvalidRegExp);
+  } // Return a regular expression object for this pattern-flag pair, or
+  // `null` in case the current environment doesn't support the flags it
+  // uses.
+
+
+  try {
+    return new RegExp(pattern, flags);
+  } catch (exception) {
+    return null;
+  }
+}
+
+function vega_expression_module_scanRegExpBody() {
+  var ch, str, classMarker, terminated, body;
+  ch = build_vega_expression_module_source[build_vega_expression_module_index];
+  vega_expression_module_assert(ch === '/', 'Regular expression literal must start with a slash');
+  str = build_vega_expression_module_source[build_vega_expression_module_index++];
+  classMarker = false;
+  terminated = false;
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    ch = build_vega_expression_module_source[build_vega_expression_module_index++];
+    str += ch;
+
+    if (ch === '\\') {
+      ch = build_vega_expression_module_source[build_vega_expression_module_index++]; // ECMA-262 7.8.5
+
+      if (vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+        vega_expression_module_throwError({}, vega_expression_module_MessageUnterminatedRegExp);
+      }
+
+      str += ch;
+    } else if (vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+      vega_expression_module_throwError({}, vega_expression_module_MessageUnterminatedRegExp);
+    } else if (classMarker) {
+      if (ch === ']') {
+        classMarker = false;
+      }
+    } else {
+      if (ch === '/') {
+        terminated = true;
+        break;
+      } else if (ch === '[') {
+        classMarker = true;
+      }
+    }
+  }
+
+  if (!terminated) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageUnterminatedRegExp);
+  } // Exclude leading and trailing slash.
+
+
+  body = str.substr(1, str.length - 2);
+  return {
+    value: body,
+    literal: str
+  };
+}
+
+function vega_expression_module_scanRegExpFlags() {
+  var ch, str, flags;
+  str = '';
+  flags = '';
+
+  while (build_vega_expression_module_index < build_vega_expression_module_length) {
+    ch = build_vega_expression_module_source[build_vega_expression_module_index];
+
+    if (!vega_expression_module_isIdentifierPart(ch.charCodeAt(0))) {
+      break;
+    }
+
+    ++build_vega_expression_module_index;
+
+    if (ch === '\\' && build_vega_expression_module_index < build_vega_expression_module_length) {
+      vega_expression_module_throwError({}, vega_expression_module_MessageUnexpectedToken, vega_expression_module_ILLEGAL);
+    } else {
+      flags += ch;
+      str += ch;
+    }
+  }
+
+  if (flags.search(/[^gimuy]/g) >= 0) {
+    vega_expression_module_throwError({}, vega_expression_module_MessageInvalidRegExp, flags);
+  }
+
+  return {
+    value: flags,
+    literal: str
+  };
+}
+
+function vega_expression_module_scanRegExp() {
+  var start, body, flags, value;
+  vega_expression_module_lookahead = null;
+  vega_expression_module_skipComment();
+  start = build_vega_expression_module_index;
+  body = vega_expression_module_scanRegExpBody();
+  flags = vega_expression_module_scanRegExpFlags();
+  value = vega_expression_module_testRegExp(body.value, flags.value);
+  return {
+    literal: body.literal + flags.literal,
+    value: value,
+    regex: {
+      pattern: body.value,
+      flags: flags.value
+    },
+    start: start,
+    end: build_vega_expression_module_index
+  };
+}
+
+function vega_expression_module_isIdentifierName(token) {
+  return token.type === vega_expression_module_TokenIdentifier || token.type === vega_expression_module_TokenKeyword || token.type === vega_expression_module_TokenBooleanLiteral || token.type === vega_expression_module_TokenNullLiteral;
+}
+
+function vega_expression_module_advance() {
+  vega_expression_module_skipComment();
+
+  if (build_vega_expression_module_index >= build_vega_expression_module_length) {
+    return {
+      type: vega_expression_module_TokenEOF,
+      start: build_vega_expression_module_index,
+      end: build_vega_expression_module_index
+    };
+  }
+
+  const ch = build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index);
+
+  if (vega_expression_module_isIdentifierStart(ch)) {
+    return vega_expression_module_scanIdentifier();
+  } // Very common: ( and ) and ;
+
+
+  if (ch === 0x28 || ch === 0x29 || ch === 0x3B) {
+    return vega_expression_module_scanPunctuator();
+  } // String literal starts with single quote (U+0027) or double quote (U+0022).
+
+
+  if (ch === 0x27 || ch === 0x22) {
+    return vega_expression_module_scanStringLiteral();
+  } // Dot (.) U+002E can also start a floating-point number, hence the need
+  // to check the next character.
+
+
+  if (ch === 0x2E) {
+    if (vega_expression_module_isDecimalDigit(build_vega_expression_module_source.charCodeAt(build_vega_expression_module_index + 1))) {
+      return vega_expression_module_scanNumericLiteral();
+    }
+
+    return vega_expression_module_scanPunctuator();
+  }
+
+  if (vega_expression_module_isDecimalDigit(ch)) {
+    return vega_expression_module_scanNumericLiteral();
+  }
+
+  return vega_expression_module_scanPunctuator();
+}
+
+function vega_expression_module_lex() {
+  const token = vega_expression_module_lookahead;
+  build_vega_expression_module_index = token.end;
+  vega_expression_module_lookahead = vega_expression_module_advance();
+  build_vega_expression_module_index = token.end;
+  return token;
+}
+
+function vega_expression_module_peek() {
+  const pos = build_vega_expression_module_index;
+  vega_expression_module_lookahead = vega_expression_module_advance();
+  build_vega_expression_module_index = pos;
+}
+
+function vega_expression_module_finishArrayExpression(elements) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxArrayExpression);
+  node.elements = elements;
+  return node;
+}
+
+function vega_expression_module_finishBinaryExpression(operator, left, right) {
+  const node = new vega_expression_module_ASTNode(operator === '||' || operator === '&&' ? vega_expression_module_SyntaxLogicalExpression : vega_expression_module_SyntaxBinaryExpression);
+  node.operator = operator;
+  node.left = left;
+  node.right = right;
+  return node;
+}
+
+function vega_expression_module_finishCallExpression(callee, args) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxCallExpression);
+  node.callee = callee;
+  node.arguments = args;
+  return node;
+}
+
+function vega_expression_module_finishConditionalExpression(test, consequent, alternate) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxConditionalExpression);
+  node.test = test;
+  node.consequent = consequent;
+  node.alternate = alternate;
+  return node;
+}
+
+function vega_expression_module_finishIdentifier(name) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxIdentifier);
+  node.name = name;
+  return node;
+}
+
+function vega_expression_module_finishLiteral(token) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxLiteral);
+  node.value = token.value;
+  node.raw = build_vega_expression_module_source.slice(token.start, token.end);
+
+  if (token.regex) {
+    if (node.raw === '//') {
+      node.raw = '/(?:)/';
+    }
+
+    node.regex = token.regex;
+  }
+
+  return node;
+}
+
+function vega_expression_module_finishMemberExpression(accessor, object, property) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxMemberExpression);
+  node.computed = accessor === '[';
+  node.object = object;
+  node.property = property;
+  if (!node.computed) property.member = true;
+  return node;
+}
+
+function vega_expression_module_finishObjectExpression(properties) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxObjectExpression);
+  node.properties = properties;
+  return node;
+}
+
+function vega_expression_module_finishProperty(kind, key, value) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxProperty);
+  node.key = key;
+  node.value = value;
+  node.kind = kind;
+  return node;
+}
+
+function vega_expression_module_finishUnaryExpression(operator, argument) {
+  const node = new vega_expression_module_ASTNode(vega_expression_module_SyntaxUnaryExpression);
+  node.operator = operator;
+  node.argument = argument;
+  node.prefix = true;
+  return node;
+} // Throw an exception
+
+
+function vega_expression_module_throwError(token, messageFormat) {
+  var error,
+      args = Array.prototype.slice.call(arguments, 2),
+      msg = messageFormat.replace(/%(\d)/g, (whole, index) => {
+    vega_expression_module_assert(index < args.length, 'Message reference must be in range');
+    return args[index];
+  });
+  error = new Error(msg);
+  error.index = build_vega_expression_module_index;
+  error.description = msg;
+  throw error;
+} // Throw an exception because of the token.
+
+
+function vega_expression_module_throwUnexpected(token) {
+  if (token.type === vega_expression_module_TokenEOF) {
+    vega_expression_module_throwError(token, vega_expression_module_MessageUnexpectedEOS);
+  }
+
+  if (token.type === vega_expression_module_TokenNumericLiteral) {
+    vega_expression_module_throwError(token, vega_expression_module_MessageUnexpectedNumber);
+  }
+
+  if (token.type === vega_expression_module_TokenStringLiteral) {
+    vega_expression_module_throwError(token, vega_expression_module_MessageUnexpectedString);
+  }
+
+  if (token.type === vega_expression_module_TokenIdentifier) {
+    vega_expression_module_throwError(token, vega_expression_module_MessageUnexpectedIdentifier);
+  }
+
+  if (token.type === vega_expression_module_TokenKeyword) {
+    vega_expression_module_throwError(token, vega_expression_module_MessageUnexpectedReserved);
+  } // BooleanLiteral, NullLiteral, or Punctuator.
+
+
+  vega_expression_module_throwError(token, vega_expression_module_MessageUnexpectedToken, token.value);
+} // Expect the next token to match the specified punctuator.
+// If not, an exception will be thrown.
+
+
+function vega_expression_module_expect(value) {
+  const token = vega_expression_module_lex();
+
+  if (token.type !== vega_expression_module_TokenPunctuator || token.value !== value) {
+    vega_expression_module_throwUnexpected(token);
+  }
+} // Return true if the next token matches the specified punctuator.
+
+
+function vega_expression_module_match(value) {
+  return vega_expression_module_lookahead.type === vega_expression_module_TokenPunctuator && vega_expression_module_lookahead.value === value;
+} // Return true if the next token matches the specified keyword
+
+
+function vega_expression_module_matchKeyword(keyword) {
+  return vega_expression_module_lookahead.type === vega_expression_module_TokenKeyword && vega_expression_module_lookahead.value === keyword;
+} // 11.1.4 Array Initialiser
+
+
+function vega_expression_module_parseArrayInitialiser() {
+  const elements = [];
+  build_vega_expression_module_index = vega_expression_module_lookahead.start;
+  vega_expression_module_expect('[');
+
+  while (!vega_expression_module_match(']')) {
+    if (vega_expression_module_match(',')) {
+      vega_expression_module_lex();
+      elements.push(null);
+    } else {
+      elements.push(vega_expression_module_parseConditionalExpression());
+
+      if (!vega_expression_module_match(']')) {
+        vega_expression_module_expect(',');
+      }
+    }
+  }
+
+  vega_expression_module_lex();
+  return vega_expression_module_finishArrayExpression(elements);
+} // 11.1.5 Object Initialiser
+
+
+function vega_expression_module_parseObjectPropertyKey() {
+  build_vega_expression_module_index = vega_expression_module_lookahead.start;
+  const token = vega_expression_module_lex(); // Note: This function is called only from parseObjectProperty(), where
+  // EOF and Punctuator tokens are already filtered out.
+
+  if (token.type === vega_expression_module_TokenStringLiteral || token.type === vega_expression_module_TokenNumericLiteral) {
+    if (token.octal) {
+      vega_expression_module_throwError(token, vega_expression_module_MessageStrictOctalLiteral);
+    }
+
+    return vega_expression_module_finishLiteral(token);
+  }
+
+  return vega_expression_module_finishIdentifier(token.value);
+}
+
+function vega_expression_module_parseObjectProperty() {
+  var token, key, id, value;
+  build_vega_expression_module_index = vega_expression_module_lookahead.start;
+  token = vega_expression_module_lookahead;
+
+  if (token.type === vega_expression_module_TokenIdentifier) {
+    id = vega_expression_module_parseObjectPropertyKey();
+    vega_expression_module_expect(':');
+    value = vega_expression_module_parseConditionalExpression();
+    return vega_expression_module_finishProperty('init', id, value);
+  }
+
+  if (token.type === vega_expression_module_TokenEOF || token.type === vega_expression_module_TokenPunctuator) {
+    vega_expression_module_throwUnexpected(token);
+  } else {
+    key = vega_expression_module_parseObjectPropertyKey();
+    vega_expression_module_expect(':');
+    value = vega_expression_module_parseConditionalExpression();
+    return vega_expression_module_finishProperty('init', key, value);
+  }
+}
+
+function vega_expression_module_parseObjectInitialiser() {
+  var properties = [],
+      property,
+      name,
+      key,
+      map = {},
+      toString = String;
+  build_vega_expression_module_index = vega_expression_module_lookahead.start;
+  vega_expression_module_expect('{');
+
+  while (!vega_expression_module_match('}')) {
+    property = vega_expression_module_parseObjectProperty();
+
+    if (property.key.type === vega_expression_module_SyntaxIdentifier) {
+      name = property.key.name;
+    } else {
+      name = toString(property.key.value);
+    }
+
+    key = '$' + name;
+
+    if (Object.prototype.hasOwnProperty.call(map, key)) {
+      vega_expression_module_throwError({}, vega_expression_module_MessageStrictDuplicateProperty);
+    } else {
+      map[key] = true;
+    }
+
+    properties.push(property);
+
+    if (!vega_expression_module_match('}')) {
+      vega_expression_module_expect(',');
+    }
+  }
+
+  vega_expression_module_expect('}');
+  return vega_expression_module_finishObjectExpression(properties);
+} // 11.1.6 The Grouping Operator
+
+
+function vega_expression_module_parseGroupExpression() {
+  vega_expression_module_expect('(');
+  const expr = vega_expression_module_parseExpression();
+  vega_expression_module_expect(')');
+  return expr;
+} // 11.1 Primary Expressions
+
+
+const vega_expression_module_legalKeywords = {
+  'if': 1
+};
+
+function vega_expression_module_parsePrimaryExpression() {
+  var type, token, expr;
+
+  if (vega_expression_module_match('(')) {
+    return vega_expression_module_parseGroupExpression();
+  }
+
+  if (vega_expression_module_match('[')) {
+    return vega_expression_module_parseArrayInitialiser();
+  }
+
+  if (vega_expression_module_match('{')) {
+    return vega_expression_module_parseObjectInitialiser();
+  }
+
+  type = vega_expression_module_lookahead.type;
+  build_vega_expression_module_index = vega_expression_module_lookahead.start;
+
+  if (type === vega_expression_module_TokenIdentifier || vega_expression_module_legalKeywords[vega_expression_module_lookahead.value]) {
+    expr = vega_expression_module_finishIdentifier(vega_expression_module_lex().value);
+  } else if (type === vega_expression_module_TokenStringLiteral || type === vega_expression_module_TokenNumericLiteral) {
+    if (vega_expression_module_lookahead.octal) {
+      vega_expression_module_throwError(vega_expression_module_lookahead, vega_expression_module_MessageStrictOctalLiteral);
+    }
+
+    expr = vega_expression_module_finishLiteral(vega_expression_module_lex());
+  } else if (type === vega_expression_module_TokenKeyword) {
+    throw new Error(vega_expression_module_DISABLED);
+  } else if (type === vega_expression_module_TokenBooleanLiteral) {
+    token = vega_expression_module_lex();
+    token.value = token.value === 'true';
+    expr = vega_expression_module_finishLiteral(token);
+  } else if (type === vega_expression_module_TokenNullLiteral) {
+    token = vega_expression_module_lex();
+    token.value = null;
+    expr = vega_expression_module_finishLiteral(token);
+  } else if (vega_expression_module_match('/') || vega_expression_module_match('/=')) {
+    expr = vega_expression_module_finishLiteral(vega_expression_module_scanRegExp());
+    vega_expression_module_peek();
+  } else {
+    vega_expression_module_throwUnexpected(vega_expression_module_lex());
+  }
+
+  return expr;
+} // 11.2 Left-Hand-Side Expressions
+
+
+function vega_expression_module_parseArguments() {
+  const args = [];
+  vega_expression_module_expect('(');
+
+  if (!vega_expression_module_match(')')) {
+    while (build_vega_expression_module_index < build_vega_expression_module_length) {
+      args.push(vega_expression_module_parseConditionalExpression());
+
+      if (vega_expression_module_match(')')) {
+        break;
+      }
+
+      vega_expression_module_expect(',');
+    }
+  }
+
+  vega_expression_module_expect(')');
+  return args;
+}
+
+function vega_expression_module_parseNonComputedProperty() {
+  build_vega_expression_module_index = vega_expression_module_lookahead.start;
+  const token = vega_expression_module_lex();
+
+  if (!vega_expression_module_isIdentifierName(token)) {
+    vega_expression_module_throwUnexpected(token);
+  }
+
+  return vega_expression_module_finishIdentifier(token.value);
+}
+
+function vega_expression_module_parseNonComputedMember() {
+  vega_expression_module_expect('.');
+  return vega_expression_module_parseNonComputedProperty();
+}
+
+function vega_expression_module_parseComputedMember() {
+  vega_expression_module_expect('[');
+  const expr = vega_expression_module_parseExpression();
+  vega_expression_module_expect(']');
+  return expr;
+}
+
+function vega_expression_module_parseLeftHandSideExpressionAllowCall() {
+  var expr, args, property;
+  expr = vega_expression_module_parsePrimaryExpression();
+
+  for (;;) {
+    if (vega_expression_module_match('.')) {
+      property = vega_expression_module_parseNonComputedMember();
+      expr = vega_expression_module_finishMemberExpression('.', expr, property);
+    } else if (vega_expression_module_match('(')) {
+      args = vega_expression_module_parseArguments();
+      expr = vega_expression_module_finishCallExpression(expr, args);
+    } else if (vega_expression_module_match('[')) {
+      property = vega_expression_module_parseComputedMember();
+      expr = vega_expression_module_finishMemberExpression('[', expr, property);
+    } else {
+      break;
+    }
+  }
+
+  return expr;
+} // 11.3 Postfix Expressions
+
+
+function vega_expression_module_parsePostfixExpression() {
+  const expr = vega_expression_module_parseLeftHandSideExpressionAllowCall();
+
+  if (vega_expression_module_lookahead.type === vega_expression_module_TokenPunctuator) {
+    if (vega_expression_module_match('++') || vega_expression_module_match('--')) {
+      throw new Error(vega_expression_module_DISABLED);
+    }
+  }
+
+  return expr;
+} // 11.4 Unary Operators
+
+
+function vega_expression_module_parseUnaryExpression() {
+  var token, expr;
+
+  if (vega_expression_module_lookahead.type !== vega_expression_module_TokenPunctuator && vega_expression_module_lookahead.type !== vega_expression_module_TokenKeyword) {
+    expr = vega_expression_module_parsePostfixExpression();
+  } else if (vega_expression_module_match('++') || vega_expression_module_match('--')) {
+    throw new Error(vega_expression_module_DISABLED);
+  } else if (vega_expression_module_match('+') || vega_expression_module_match('-') || vega_expression_module_match('~') || vega_expression_module_match('!')) {
+    token = vega_expression_module_lex();
+    expr = vega_expression_module_parseUnaryExpression();
+    expr = vega_expression_module_finishUnaryExpression(token.value, expr);
+  } else if (vega_expression_module_matchKeyword('delete') || vega_expression_module_matchKeyword('void') || vega_expression_module_matchKeyword('typeof')) {
+    throw new Error(vega_expression_module_DISABLED);
+  } else {
+    expr = vega_expression_module_parsePostfixExpression();
+  }
+
+  return expr;
+}
+
+function vega_expression_module_binaryPrecedence(token) {
+  let prec = 0;
+
+  if (token.type !== vega_expression_module_TokenPunctuator && token.type !== vega_expression_module_TokenKeyword) {
+    return 0;
+  }
+
+  switch (token.value) {
+    case '||':
+      prec = 1;
+      break;
+
+    case '&&':
+      prec = 2;
+      break;
+
+    case '|':
+      prec = 3;
+      break;
+
+    case '^':
+      prec = 4;
+      break;
+
+    case '&':
+      prec = 5;
+      break;
+
+    case '==':
+    case '!=':
+    case '===':
+    case '!==':
+      prec = 6;
+      break;
+
+    case '<':
+    case '>':
+    case '<=':
+    case '>=':
+    case 'instanceof':
+    case 'in':
+      prec = 7;
+      break;
+
+    case '<<':
+    case '>>':
+    case '>>>':
+      prec = 8;
+      break;
+
+    case '+':
+    case '-':
+      prec = 9;
+      break;
+
+    case '*':
+    case '/':
+    case '%':
+      prec = 11;
+      break;
+  }
+
+  return prec;
+} // 11.5 Multiplicative Operators
+// 11.6 Additive Operators
+// 11.7 Bitwise Shift Operators
+// 11.8 Relational Operators
+// 11.9 Equality Operators
+// 11.10 Binary Bitwise Operators
+// 11.11 Binary Logical Operators
+
+
+function vega_expression_module_parseBinaryExpression() {
+  var marker, markers, expr, token, prec, stack, right, operator, left, i;
+  marker = vega_expression_module_lookahead;
+  left = vega_expression_module_parseUnaryExpression();
+  token = vega_expression_module_lookahead;
+  prec = vega_expression_module_binaryPrecedence(token);
+
+  if (prec === 0) {
+    return left;
+  }
+
+  token.prec = prec;
+  vega_expression_module_lex();
+  markers = [marker, vega_expression_module_lookahead];
+  right = vega_expression_module_parseUnaryExpression();
+  stack = [left, token, right];
+
+  while ((prec = vega_expression_module_binaryPrecedence(vega_expression_module_lookahead)) > 0) {
+    // Reduce: make a binary expression from the three topmost entries.
+    while (stack.length > 2 && prec <= stack[stack.length - 2].prec) {
+      right = stack.pop();
+      operator = stack.pop().value;
+      left = stack.pop();
+      markers.pop();
+      expr = vega_expression_module_finishBinaryExpression(operator, left, right);
+      stack.push(expr);
+    } // Shift.
+
+
+    token = vega_expression_module_lex();
+    token.prec = prec;
+    stack.push(token);
+    markers.push(vega_expression_module_lookahead);
+    expr = vega_expression_module_parseUnaryExpression();
+    stack.push(expr);
+  } // Final reduce to clean-up the stack.
+
+
+  i = stack.length - 1;
+  expr = stack[i];
+  markers.pop();
+
+  while (i > 1) {
+    markers.pop();
+    expr = vega_expression_module_finishBinaryExpression(stack[i - 1].value, stack[i - 2], expr);
+    i -= 2;
+  }
+
+  return expr;
+} // 11.12 Conditional Operator
+
+
+function vega_expression_module_parseConditionalExpression() {
+  var expr, consequent, alternate;
+  expr = vega_expression_module_parseBinaryExpression();
+
+  if (vega_expression_module_match('?')) {
+    vega_expression_module_lex();
+    consequent = vega_expression_module_parseConditionalExpression();
+    vega_expression_module_expect(':');
+    alternate = vega_expression_module_parseConditionalExpression();
+    expr = vega_expression_module_finishConditionalExpression(expr, consequent, alternate);
+  }
+
+  return expr;
+} // 11.14 Comma Operator
+
+
+function vega_expression_module_parseExpression() {
+  const expr = vega_expression_module_parseConditionalExpression();
+
+  if (vega_expression_module_match(',')) {
+    throw new Error(vega_expression_module_DISABLED); // no sequence expressions
+  }
+
+  return expr;
+}
+
+function vega_expression_module_parser (code) {
+  build_vega_expression_module_source = code;
+  build_vega_expression_module_index = 0;
+  build_vega_expression_module_length = build_vega_expression_module_source.length;
+  vega_expression_module_lookahead = null;
+  vega_expression_module_peek();
+  const expr = vega_expression_module_parseExpression();
+
+  if (vega_expression_module_lookahead.type !== vega_expression_module_TokenEOF) {
+    throw new Error('Unexpect token after expression.');
+  }
+
+  return expr;
+}
+
+var vega_expression_module_Constants = {
+  NaN: 'NaN',
+  E: 'Math.E',
+  LN2: 'Math.LN2',
+  LN10: 'Math.LN10',
+  LOG2E: 'Math.LOG2E',
+  LOG10E: 'Math.LOG10E',
+  PI: 'Math.PI',
+  SQRT1_2: 'Math.SQRT1_2',
+  SQRT2: 'Math.SQRT2',
+  MIN_VALUE: 'Number.MIN_VALUE',
+  MAX_VALUE: 'Number.MAX_VALUE'
+};
+
+function vega_expression_module_Functions (codegen) {
+  function fncall(name, args, cast, type) {
+    let obj = codegen(args[0]);
+
+    if (cast) {
+      obj = cast + '(' + obj + ')';
+      if (cast.lastIndexOf('new ', 0) === 0) obj = '(' + obj + ')';
+    }
+
+    return obj + '.' + name + (type < 0 ? '' : type === 0 ? '()' : '(' + args.slice(1).map(codegen).join(',') + ')');
+  }
+
+  function fn(name, cast, type) {
+    return args => fncall(name, args, cast, type);
+  }
+
+  const DATE = 'new Date',
+        STRING = 'String',
+        REGEXP = 'RegExp';
+  return {
+    // MATH functions
+    isNaN: 'Number.isNaN',
+    isFinite: 'Number.isFinite',
+    abs: 'Math.abs',
+    acos: 'Math.acos',
+    asin: 'Math.asin',
+    atan: 'Math.atan',
+    atan2: 'Math.atan2',
+    ceil: 'Math.ceil',
+    cos: 'Math.cos',
+    exp: 'Math.exp',
+    floor: 'Math.floor',
+    log: 'Math.log',
+    max: 'Math.max',
+    min: 'Math.min',
+    pow: 'Math.pow',
+    random: 'Math.random',
+    round: 'Math.round',
+    sin: 'Math.sin',
+    sqrt: 'Math.sqrt',
+    tan: 'Math.tan',
+    clamp: function (args) {
+      if (args.length < 3) Object(vega_util_module["o" /* error */])('Missing arguments to clamp function.');
+      if (args.length > 3) Object(vega_util_module["o" /* error */])('Too many arguments to clamp function.');
+      const a = args.map(codegen);
+      return 'Math.max(' + a[1] + ', Math.min(' + a[2] + ',' + a[0] + '))';
+    },
+    // DATE functions
+    now: 'Date.now',
+    utc: 'Date.UTC',
+    datetime: DATE,
+    date: fn('getDate', DATE, 0),
+    day: fn('getDay', DATE, 0),
+    year: fn('getFullYear', DATE, 0),
+    month: fn('getMonth', DATE, 0),
+    hours: fn('getHours', DATE, 0),
+    minutes: fn('getMinutes', DATE, 0),
+    seconds: fn('getSeconds', DATE, 0),
+    milliseconds: fn('getMilliseconds', DATE, 0),
+    time: fn('getTime', DATE, 0),
+    timezoneoffset: fn('getTimezoneOffset', DATE, 0),
+    utcdate: fn('getUTCDate', DATE, 0),
+    utcday: fn('getUTCDay', DATE, 0),
+    utcyear: fn('getUTCFullYear', DATE, 0),
+    utcmonth: fn('getUTCMonth', DATE, 0),
+    utchours: fn('getUTCHours', DATE, 0),
+    utcminutes: fn('getUTCMinutes', DATE, 0),
+    utcseconds: fn('getUTCSeconds', DATE, 0),
+    utcmilliseconds: fn('getUTCMilliseconds', DATE, 0),
+    // sequence functions
+    length: fn('length', null, -1),
+    // STRING functions
+    parseFloat: 'parseFloat',
+    parseInt: 'parseInt',
+    upper: fn('toUpperCase', STRING, 0),
+    lower: fn('toLowerCase', STRING, 0),
+    substring: fn('substring', STRING),
+    split: fn('split', STRING),
+    trim: fn('trim', STRING, 0),
+    // REGEXP functions
+    regexp: REGEXP,
+    test: fn('test', REGEXP),
+    // Control Flow functions
+    if: function (args) {
+      if (args.length < 3) Object(vega_util_module["o" /* error */])('Missing arguments to if function.');
+      if (args.length > 3) Object(vega_util_module["o" /* error */])('Too many arguments to if function.');
+      const a = args.map(codegen);
+      return '(' + a[0] + '?' + a[1] + ':' + a[2] + ')';
+    }
+  };
+}
+
+function vega_expression_module_stripQuotes(s) {
+  const n = s && s.length - 1;
+  return n && (s[0] === '"' && s[n] === '"' || s[0] === '\'' && s[n] === '\'') ? s.slice(1, -1) : s;
+}
+
+function build_vega_expression_module_codegen (opt) {
+  opt = opt || {};
+  const allowed = opt.allowed ? Object(vega_util_module["fb" /* toSet */])(opt.allowed) : {},
+        forbidden = opt.forbidden ? Object(vega_util_module["fb" /* toSet */])(opt.forbidden) : {},
+        constants = opt.constants || vega_expression_module_Constants,
+        functions = (opt.functions || vega_expression_module_Functions)(visit),
+        globalvar = opt.globalvar,
+        fieldvar = opt.fieldvar,
+        outputGlobal = Object(vega_util_module["E" /* isFunction */])(globalvar) ? globalvar : id => `${globalvar}["${id}"]`;
+  let globals = {},
+      fields = {},
+      memberDepth = 0;
+
+  function visit(ast) {
+    if (Object(vega_util_module["J" /* isString */])(ast)) return ast;
+    const generator = Generators[ast.type];
+    if (generator == null) Object(vega_util_module["o" /* error */])('Unsupported type: ' + ast.type);
+    return generator(ast);
+  }
+
+  const Generators = {
+    Literal: n => n.raw,
+    Identifier: n => {
+      const id = n.name;
+
+      if (memberDepth > 0) {
+        return id;
+      } else if (Object(vega_util_module["w" /* hasOwnProperty */])(forbidden, id)) {
+        return Object(vega_util_module["o" /* error */])('Illegal identifier: ' + id);
+      } else if (Object(vega_util_module["w" /* hasOwnProperty */])(constants, id)) {
+        return constants[id];
+      } else if (Object(vega_util_module["w" /* hasOwnProperty */])(allowed, id)) {
+        return id;
+      } else {
+        globals[id] = 1;
+        return outputGlobal(id);
+      }
+    },
+    MemberExpression: n => {
+      const d = !n.computed,
+            o = visit(n.object);
+      if (d) memberDepth += 1;
+      const p = visit(n.property);
+
+      if (o === fieldvar) {
+        // strip quotes to sanitize field name (#1653)
+        fields[vega_expression_module_stripQuotes(p)] = 1;
+      }
+
+      if (d) memberDepth -= 1;
+      return o + (d ? '.' + p : '[' + p + ']');
+    },
+    CallExpression: n => {
+      if (n.callee.type !== 'Identifier') {
+        Object(vega_util_module["o" /* error */])('Illegal callee type: ' + n.callee.type);
+      }
+
+      const callee = n.callee.name,
+            args = n.arguments,
+            fn = Object(vega_util_module["w" /* hasOwnProperty */])(functions, callee) && functions[callee];
+      if (!fn) Object(vega_util_module["o" /* error */])('Unrecognized function: ' + callee);
+      return Object(vega_util_module["E" /* isFunction */])(fn) ? fn(args) : fn + '(' + args.map(visit).join(',') + ')';
+    },
+    ArrayExpression: n => '[' + n.elements.map(visit).join(',') + ']',
+    BinaryExpression: n => '(' + visit(n.left) + ' ' + n.operator + ' ' + visit(n.right) + ')',
+    UnaryExpression: n => '(' + n.operator + visit(n.argument) + ')',
+    ConditionalExpression: n => '(' + visit(n.test) + '?' + visit(n.consequent) + ':' + visit(n.alternate) + ')',
+    LogicalExpression: n => '(' + visit(n.left) + n.operator + visit(n.right) + ')',
+    ObjectExpression: n => '{' + n.properties.map(visit).join(',') + '}',
+    Property: n => {
+      memberDepth += 1;
+      const k = visit(n.key);
+      memberDepth -= 1;
+      return k + ':' + visit(n.value);
+    }
+  };
+
+  function codegen(ast) {
+    const result = {
+      code: visit(ast),
+      globals: Object.keys(globals),
+      fields: Object.keys(fields)
+    };
+    globals = {};
+    fields = {};
+    return result;
+  }
+
+  codegen.functions = functions;
+  codegen.constants = constants;
+  return codegen;
+}
+
+
+
 // CONCATENATED MODULE: ./node_modules/vega-selections/build/vega-selection.module.js
 
 
@@ -53774,7 +56200,7 @@ function vega_selection_module_bisector (f) {
   if (f.length === 1) {
     delta = (d, x) => f(d) - x;
 
-    compare = vega_selection_module_ascendingComparator(f);
+    compare = ascendingComparator(f);
   }
 
   function left(a, x, lo, hi) {
@@ -53815,7 +56241,7 @@ function vega_selection_module_bisector (f) {
   };
 }
 
-function vega_selection_module_ascendingComparator(f) {
+function ascendingComparator(f) {
   return (d, x) => vega_selection_module_ascending(f(d), x);
 }
 
@@ -54099,7 +56525,7 @@ var vega_selection_module_ops = {
 const DataPrefix = ':',
       IndexPrefix = '@';
 function selectionVisitor(name, args, scope, params) {
-  if (args[0].type !== Literal) Object(vega_util_module["o" /* error */])('First argument to selection functions must be a string literal.');
+  if (args[0].type !== vega_expression_module_Literal) Object(vega_util_module["o" /* error */])('First argument to selection functions must be a string literal.');
   const data = args[0].value,
         op = args.length >= 2 && Object(vega_util_module["W" /* peek */])(args).value,
         field = 'unit',
@@ -54164,10 +56590,10 @@ const vega_functions_module_wrap = method => function (value, spec) {
 };
 
 const vega_functions_module_format = vega_functions_module_wrap('format');
-const vega_functions_module_timeFormat = vega_functions_module_wrap('timeFormat');
-const vega_functions_module_utcFormat = vega_functions_module_wrap('utcFormat');
-const vega_functions_module_timeParse = vega_functions_module_wrap('timeParse');
-const vega_functions_module_utcParse = vega_functions_module_wrap('utcParse');
+const timeFormat = vega_functions_module_wrap('timeFormat');
+const utcFormat = vega_functions_module_wrap('utcFormat');
+const timeParse = vega_functions_module_wrap('timeParse');
+const utcParse = vega_functions_module_wrap('utcParse');
 const dateObj = new Date(2000, 0, 1);
 
 function vega_functions_module_time(month, day, specifier) {
@@ -54175,7 +56601,7 @@ function vega_functions_module_time(month, day, specifier) {
   dateObj.setYear(2000);
   dateObj.setMonth(month);
   dateObj.setDate(day);
-  return vega_functions_module_timeFormat.call(this, dateObj, specifier);
+  return timeFormat.call(this, dateObj, specifier);
 }
 
 function monthFormat(month) {
@@ -54263,9 +56689,9 @@ function internalScaleFunctions(codegen, fnctx, visitors) {
 
 
   return {
-    _bandwidth: args => "this.__bandwidth(".concat(ref(args[0]), ")"),
-    _range: args => "".concat(ref(args[0]), ".range()"),
-    _scale: args => "".concat(ref(args[0]), "(").concat(codegen(args[1]), ")")
+    _bandwidth: args => `this.__bandwidth(${ref(args[0])})`,
+    _range: args => `${ref(args[0])}.range()`,
+    _scale: args => `${ref(args[0])}(${codegen(args[1])})`
   };
 }
 
@@ -54658,25 +57084,25 @@ const functionContext = {
   contrast,
   sequence: src_range,
   format: vega_functions_module_format,
-  utcFormat: vega_functions_module_utcFormat,
-  utcParse: vega_functions_module_utcParse,
-  utcOffset: utcOffset,
-  utcSequence: utcSequence,
-  timeFormat: vega_functions_module_timeFormat,
-  timeParse: vega_functions_module_timeParse,
-  timeOffset: timeOffset,
-  timeSequence: timeSequence,
-  timeUnitSpecifier: timeUnitSpecifier,
+  utcFormat,
+  utcParse,
+  utcOffset: vega_time_module["w" /* utcOffset */],
+  utcSequence: vega_time_module["x" /* utcSequence */],
+  timeFormat,
+  timeParse,
+  timeOffset: vega_time_module["q" /* timeOffset */],
+  timeSequence: vega_time_module["r" /* timeSequence */],
+  timeUnitSpecifier: vega_time_module["s" /* timeUnitSpecifier */],
   monthFormat,
   monthAbbrevFormat,
   dayFormat,
   dayAbbrevFormat,
   quarter: vega_util_module["X" /* quarter */],
   utcquarter: vega_util_module["jb" /* utcquarter */],
-  week: vega_time_module_week,
-  utcweek: utcweek,
-  dayofyear: dayofyear,
-  utcdayofyear: utcdayofyear,
+  week: vega_time_module["A" /* week */],
+  utcweek: vega_time_module["z" /* utcweek */],
+  dayofyear: vega_time_module["m" /* dayofyear */],
+  utcdayofyear: vega_time_module["y" /* utcdayofyear */],
   warn,
   info,
   debug,
@@ -54716,7 +57142,7 @@ const codegenParams = {
   forbidden: ['_'],
   allowed: ['datum', 'event', 'item'],
   fieldvar: 'datum',
-  globalvar: id => "_[".concat(Object(vega_util_module["bb" /* stringValue */])(SignalPrefix + id), "]"),
+  globalvar: id => `_[${Object(vega_util_module["bb" /* stringValue */])(SignalPrefix + id)}]`,
   functions: buildFunctions,
   constants: Constants,
   visitors: astVisitors
@@ -56149,7 +58575,7 @@ function vega_view_module_range(bind, el, param, value) {
   value = value !== undefined ? value : (+param.max + +param.min) / 2;
   const max = param.max != null ? param.max : Math.max(100, +value) || 100,
         min = param.min || Math.min(0, max, +value) || 0,
-        step = param.step || tickStep(min, max, 100);
+        step = param.step || Object(src_ticks["c" /* tickStep */])(min, max, 100);
   const node = vega_view_module_element('input', {
     type: 'range',
     name: param.signal,
@@ -56573,7 +58999,7 @@ function View(spec, options) {
 
   if (options.locale || spec.locale) {
     const loc = Object(vega_util_module["p" /* extend */])({}, spec.locale, options.locale);
-    view.locale(vega_format_module_locale(loc.number, loc.time));
+    view.locale(Object(vega_format_module["b" /* locale */])(loc.number, loc.time));
   }
 
   view._el = null;
@@ -56912,7 +59338,7 @@ Object(vega_util_module["z" /* inherits */])(View, Dataflow, {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vega-event-selector/build/vega-event-selector.module.js
+// CONCATENATED MODULE: ./node_modules/vega-parser/node_modules/vega-event-selector/build/vega-event-selector.module.js
 const vega_event_selector_module_VIEW = 'view',
       LBRACK = '[',
       RBRACK = ']',
@@ -57283,14 +59709,14 @@ function applyDefault(defaults, key, value) {
   };
 }
 
-const scaleRef = scale => Object(vega_util_module["J" /* isString */])(scale) ? Object(vega_util_module["bb" /* stringValue */])(scale) : scale.signal ? "(".concat(scale.signal, ")") : vega_parser_module_field(scale);
+const scaleRef = scale => Object(vega_util_module["J" /* isString */])(scale) ? Object(vega_util_module["bb" /* stringValue */])(scale) : scale.signal ? `(${scale.signal})` : vega_parser_module_field(scale);
 
-function vega_parser_module_entry(enc) {
+function entry$1(enc) {
   if (enc.gradient != null) {
     return vega_parser_module_gradient(enc);
   }
 
-  let value = enc.signal ? "(".concat(enc.signal, ")") : enc.color ? vega_parser_module_color(enc.color) : enc.field != null ? vega_parser_module_field(enc.field) : enc.value !== undefined ? Object(vega_util_module["bb" /* stringValue */])(enc.value) : undefined;
+  let value = enc.signal ? `(${enc.signal})` : enc.color ? vega_parser_module_color(enc.color) : enc.field != null ? vega_parser_module_field(enc.field) : enc.value !== undefined ? Object(vega_util_module["bb" /* stringValue */])(enc.value) : undefined;
 
   if (enc.scale != null) {
     value = vega_parser_module_scale(enc, value);
@@ -57301,25 +59727,25 @@ function vega_parser_module_entry(enc) {
   }
 
   if (enc.exponent != null) {
-    value = "pow(".concat(value, ",").concat(vega_parser_module_property(enc.exponent), ")");
+    value = `pow(${value},${vega_parser_module_property(enc.exponent)})`;
   }
 
   if (enc.mult != null) {
-    value += "*".concat(vega_parser_module_property(enc.mult));
+    value += `*${vega_parser_module_property(enc.mult)}`;
   }
 
   if (enc.offset != null) {
-    value += "+".concat(vega_parser_module_property(enc.offset));
+    value += `+${vega_parser_module_property(enc.offset)}`;
   }
 
   if (enc.round) {
-    value = "round(".concat(value, ")");
+    value = `round(${value})`;
   }
 
   return value;
 }
 
-const _color = (type, x, y, z) => "(".concat(type, "(").concat([x, y, z].map(vega_parser_module_entry).join(','), ")+'')");
+const _color = (type, x, y, z) => `(${type}(${[x, y, z].map(entry$1).join(',')})+'')`;
 
 function vega_parser_module_color(enc) {
   return enc.c ? _color('hcl', enc.h, enc.c, enc.l) : enc.h || enc.s ? _color('hsl', enc.h, enc.s, enc.l) : enc.l || enc.a ? _color('lab', enc.l, enc.a, enc.b) : enc.r || enc.g || enc.b ? _color('rgb', enc.r, enc.g, enc.b) : null;
@@ -57332,11 +59758,11 @@ function vega_parser_module_gradient(enc) {
   while (args.length && Object(vega_util_module["W" /* peek */])(args) == null) args.pop();
 
   args.unshift(scaleRef(enc.gradient));
-  return "gradient(".concat(args.join(','), ")");
+  return `gradient(${args.join(',')})`;
 }
 
 function vega_parser_module_property(property) {
-  return Object(vega_util_module["H" /* isObject */])(property) ? '(' + vega_parser_module_entry(property) + ')' : property;
+  return Object(vega_util_module["H" /* isObject */])(property) ? '(' + entry$1(property) + ')' : property;
 }
 
 function vega_parser_module_field(ref) {
@@ -57384,17 +59810,17 @@ function vega_parser_module_scale(enc, value) {
 
   if (enc.range != null) {
     // pull value from scale range
-    value = "lerp(_range(".concat(scale, "), ").concat(+enc.range, ")");
+    value = `lerp(_range(${scale}), ${+enc.range})`;
   } else {
     // run value through scale and/or pull scale bandwidth
-    if (value !== undefined) value = "_scale(".concat(scale, ", ").concat(value, ")");
+    if (value !== undefined) value = `_scale(${scale}, ${value})`;
 
     if (enc.band) {
-      value = (value ? value + '+' : '') + "_bandwidth(".concat(scale, ")") + (+enc.band === 1 ? '' : '*' + vega_parser_module_property(enc.band));
+      value = (value ? value + '+' : '') + `_bandwidth(${scale})` + (+enc.band === 1 ? '' : '*' + vega_parser_module_property(enc.band));
 
       if (enc.extra) {
         // include logic to handle extraneous elements
-        value = "(datum.extra ? _scale(".concat(scale, ", datum.extra.value) : ").concat(value, ")");
+        value = `(datum.extra ? _scale(${scale}, datum.extra.value) : ${value})`;
       }
     }
 
@@ -57407,8 +59833,8 @@ function vega_parser_module_scale(enc, value) {
 function vega_parser_module_rule (enc) {
   let code = '';
   enc.forEach(rule => {
-    const value = vega_parser_module_entry(rule);
-    code += rule.test ? "(".concat(rule.test, ")?").concat(value, ":") : value;
+    const value = entry$1(rule);
+    code += rule.test ? `(${rule.test})?${value}:` : value;
   }); // if no else clause, terminate with null (#1366)
 
   if (Object(vega_util_module["W" /* peek */])(code) === ':') {
@@ -57440,7 +59866,7 @@ function parseBlock(block, marktype, params, scope) {
   for (const name in block) {
     if (block[name] != null) {
       // skip any null entries
-      channels[name] = vega_parser_module_parse(vega_parser_module_expr(block[name]), scope, params, fields);
+      channels[name] = parse$1(vega_parser_module_expr(block[name]), scope, params, fields);
     }
   }
 
@@ -57455,10 +59881,10 @@ function parseBlock(block, marktype, params, scope) {
 }
 
 function vega_parser_module_expr(enc) {
-  return Object(vega_util_module["B" /* isArray */])(enc) ? vega_parser_module_rule(enc) : vega_parser_module_entry(enc);
+  return Object(vega_util_module["B" /* isArray */])(enc) ? vega_parser_module_rule(enc) : entry$1(enc);
 }
 
-function vega_parser_module_parse(code, scope, params, fields) {
+function parse$1(code, scope, params, fields) {
   const expr = vega_functions_module_parser(code, scope);
   expr.$fields.forEach(name => fields[name] = 1);
   Object(vega_util_module["p" /* extend */])(params, expr.$params);
@@ -57497,11 +59923,11 @@ function Entry(type, value, params, parent) {
   this.params = params;
   if (parent) this.parent = parent;
 }
-function entry$1(type, value, params, parent) {
+function vega_parser_module_entry(type, value, params, parent) {
   return new Entry(type, value, params, parent);
 }
 function vega_parser_module_operator(value, params) {
-  return entry$1('operator', value, params);
+  return vega_parser_module_entry('operator', value, params);
 } // -----
 
 function vega_parser_module_ref(op) {
@@ -57512,7 +59938,7 @@ function vega_parser_module_ref(op) {
   if (op.id < 0) (op.refs = op.refs || []).push(ref);
   return ref;
 }
-function vega_parser_module_fieldRef(field, name) {
+function fieldRef$1(field, name) {
   return name ? {
     $field: field,
     $name: name
@@ -57520,7 +59946,7 @@ function vega_parser_module_fieldRef(field, name) {
     $field: field
   };
 }
-const keyFieldRef = vega_parser_module_fieldRef('key');
+const keyFieldRef = fieldRef$1('key');
 function compareRef(fields, orders) {
   return {
     $compare: fields,
@@ -57544,12 +59970,12 @@ function aggrField(op, field) {
   return (op && op.signal ? '$' + op.signal : op || '') + (op && field ? '_' : '') + (field && field.signal ? '$' + field.signal : field || '');
 } // -----
 
-const Scope = 'scope';
+const Scope$1 = 'scope';
 const vega_parser_module_View = 'view';
 function isSignal(_) {
   return _ && _.signal;
 }
-function vega_parser_module_isExpr(_) {
+function isExpr$1(_) {
   return _ && _.expr;
 }
 function vega_parser_module_hasSignal(_) {
@@ -57573,7 +59999,7 @@ function vega_parser_module_parseStream(stream, scope) {
 }
 
 function eventSource(source) {
-  return source === Scope ? vega_parser_module_View : source || vega_parser_module_View;
+  return source === Scope$1 ? vega_parser_module_View : source || vega_parser_module_View;
 }
 
 function mergeStream(stream, scope) {
@@ -57629,7 +60055,7 @@ function streamParameters(entry, stream, scope) {
     param.push(filterMark(stream.marktype, stream.markname, stream.markrole));
   }
 
-  if (stream.source === Scope) {
+  if (stream.source === Scope$1) {
     // add filter to limit events from sub-scope only
     param.push('inScope(event.item)');
   }
@@ -57680,7 +60106,7 @@ function vega_parser_module_parseUpdate (spec, scope, target) {
 
 
   if (Object(vega_util_module["J" /* isString */])(events)) {
-    events = eventSelector(events, scope.isSubscope() ? Scope : vega_parser_module_View);
+    events = eventSelector(events, scope.isSubscope() ? Scope$1 : vega_parser_module_View);
   } // separate event streams from signal updates
 
 
@@ -57755,7 +60181,7 @@ function parseSignalUpdates (signal, scope) {
   }
 }
 
-const vega_parser_module_transform = name => (params, value, parent) => entry$1(name, value, params || undefined, parent);
+const vega_parser_module_transform = name => (params, value, parent) => vega_parser_module_entry(name, value, params || undefined, parent);
 
 const vega_parser_module_Aggregate = vega_parser_module_transform('aggregate');
 const vega_parser_module_AxisTicks = vega_parser_module_transform('axisticks');
@@ -57872,14 +60298,14 @@ function multipleDomain(domain, spec, scope) {
     d = Object(vega_util_module["J" /* isString */])(d) ? {
       data: data,
       field: d
-    } : Object(vega_util_module["B" /* isArray */])(d) || d.signal ? fieldRef$1(d, scope) : d;
+    } : Object(vega_util_module["B" /* isArray */])(d) || d.signal ? vega_parser_module_fieldRef(d, scope) : d;
     dom.push(d);
     return dom;
   }, []);
   return (isDiscrete(spec.type) ? ordinalMultipleDomain : isQuantile(spec.type) ? quantileMultipleDomain : numericMultipleDomain)(domain, scope, fields);
 }
 
-function fieldRef$1(data, scope) {
+function vega_parser_module_fieldRef(data, scope) {
   const name = '_:vega:_' + FIELD_REF_ID++,
         coll = vega_parser_module_Collect({});
 
@@ -58051,21 +60477,21 @@ function vega_parser_module_parseProjection (proj, scope) {
 
   for (const name in proj) {
     if (name === 'name') continue;
-    params[name] = vega_parser_module_parseParameter(proj[name], name, scope);
+    params[name] = parseParameter$1(proj[name], name, scope);
   } // apply projection defaults from config
 
 
   for (const name in config) {
     if (params[name] == null) {
-      params[name] = vega_parser_module_parseParameter(config[name], name, scope);
+      params[name] = parseParameter$1(config[name], name, scope);
     }
   }
 
   scope.addProjection(proj.name, params);
 }
 
-function vega_parser_module_parseParameter(_, name, scope) {
-  return Object(vega_util_module["B" /* isArray */])(_) ? _.map(_ => vega_parser_module_parseParameter(_, name, scope)) : !Object(vega_util_module["H" /* isObject */])(_) ? _ : _.signal ? scope.signalRef(_.signal) : name === 'fit' ? _ : Object(vega_util_module["o" /* error */])('Unsupported parameter object: ' + Object(vega_util_module["bb" /* stringValue */])(_));
+function parseParameter$1(_, name, scope) {
+  return Object(vega_util_module["B" /* isArray */])(_) ? _.map(_ => parseParameter$1(_, name, scope)) : !Object(vega_util_module["H" /* isObject */])(_) ? _ : _.signal ? scope.signalRef(_.signal) : name === 'fit' ? _ : Object(vega_util_module["o" /* error */])('Unsupported parameter object: ' + Object(vega_util_module["bb" /* stringValue */])(_));
 }
 
 const vega_parser_module_Top = 'top';
@@ -58146,9 +60572,9 @@ function getStyle(name, scope, style) {
   return s && s[name];
 }
 function anchorExpr(s, e, m) {
-  return "item.anchor === '".concat(vega_parser_module_Start, "' ? ").concat(s, " : item.anchor === '").concat(vega_parser_module_End, "' ? ").concat(e, " : ").concat(m);
+  return `item.anchor === '${vega_parser_module_Start}' ? ${s} : item.anchor === '${vega_parser_module_End}' ? ${e} : ${m}`;
 }
-const alignExpr = anchorExpr(Object(vega_util_module["bb" /* stringValue */])(vega_parser_module_Left), Object(vega_util_module["bb" /* stringValue */])(vega_parser_module_Right), Object(vega_util_module["bb" /* stringValue */])(vega_parser_module_Center));
+const alignExpr$1 = anchorExpr(Object(vega_util_module["bb" /* stringValue */])(vega_parser_module_Left), Object(vega_util_module["bb" /* stringValue */])(vega_parser_module_Right), Object(vega_util_module["bb" /* stringValue */])(vega_parser_module_Center));
 function tickBand(_) {
   const v = _('tickBand');
 
@@ -58163,15 +60589,15 @@ function tickBand(_) {
   } else if (v.signal) {
     // if signal, augment code to interpret values
     band = {
-      signal: "(".concat(v.signal, ") === 'extent' ? 1 : 0.5")
+      signal: `(${v.signal}) === 'extent' ? 1 : 0.5`
     };
     extra = {
-      signal: "(".concat(v.signal, ") === 'extent'")
+      signal: `(${v.signal}) === 'extent'`
     };
 
     if (!Object(vega_util_module["H" /* isObject */])(offset)) {
       offset = {
-        signal: "(".concat(v.signal, ") === 'extent' ? 0 : ").concat(offset)
+        signal: `(${v.signal}) === 'extent' ? 0 : ${offset}`
       };
     }
   } else if (v === 'extent') {
@@ -58320,8 +60746,8 @@ function legendGradientDiscrete (spec, scale, config, userEncode, dataRef) {
   }, userEncode);
 }
 
-const alignExpr$1 = "datum.".concat(Perc, "<=0?\"").concat(vega_parser_module_Left, "\":datum.").concat(Perc, ">=1?\"").concat(vega_parser_module_Right, "\":\"").concat(vega_parser_module_Center, "\""),
-      baselineExpr = "datum.".concat(Perc, "<=0?\"").concat(vega_parser_module_Bottom, "\":datum.").concat(Perc, ">=1?\"").concat(vega_parser_module_Top, "\":\"").concat(vega_parser_module_Middle, "\"");
+const alignExpr = `datum.${Perc}<=0?"${vega_parser_module_Left}":datum.${Perc}>=1?"${vega_parser_module_Right}":"${vega_parser_module_Center}"`,
+      baselineExpr = `datum.${Perc}<=0?"${vega_parser_module_Bottom}":datum.${Perc}>=1?"${vega_parser_module_Top}":"${vega_parser_module_Middle}"`;
 function legendGradientLabels (spec, config, userEncode, dataRef) {
   const _ = vega_parser_module_lookup(spec, config),
         vertical = _.isVertical(),
@@ -58371,7 +60797,7 @@ function legendGradientLabels (spec, config, userEncode, dataRef) {
     adjust = '1-';
   } else {
     enter.align = update.align = {
-      signal: alignExpr$1
+      signal: alignExpr
     };
     enter.baseline = {
       value: 'top'
@@ -58413,12 +60839,12 @@ function legendSymbolGroups (spec, config, userEncode, dataRef, columns) {
         valueRef = {
     data: 'value'
   },
-        xSignal = "(".concat(columns, ") ? datum.").concat(Offset, " : datum.").concat(Size),
+        xSignal = `(${columns}) ? datum.${Offset} : datum.${Size}`,
         yEncode = height ? encoder(height) : {
     field: Size
   },
-        index = "datum.".concat(Index),
-        ncols = "max(1, ".concat(columns, ")");
+        index = `datum.${Index}`,
+        ncols = `max(1, ${columns})`;
 
   let encode, enter, update, nrows, sort;
   yEncode.mult = 0.5; // -- LEGEND SYMBOLS --
@@ -58547,22 +60973,22 @@ function legendSymbolGroups (spec, config, userEncode, dataRef, columns) {
   }; // annotate and sort groups to ensure correct ordering
 
   if (_.isVertical(true)) {
-    nrows = "ceil(item.mark.items.length / ".concat(ncols, ")");
-    update.row.signal = "".concat(index, "%").concat(nrows);
-    update.column.signal = "floor(".concat(index, " / ").concat(nrows, ")");
+    nrows = `ceil(item.mark.items.length / ${ncols})`;
+    update.row.signal = `${index}%${nrows}`;
+    update.column.signal = `floor(${index} / ${nrows})`;
     sort = {
       field: ['row', index]
     };
   } else {
-    update.row.signal = "floor(".concat(index, " / ").concat(ncols, ")");
-    update.column.signal = "".concat(index, " % ").concat(ncols);
+    update.row.signal = `floor(${index} / ${ncols})`;
+    update.column.signal = `${index} % ${ncols}`;
     sort = {
       field: index
     };
   } // handle zero column case (implies infinite columns)
 
 
-  update.column.signal = "(".concat(columns, ")?").concat(update.column.signal, ":").concat(index); // facet legend entries into sub-groups
+  update.column.signal = `(${columns})?${update.column.signal}:${index}`; // facet legend entries into sub-groups
 
   dataRef = {
     facet: {
@@ -58601,14 +61027,14 @@ function legendSymbolLayout(spec, config) {
 
 const isL = 'item.orient === "left"',
       isR = 'item.orient === "right"',
-      isLR = "(".concat(isL, " || ").concat(isR, ")"),
-      isVG = "datum.vgrad && ".concat(isLR),
+      isLR = `(${isL} || ${isR})`,
+      isVG = `datum.vgrad && ${isLR}`,
       vega_parser_module_baseline = anchorExpr('"top"', '"bottom"', '"middle"'),
       alignFlip = anchorExpr('"right"', '"left"', '"center"'),
-      exprAlign = "datum.vgrad && ".concat(isR, " ? (").concat(alignFlip, ") : (").concat(isLR, " && !(datum.vgrad && ").concat(isL, ")) ? \"left\" : ").concat(alignExpr),
-      exprAnchor = "item._anchor || (".concat(isLR, " ? \"middle\" : \"start\")"),
-      exprAngle = "".concat(isVG, " ? (").concat(isL, " ? -90 : 90) : 0"),
-      exprBaseline = "".concat(isLR, " ? (datum.vgrad ? (").concat(isR, " ? \"bottom\" : \"top\") : ").concat(vega_parser_module_baseline, ") : \"top\"");
+      exprAlign = `datum.vgrad && ${isR} ? (${alignFlip}) : (${isLR} && !(datum.vgrad && ${isL})) ? "left" : ${alignExpr$1}`,
+      exprAnchor = `item._anchor || (${isLR} ? "middle" : "start")`,
+      exprAngle = `${isVG} ? (${isL} ? -90 : 90) : 0`,
+      exprBaseline = `${isLR} ? (datum.vgrad ? (${isR} ? "bottom" : "top") : ${vega_parser_module_baseline}) : "top"`;
 function legendTitle (spec, config, userEncode, dataRef) {
   const _ = vega_parser_module_lookup(spec, config);
 
@@ -58718,7 +61144,7 @@ function vega_parser_module_interactive (spec, scope) {
 function parseTransform (spec, scope) {
   const def = vega_dataflow_module_definition(spec.type);
   if (!def) Object(vega_util_module["o" /* error */])('Unrecognized transform type: ' + Object(vega_util_module["bb" /* stringValue */])(spec.type));
-  const t = entry$1(def.type.toLowerCase(), null, vega_parser_module_parseParameters(def, spec, scope));
+  const t = vega_parser_module_entry(def.type.toLowerCase(), null, vega_parser_module_parseParameters(def, spec, scope));
   if (spec.signal) scope.addSignal(spec.signal, scope.proxy(t));
   t.metadata = def.metadata || {};
   return t;
@@ -58733,7 +61159,7 @@ function vega_parser_module_parseParameters(def, spec, scope) {
 
   for (let i = 0; i < n; ++i) {
     const pdef = def.params[i];
-    params[pdef.name] = parseParameter$1(pdef, spec, scope);
+    params[pdef.name] = vega_parser_module_parseParameter(pdef, spec, scope);
   }
 
   return params;
@@ -58743,7 +61169,7 @@ function vega_parser_module_parseParameters(def, spec, scope) {
  */
 
 
-function parseParameter$1(def, spec, scope) {
+function vega_parser_module_parseParameter(def, spec, scope) {
   const type = def.type,
         value = spec[def.name];
 
@@ -58772,10 +61198,10 @@ function parameterValue(def, value, scope) {
   const type = def.type;
 
   if (isSignal(value)) {
-    return isExpr$1(type) ? Object(vega_util_module["o" /* error */])('Expression references can not be signals.') : isField(type) ? scope.fieldRef(value) : isCompare(type) ? scope.compareRef(value) : scope.signalRef(value.signal);
+    return vega_parser_module_isExpr(type) ? Object(vega_util_module["o" /* error */])('Expression references can not be signals.') : isField(type) ? scope.fieldRef(value) : isCompare(type) ? scope.compareRef(value) : scope.signalRef(value.signal);
   } else {
     const expr = def.expr || isField(type);
-    return expr && outerExpr(value) ? scope.exprRef(value.expr, value.as) : expr && outerField(value) ? vega_parser_module_fieldRef(value.field, value.as) : isExpr$1(type) ? vega_functions_module_parser(value, scope) : isData(type) ? vega_parser_module_ref(scope.getData(value).values) : isField(type) ? vega_parser_module_fieldRef(value) : isCompare(type) ? scope.compareRef(value) : value;
+    return expr && outerExpr(value) ? scope.exprRef(value.expr, value.as) : expr && outerField(value) ? fieldRef$1(value.field, value.as) : vega_parser_module_isExpr(type) ? vega_functions_module_parser(value, scope) : isData(type) ? vega_parser_module_ref(scope.getData(value).values) : isField(type) ? fieldRef$1(value) : isCompare(type) ? scope.compareRef(value) : value;
   }
 }
 /**
@@ -58842,38 +61268,38 @@ function parseSubParameter(def, value, scope) {
 const outerExpr = _ => _ && _.expr;
 const outerField = _ => _ && _.field;
 const isData = _ => _ === 'data';
-const isExpr$1 = _ => _ === 'expr';
+const vega_parser_module_isExpr = _ => _ === 'expr';
 const isField = _ => _ === 'field';
 const isCompare = _ => _ === 'compare';
 
-function vega_parser_module_parseData (from, group, scope) {
+function parseData$1 (from, group, scope) {
   let facet, key, op, dataRef, parent; // if no source data, generate singleton datum
 
   if (!from) {
     dataRef = vega_parser_module_ref(scope.add(vega_parser_module_Collect(null, [{}])));
   } // if faceted, process facet specification
   else if (facet = from.facet) {
-      if (!group) Object(vega_util_module["o" /* error */])('Only group marks can be faceted.'); // use pre-faceted source data, if available
+    if (!group) Object(vega_util_module["o" /* error */])('Only group marks can be faceted.'); // use pre-faceted source data, if available
 
-      if (facet.field != null) {
-        dataRef = parent = getDataRef(facet, scope);
+    if (facet.field != null) {
+      dataRef = parent = getDataRef(facet, scope);
+    } else {
+      // generate facet aggregates if no direct data specification
+      if (!from.data) {
+        op = parseTransform(Object(vega_util_module["p" /* extend */])({
+          type: 'aggregate',
+          groupby: Object(vega_util_module["i" /* array */])(facet.groupby)
+        }, facet.aggregate), scope);
+        op.params.key = scope.keyRef(facet.groupby);
+        op.params.pulse = getDataRef(facet, scope);
+        dataRef = parent = vega_parser_module_ref(scope.add(op));
       } else {
-        // generate facet aggregates if no direct data specification
-        if (!from.data) {
-          op = parseTransform(Object(vega_util_module["p" /* extend */])({
-            type: 'aggregate',
-            groupby: Object(vega_util_module["i" /* array */])(facet.groupby)
-          }, facet.aggregate), scope);
-          op.params.key = scope.keyRef(facet.groupby);
-          op.params.pulse = getDataRef(facet, scope);
-          dataRef = parent = vega_parser_module_ref(scope.add(op));
-        } else {
-          parent = vega_parser_module_ref(scope.getData(from.data).aggregate);
-        }
-
-        key = scope.keyRef(facet.groupby, true);
+        parent = vega_parser_module_ref(scope.getData(from.data).aggregate);
       }
-    } // if not yet defined, get source data reference
+
+      key = scope.keyRef(facet.groupby, true);
+    }
+  } // if not yet defined, get source data reference
 
 
   if (!dataRef) {
@@ -58976,7 +61402,7 @@ function vega_parser_module_cache(scope, ds, name, optype, field, counts, index)
       pulse: vega_parser_module_ref(ds.output)
     };
     if (sort) params.sort = scope.sortRef(counts);
-    op = scope.add(entry$1(optype, undefined, params));
+    op = scope.add(vega_parser_module_entry(optype, undefined, params));
     if (index) ds.index[field] = op;
     v = vega_parser_module_ref(op);
     if (k != null) cache[k] = v;
@@ -59129,10 +61555,10 @@ function parseMark (spec, scope) {
       boundRef;
   const nested = role === MarkRole || layout || facet; // resolve input data
 
-  const input = vega_parser_module_parseData(spec.from, group, scope); // data join to map tuples to visual items
+  const input = parseData$1(spec.from, group, scope); // data join to map tuples to visual items
 
   op = scope.add(vega_parser_module_DataJoin({
-    key: input.key || (spec.key ? vega_parser_module_fieldRef(spec.key) : undefined),
+    key: input.key || (spec.key ? fieldRef$1(spec.key) : undefined),
     pulse: input.pulse,
     clean: !group
   }));
@@ -59333,18 +61759,18 @@ function parseLegend (spec, scope) {
   if (type === vega_parser_module_Gradient) {
     children = [legendGradient(spec, scale, config, encode.gradient), legendGradientLabels(spec, config, encode.labels, entryRef)]; // adjust default tick count based on the gradient length
 
-    params.count = params.count || scope.signalRef("max(2,2*floor((".concat(deref(_.gradientLength()), ")/100))"));
+    params.count = params.count || scope.signalRef(`max(2,2*floor((${deref(_.gradientLength())})/100))`);
   } // discrete gradient legend
   else if (type === vega_parser_module_Discrete) {
-      children = [legendGradientDiscrete(spec, scale, config, encode.gradient, entryRef), legendGradientLabels(spec, config, encode.labels, entryRef)];
-    } // symbol legend
-    else {
-        // determine legend symbol group layout
-        entryLayout = legendSymbolLayout(spec, config);
-        children = [legendSymbolGroups(spec, config, encode, entryRef, deref(entryLayout.columns))]; // pass symbol size information to legend entry generator
+    children = [legendGradientDiscrete(spec, scale, config, encode.gradient, entryRef), legendGradientLabels(spec, config, encode.labels, entryRef)];
+  } // symbol legend
+  else {
+    // determine legend symbol group layout
+    entryLayout = legendSymbolLayout(spec, config);
+    children = [legendSymbolGroups(spec, config, encode, entryRef, deref(entryLayout.columns))]; // pass symbol size information to legend entry generator
 
-        params.size = sizeExpression(spec, scope, children[0].marks);
-      } // generate legend marks
+    params.size = sizeExpression(spec, scope, children[0].marks);
+  } // generate legend marks
 
 
   children = [guideGroup({
@@ -59417,18 +61843,18 @@ function sizeExpression(spec, scope, marks) {
   const size = deref(getChannel('size', spec, marks)),
         strokeWidth = deref(getChannel('strokeWidth', spec, marks)),
         fontSize = deref(getFontSize(marks[1].encode, scope, GuideLabelStyle));
-  return vega_functions_module_parser("max(ceil(sqrt(".concat(size, ")+").concat(strokeWidth, "),").concat(fontSize, ")"), scope);
+  return vega_functions_module_parser(`max(ceil(sqrt(${size})+${strokeWidth}),${fontSize})`, scope);
 }
 
 function getChannel(name, spec, marks) {
-  return spec[name] ? "scale(\"".concat(spec[name], "\",datum)") : getEncoding(name, marks[0].encode);
+  return spec[name] ? `scale("${spec[name]}",datum)` : getEncoding(name, marks[0].encode);
 }
 
 function getFontSize(encode, scope, style) {
   return getEncoding('fontSize', encode) || getStyle('fontSize', scope, style);
 }
 
-const angleExpr = "item.orient===\"".concat(vega_parser_module_Left, "\"?-90:item.orient===\"").concat(vega_parser_module_Right, "\"?90:0");
+const angleExpr = `item.orient==="${vega_parser_module_Left}"?-90:item.orient==="${vega_parser_module_Right}"?90:0`;
 function parseTitle (spec, scope) {
   spec = Object(vega_util_module["J" /* isString */])(spec) ? {
     text: spec
@@ -59486,7 +61912,7 @@ function groupEncode(_, userEncode) {
     orient: _('orient'),
     anchor: _('anchor'),
     align: {
-      signal: alignExpr
+      signal: alignExpr$1
     },
     angle: {
       signal: angleExpr
@@ -59605,7 +62031,7 @@ function buildSubTitle(spec, _, userEncode, dataRef) {
   }, userEncode);
 }
 
-function parseData$1(data, scope) {
+function vega_parser_module_parseData(data, scope) {
   const transforms = [];
 
   if (data.transform) {
@@ -59641,7 +62067,7 @@ function analyze(data, scope, ops) {
     // hard-wired input data set
     if (isSignal(data.values) || vega_parser_module_hasSignal(data.format)) {
       // if either values is signal or format has signal, use dynamic loader
-      output.push(vega_parser_module_load(scope, data));
+      output.push(load(scope, data));
       output.push(source = collect());
     } else {
       // otherwise, ingest upon dataflow init
@@ -59654,7 +62080,7 @@ function analyze(data, scope, ops) {
     // load data from external source
     if (vega_parser_module_hasSignal(data.url) || vega_parser_module_hasSignal(data.format)) {
       // if either url or format has signal, use dynamic loader
-      output.push(vega_parser_module_load(scope, data));
+      output.push(load(scope, data));
       output.push(source = collect());
     } else {
       // otherwise, request load upon dataflow init
@@ -59710,7 +62136,7 @@ function collect(values) {
   return s;
 }
 
-function vega_parser_module_load(scope, data) {
+function load(scope, data) {
   return vega_parser_module_Load({
     url: data.url ? scope.property(data.url) : undefined,
     async: data.async ? scope.property(data.async) : undefined,
@@ -59738,15 +62164,15 @@ const ifRight = (orient, a, b) => isSignal(orient) ? ifRightExpr(orient.signal, 
   value: b
 };
 
-const ifXEnc = ($orient, a, b) => ifEnc("".concat($orient, " === '").concat(vega_parser_module_Top, "' || ").concat($orient, " === '").concat(vega_parser_module_Bottom, "'"), a, b);
+const ifXEnc = ($orient, a, b) => ifEnc(`${$orient} === '${vega_parser_module_Top}' || ${$orient} === '${vega_parser_module_Bottom}'`, a, b);
 
-const ifYEnc = ($orient, a, b) => ifEnc("".concat($orient, " !== '").concat(vega_parser_module_Top, "' && ").concat($orient, " !== '").concat(vega_parser_module_Bottom, "'"), a, b);
+const ifYEnc = ($orient, a, b) => ifEnc(`${$orient} !== '${vega_parser_module_Top}' && ${$orient} !== '${vega_parser_module_Bottom}'`, a, b);
 
-const ifLeftTopExpr = ($orient, a, b) => ifExpr("".concat($orient, " === '").concat(vega_parser_module_Left, "' || ").concat($orient, " === '").concat(vega_parser_module_Top, "'"), a, b);
+const ifLeftTopExpr = ($orient, a, b) => ifExpr(`${$orient} === '${vega_parser_module_Left}' || ${$orient} === '${vega_parser_module_Top}'`, a, b);
 
-const ifTopExpr = ($orient, a, b) => ifExpr("".concat($orient, " === '").concat(vega_parser_module_Top, "'"), a, b);
+const ifTopExpr = ($orient, a, b) => ifExpr(`${$orient} === '${vega_parser_module_Top}'`, a, b);
 
-const ifRightExpr = ($orient, a, b) => ifExpr("".concat($orient, " === '").concat(vega_parser_module_Right, "'"), a, b);
+const ifRightExpr = ($orient, a, b) => ifExpr(`${$orient} === '${vega_parser_module_Right}'`, a, b);
 
 const ifEnc = (test, a, b) => {
   // ensure inputs are encoder objects (or null)
@@ -59758,7 +62184,7 @@ const ifEnc = (test, a, b) => {
     a = a ? a.signal || Object(vega_util_module["bb" /* stringValue */])(a.value) : null;
     b = b ? b.signal || Object(vega_util_module["bb" /* stringValue */])(b.value) : null;
     return {
-      signal: "".concat(test, " ? (").concat(a, ") : (").concat(b, ")")
+      signal: `${test} ? (${a}) : (${b})`
     };
   } else {
     // otherwise generate rule set
@@ -59771,17 +62197,17 @@ const ifEnc = (test, a, b) => {
 const isSimple = enc => enc == null || Object.keys(enc).length === 1;
 
 const ifExpr = (test, a, b) => ({
-  signal: "".concat(test, " ? (").concat(toExpr(a), ") : (").concat(toExpr(b), ")")
+  signal: `${test} ? (${toExpr(a)}) : (${toExpr(b)})`
 });
 
 const ifOrient = ($orient, t, b, l, r) => ({
-  signal: (l != null ? "".concat($orient, " === '").concat(vega_parser_module_Left, "' ? (").concat(toExpr(l), ") : ") : '') + (b != null ? "".concat($orient, " === '").concat(vega_parser_module_Bottom, "' ? (").concat(toExpr(b), ") : ") : '') + (r != null ? "".concat($orient, " === '").concat(vega_parser_module_Right, "' ? (").concat(toExpr(r), ") : ") : '') + (t != null ? "".concat($orient, " === '").concat(vega_parser_module_Top, "' ? (").concat(toExpr(t), ") : ") : '') + '(null)'
+  signal: (l != null ? `${$orient} === '${vega_parser_module_Left}' ? (${toExpr(l)}) : ` : '') + (b != null ? `${$orient} === '${vega_parser_module_Bottom}' ? (${toExpr(b)}) : ` : '') + (r != null ? `${$orient} === '${vega_parser_module_Right}' ? (${toExpr(r)}) : ` : '') + (t != null ? `${$orient} === '${vega_parser_module_Top}' ? (${toExpr(t)}) : ` : '') + '(null)'
 });
 
 const toExpr = v => isSignal(v) ? v.signal : v == null ? null : Object(vega_util_module["bb" /* stringValue */])(v);
 
 const mult = (sign, value) => value === 0 ? 0 : isSignal(sign) ? {
-  signal: "(".concat(sign.signal, ") * ").concat(value)
+  signal: `(${sign.signal}) * ${value}`
 } : {
   value: sign * value
 };
@@ -59995,7 +62421,7 @@ function axisGrid (spec, config, userEncode, dataRef, band) {
 function vega_parser_module_offsetValue(offset, sign) {
   if (sign === 1) ; else if (!Object(vega_util_module["H" /* isObject */])(offset)) {
     offset = isSignal(sign) ? {
-      signal: "(".concat(sign.signal, ") * (").concat(offset || 0, ")")
+      signal: `(${sign.signal}) * (${offset || 0})`
     } : sign * (offset || 0);
   } else {
     let entry = offset = Object(vega_util_module["p" /* extend */])({}, offset);
@@ -60004,7 +62430,7 @@ function vega_parser_module_offsetValue(offset, sign) {
       if (!Object(vega_util_module["H" /* isObject */])(entry.mult)) {
         entry.mult = isSignal(sign) // no offset if sign === 1
         ? {
-          signal: "(".concat(entry.mult, ") * (").concat(sign.signal, ")")
+          signal: `(${entry.mult}) * (${sign.signal})`
         } : entry.mult * sign;
         return offset;
       } else {
@@ -60102,7 +62528,7 @@ function axisLabels (spec, config, userEncode, dataRef, size, band) {
   const baseline = ifX(orient, ifTop(orient, 'bottom', 'top'), flushOn ? flushExpr(scale, flush, '"top"', '"bottom"', '"middle"') : {
     value: 'middle'
   });
-  const offsetExpr = flushExpr(scale, flush, "-(".concat(flushOffset, ")"), flushOffset, 0);
+  const offsetExpr = flushExpr(scale, flush, `-(${flushOffset})`, flushOffset, 0);
   flushOn = flushOn && flushOffset;
   const enter = {
     opacity: vega_parser_module_zero,
@@ -60192,7 +62618,7 @@ function axisTitle (spec, config, userEncode, dataRef) {
       opacity: vega_parser_module_zero,
       anchor: encoder(_('titleAnchor', null)),
       align: {
-        signal: alignExpr
+        signal: alignExpr$1
       }
     },
     update: update = Object(vega_util_module["p" /* extend */])({}, enter, {
@@ -60204,7 +62630,7 @@ function axisTitle (spec, config, userEncode, dataRef) {
     }
   };
   const titlePos = {
-    signal: "lerp(range(\"".concat(spec.scale, "\"), ").concat(anchorExpr(0, 1, 0.5), ")")
+    signal: `lerp(range("${spec.scale}"), ${anchorExpr(0, 1, 0.5)})`
   };
   update.x = ifX(orient, titlePos);
   update.y = ifY(orient, titlePos);
@@ -60338,7 +62764,7 @@ function buildAxisEncode(_, spec) {
     minExtent: _('minExtent'),
     maxExtent: _('maxExtent'),
     range: {
-      signal: "abs(span(range(\"".concat(spec.scale, "\")))")
+      signal: `abs(span(range("${spec.scale}")))`
     },
     translate: _('translate'),
     // accessibility support
@@ -60358,7 +62784,7 @@ function parseScope (spec, scope, preprocessed) {
 
   scales.forEach(_ => initScale(_, scope)); // parse data sources
 
-  Object(vega_util_module["i" /* array */])(spec.data).forEach(_ => parseData$1(_, scope)); // parse scale definitions
+  Object(vega_util_module["i" /* array */])(spec.data).forEach(_ => vega_parser_module_parseData(_, scope)); // parse scale definitions
 
   scales.forEach(_ => vega_parser_module_parseScale(_, scope)); // parse signal updates
 
@@ -60495,7 +62921,7 @@ function collectSignals(spec, config) {
   return signals;
 }
 
-function Scope$1(config, options) {
+function Scope(config, options) {
   this.config = config || {};
   this.options = options || {};
   this.bindings = [];
@@ -60541,7 +62967,7 @@ function Subscope(scope) {
   this._markpath = scope._markpath;
 }
 
-Scope$1.prototype = Subscope.prototype = {
+Scope.prototype = Subscope.prototype = {
   parse(spec) {
     return parseScope(spec, this);
   },
@@ -60685,7 +63111,7 @@ Scope$1.prototype = Subscope.prototype = {
 
   // ----
   fieldRef(field, name) {
-    if (Object(vega_util_module["J" /* isString */])(field)) return vega_parser_module_fieldRef(field, name);
+    if (Object(vega_util_module["J" /* isString */])(field)) return fieldRef$1(field, name);
 
     if (!field.signal) {
       Object(vega_util_module["o" /* error */])('Unsupported field reference: ' + Object(vega_util_module["bb" /* stringValue */])(field));
@@ -60708,7 +63134,7 @@ Scope$1.prototype = Subscope.prototype = {
   compareRef(cmp) {
     let signal = false;
 
-    const check = _ => isSignal(_) ? (signal = true, this.signalRef(_.signal)) : vega_parser_module_isExpr(_) ? (signal = true, this.exprRef(_.expr)) : _;
+    const check = _ => isSignal(_) ? (signal = true, this.signalRef(_.signal)) : isExpr$1(_) ? (signal = true, this.exprRef(_.expr)) : _;
 
     const fields = Object(vega_util_module["i" /* array */])(cmp.field).map(check),
           orders = Object(vega_util_module["i" /* array */])(cmp.order).map(check);
@@ -61152,13 +63578,2003 @@ function vega_parser_module_defaults () {
   };
 }
 
-function parse$1 (spec, config, options) {
+function vega_parser_module_parse (spec, config, options) {
   if (!Object(vega_util_module["H" /* isObject */])(spec)) {
     Object(vega_util_module["o" /* error */])('Input Vega specification must be an object.');
   }
 
   config = Object(vega_util_module["P" /* mergeConfig */])(vega_parser_module_defaults(), config, spec.config);
-  return parseView(spec, new Scope$1(config, options)).toRuntime();
+  return parseView(spec, new Scope(config, options)).toRuntime();
+}
+
+
+
+// CONCATENATED MODULE: ./node_modules/vega-expression/build/vega-expression.module.js
+
+
+const build_vega_expression_module_RawCode = 'RawCode';
+const build_vega_expression_module_Literal = 'Literal';
+const build_vega_expression_module_Property = 'Property';
+const vega_expression_build_vega_expression_module_Identifier = 'Identifier';
+const build_vega_expression_module_ArrayExpression = 'ArrayExpression';
+const build_vega_expression_module_BinaryExpression = 'BinaryExpression';
+const vega_expression_build_vega_expression_module_CallExpression = 'CallExpression';
+const build_vega_expression_module_ConditionalExpression = 'ConditionalExpression';
+const build_vega_expression_module_LogicalExpression = 'LogicalExpression';
+const build_vega_expression_module_MemberExpression = 'MemberExpression';
+const build_vega_expression_module_ObjectExpression = 'ObjectExpression';
+const build_vega_expression_module_UnaryExpression = 'UnaryExpression';
+function build_vega_expression_module_ASTNode(type) {
+  this.type = type;
+}
+
+build_vega_expression_module_ASTNode.prototype.visit = function (visitor) {
+  let c, i, n;
+  if (visitor(this)) return 1;
+
+  for (c = vega_expression_build_vega_expression_module_children(this), i = 0, n = c.length; i < n; ++i) {
+    if (c[i].visit(visitor)) return 1;
+  }
+};
+
+function vega_expression_build_vega_expression_module_children(node) {
+  switch (node.type) {
+    case build_vega_expression_module_ArrayExpression:
+      return node.elements;
+
+    case build_vega_expression_module_BinaryExpression:
+    case build_vega_expression_module_LogicalExpression:
+      return [node.left, node.right];
+
+    case vega_expression_build_vega_expression_module_CallExpression:
+      return [node.callee].concat(node.arguments);
+
+    case build_vega_expression_module_ConditionalExpression:
+      return [node.test, node.consequent, node.alternate];
+
+    case build_vega_expression_module_MemberExpression:
+      return [node.object, node.property];
+
+    case build_vega_expression_module_ObjectExpression:
+      return node.properties;
+
+    case build_vega_expression_module_Property:
+      return [node.key, node.value];
+
+    case build_vega_expression_module_UnaryExpression:
+      return [node.argument];
+
+    case vega_expression_build_vega_expression_module_Identifier:
+    case build_vega_expression_module_Literal:
+    case build_vega_expression_module_RawCode:
+    default:
+      return [];
+  }
+}
+
+/*
+  The following expression parser is based on Esprima (http://esprima.org/).
+  Original header comment and license for Esprima is included here:
+
+  Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
+  Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
+  Copyright (C) 2013 Mathias Bynens <mathias@qiwi.be>
+  Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
+  Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
+  Copyright (C) 2012 Joost-Wim Boekesteijn <joost-wim@boekesteijn.nl>
+  Copyright (C) 2012 Kris Kowal <kris.kowal@cixar.com>
+  Copyright (C) 2012 Yusuke Suzuki <utatane.tea@gmail.com>
+  Copyright (C) 2012 Arpad Borsos <arpad.borsos@googlemail.com>
+  Copyright (C) 2011 Ariya Hidayat <ariya.hidayat@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+var build_vega_expression_module_TokenName, vega_expression_build_vega_expression_module_source, vega_expression_build_vega_expression_module_index, vega_expression_build_vega_expression_module_length, build_vega_expression_module_lookahead;
+var build_vega_expression_module_TokenBooleanLiteral = 1,
+    build_vega_expression_module_TokenEOF = 2,
+    build_vega_expression_module_TokenIdentifier = 3,
+    build_vega_expression_module_TokenKeyword = 4,
+    build_vega_expression_module_TokenNullLiteral = 5,
+    build_vega_expression_module_TokenNumericLiteral = 6,
+    build_vega_expression_module_TokenPunctuator = 7,
+    build_vega_expression_module_TokenStringLiteral = 8,
+    build_vega_expression_module_TokenRegularExpression = 9;
+build_vega_expression_module_TokenName = {};
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenBooleanLiteral] = 'Boolean';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenEOF] = '<end>';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenIdentifier] = 'Identifier';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenKeyword] = 'Keyword';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenNullLiteral] = 'Null';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenNumericLiteral] = 'Numeric';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenPunctuator] = 'Punctuator';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenStringLiteral] = 'String';
+build_vega_expression_module_TokenName[build_vega_expression_module_TokenRegularExpression] = 'RegularExpression';
+var build_vega_expression_module_SyntaxArrayExpression = 'ArrayExpression',
+    build_vega_expression_module_SyntaxBinaryExpression = 'BinaryExpression',
+    build_vega_expression_module_SyntaxCallExpression = 'CallExpression',
+    build_vega_expression_module_SyntaxConditionalExpression = 'ConditionalExpression',
+    build_vega_expression_module_SyntaxIdentifier = 'Identifier',
+    build_vega_expression_module_SyntaxLiteral = 'Literal',
+    build_vega_expression_module_SyntaxLogicalExpression = 'LogicalExpression',
+    build_vega_expression_module_SyntaxMemberExpression = 'MemberExpression',
+    build_vega_expression_module_SyntaxObjectExpression = 'ObjectExpression',
+    build_vega_expression_module_SyntaxProperty = 'Property',
+    build_vega_expression_module_SyntaxUnaryExpression = 'UnaryExpression'; // Error messages should be identical to V8.
+
+var build_vega_expression_module_MessageUnexpectedToken = 'Unexpected token %0',
+    build_vega_expression_module_MessageUnexpectedNumber = 'Unexpected number',
+    build_vega_expression_module_MessageUnexpectedString = 'Unexpected string',
+    build_vega_expression_module_MessageUnexpectedIdentifier = 'Unexpected identifier',
+    build_vega_expression_module_MessageUnexpectedReserved = 'Unexpected reserved word',
+    build_vega_expression_module_MessageUnexpectedEOS = 'Unexpected end of input',
+    build_vega_expression_module_MessageInvalidRegExp = 'Invalid regular expression',
+    build_vega_expression_module_MessageUnterminatedRegExp = 'Invalid regular expression: missing /',
+    build_vega_expression_module_MessageStrictOctalLiteral = 'Octal literals are not allowed in strict mode.',
+    build_vega_expression_module_MessageStrictDuplicateProperty = 'Duplicate data property in object literal not allowed in strict mode';
+var build_vega_expression_module_ILLEGAL = 'ILLEGAL',
+    build_vega_expression_module_DISABLED = 'Disabled.'; // See also tools/generate-unicode-regex.py.
+
+var build_vega_expression_module_RegexNonAsciiIdentifierStart = new RegExp('[\\xAA\\xB5\\xBA\\xC0-\\xD6\\xD8-\\xF6\\xF8-\\u02C1\\u02C6-\\u02D1\\u02E0-\\u02E4\\u02EC\\u02EE\\u0370-\\u0374\\u0376\\u0377\\u037A-\\u037D\\u037F\\u0386\\u0388-\\u038A\\u038C\\u038E-\\u03A1\\u03A3-\\u03F5\\u03F7-\\u0481\\u048A-\\u052F\\u0531-\\u0556\\u0559\\u0561-\\u0587\\u05D0-\\u05EA\\u05F0-\\u05F2\\u0620-\\u064A\\u066E\\u066F\\u0671-\\u06D3\\u06D5\\u06E5\\u06E6\\u06EE\\u06EF\\u06FA-\\u06FC\\u06FF\\u0710\\u0712-\\u072F\\u074D-\\u07A5\\u07B1\\u07CA-\\u07EA\\u07F4\\u07F5\\u07FA\\u0800-\\u0815\\u081A\\u0824\\u0828\\u0840-\\u0858\\u08A0-\\u08B2\\u0904-\\u0939\\u093D\\u0950\\u0958-\\u0961\\u0971-\\u0980\\u0985-\\u098C\\u098F\\u0990\\u0993-\\u09A8\\u09AA-\\u09B0\\u09B2\\u09B6-\\u09B9\\u09BD\\u09CE\\u09DC\\u09DD\\u09DF-\\u09E1\\u09F0\\u09F1\\u0A05-\\u0A0A\\u0A0F\\u0A10\\u0A13-\\u0A28\\u0A2A-\\u0A30\\u0A32\\u0A33\\u0A35\\u0A36\\u0A38\\u0A39\\u0A59-\\u0A5C\\u0A5E\\u0A72-\\u0A74\\u0A85-\\u0A8D\\u0A8F-\\u0A91\\u0A93-\\u0AA8\\u0AAA-\\u0AB0\\u0AB2\\u0AB3\\u0AB5-\\u0AB9\\u0ABD\\u0AD0\\u0AE0\\u0AE1\\u0B05-\\u0B0C\\u0B0F\\u0B10\\u0B13-\\u0B28\\u0B2A-\\u0B30\\u0B32\\u0B33\\u0B35-\\u0B39\\u0B3D\\u0B5C\\u0B5D\\u0B5F-\\u0B61\\u0B71\\u0B83\\u0B85-\\u0B8A\\u0B8E-\\u0B90\\u0B92-\\u0B95\\u0B99\\u0B9A\\u0B9C\\u0B9E\\u0B9F\\u0BA3\\u0BA4\\u0BA8-\\u0BAA\\u0BAE-\\u0BB9\\u0BD0\\u0C05-\\u0C0C\\u0C0E-\\u0C10\\u0C12-\\u0C28\\u0C2A-\\u0C39\\u0C3D\\u0C58\\u0C59\\u0C60\\u0C61\\u0C85-\\u0C8C\\u0C8E-\\u0C90\\u0C92-\\u0CA8\\u0CAA-\\u0CB3\\u0CB5-\\u0CB9\\u0CBD\\u0CDE\\u0CE0\\u0CE1\\u0CF1\\u0CF2\\u0D05-\\u0D0C\\u0D0E-\\u0D10\\u0D12-\\u0D3A\\u0D3D\\u0D4E\\u0D60\\u0D61\\u0D7A-\\u0D7F\\u0D85-\\u0D96\\u0D9A-\\u0DB1\\u0DB3-\\u0DBB\\u0DBD\\u0DC0-\\u0DC6\\u0E01-\\u0E30\\u0E32\\u0E33\\u0E40-\\u0E46\\u0E81\\u0E82\\u0E84\\u0E87\\u0E88\\u0E8A\\u0E8D\\u0E94-\\u0E97\\u0E99-\\u0E9F\\u0EA1-\\u0EA3\\u0EA5\\u0EA7\\u0EAA\\u0EAB\\u0EAD-\\u0EB0\\u0EB2\\u0EB3\\u0EBD\\u0EC0-\\u0EC4\\u0EC6\\u0EDC-\\u0EDF\\u0F00\\u0F40-\\u0F47\\u0F49-\\u0F6C\\u0F88-\\u0F8C\\u1000-\\u102A\\u103F\\u1050-\\u1055\\u105A-\\u105D\\u1061\\u1065\\u1066\\u106E-\\u1070\\u1075-\\u1081\\u108E\\u10A0-\\u10C5\\u10C7\\u10CD\\u10D0-\\u10FA\\u10FC-\\u1248\\u124A-\\u124D\\u1250-\\u1256\\u1258\\u125A-\\u125D\\u1260-\\u1288\\u128A-\\u128D\\u1290-\\u12B0\\u12B2-\\u12B5\\u12B8-\\u12BE\\u12C0\\u12C2-\\u12C5\\u12C8-\\u12D6\\u12D8-\\u1310\\u1312-\\u1315\\u1318-\\u135A\\u1380-\\u138F\\u13A0-\\u13F4\\u1401-\\u166C\\u166F-\\u167F\\u1681-\\u169A\\u16A0-\\u16EA\\u16EE-\\u16F8\\u1700-\\u170C\\u170E-\\u1711\\u1720-\\u1731\\u1740-\\u1751\\u1760-\\u176C\\u176E-\\u1770\\u1780-\\u17B3\\u17D7\\u17DC\\u1820-\\u1877\\u1880-\\u18A8\\u18AA\\u18B0-\\u18F5\\u1900-\\u191E\\u1950-\\u196D\\u1970-\\u1974\\u1980-\\u19AB\\u19C1-\\u19C7\\u1A00-\\u1A16\\u1A20-\\u1A54\\u1AA7\\u1B05-\\u1B33\\u1B45-\\u1B4B\\u1B83-\\u1BA0\\u1BAE\\u1BAF\\u1BBA-\\u1BE5\\u1C00-\\u1C23\\u1C4D-\\u1C4F\\u1C5A-\\u1C7D\\u1CE9-\\u1CEC\\u1CEE-\\u1CF1\\u1CF5\\u1CF6\\u1D00-\\u1DBF\\u1E00-\\u1F15\\u1F18-\\u1F1D\\u1F20-\\u1F45\\u1F48-\\u1F4D\\u1F50-\\u1F57\\u1F59\\u1F5B\\u1F5D\\u1F5F-\\u1F7D\\u1F80-\\u1FB4\\u1FB6-\\u1FBC\\u1FBE\\u1FC2-\\u1FC4\\u1FC6-\\u1FCC\\u1FD0-\\u1FD3\\u1FD6-\\u1FDB\\u1FE0-\\u1FEC\\u1FF2-\\u1FF4\\u1FF6-\\u1FFC\\u2071\\u207F\\u2090-\\u209C\\u2102\\u2107\\u210A-\\u2113\\u2115\\u2119-\\u211D\\u2124\\u2126\\u2128\\u212A-\\u212D\\u212F-\\u2139\\u213C-\\u213F\\u2145-\\u2149\\u214E\\u2160-\\u2188\\u2C00-\\u2C2E\\u2C30-\\u2C5E\\u2C60-\\u2CE4\\u2CEB-\\u2CEE\\u2CF2\\u2CF3\\u2D00-\\u2D25\\u2D27\\u2D2D\\u2D30-\\u2D67\\u2D6F\\u2D80-\\u2D96\\u2DA0-\\u2DA6\\u2DA8-\\u2DAE\\u2DB0-\\u2DB6\\u2DB8-\\u2DBE\\u2DC0-\\u2DC6\\u2DC8-\\u2DCE\\u2DD0-\\u2DD6\\u2DD8-\\u2DDE\\u2E2F\\u3005-\\u3007\\u3021-\\u3029\\u3031-\\u3035\\u3038-\\u303C\\u3041-\\u3096\\u309D-\\u309F\\u30A1-\\u30FA\\u30FC-\\u30FF\\u3105-\\u312D\\u3131-\\u318E\\u31A0-\\u31BA\\u31F0-\\u31FF\\u3400-\\u4DB5\\u4E00-\\u9FCC\\uA000-\\uA48C\\uA4D0-\\uA4FD\\uA500-\\uA60C\\uA610-\\uA61F\\uA62A\\uA62B\\uA640-\\uA66E\\uA67F-\\uA69D\\uA6A0-\\uA6EF\\uA717-\\uA71F\\uA722-\\uA788\\uA78B-\\uA78E\\uA790-\\uA7AD\\uA7B0\\uA7B1\\uA7F7-\\uA801\\uA803-\\uA805\\uA807-\\uA80A\\uA80C-\\uA822\\uA840-\\uA873\\uA882-\\uA8B3\\uA8F2-\\uA8F7\\uA8FB\\uA90A-\\uA925\\uA930-\\uA946\\uA960-\\uA97C\\uA984-\\uA9B2\\uA9CF\\uA9E0-\\uA9E4\\uA9E6-\\uA9EF\\uA9FA-\\uA9FE\\uAA00-\\uAA28\\uAA40-\\uAA42\\uAA44-\\uAA4B\\uAA60-\\uAA76\\uAA7A\\uAA7E-\\uAAAF\\uAAB1\\uAAB5\\uAAB6\\uAAB9-\\uAABD\\uAAC0\\uAAC2\\uAADB-\\uAADD\\uAAE0-\\uAAEA\\uAAF2-\\uAAF4\\uAB01-\\uAB06\\uAB09-\\uAB0E\\uAB11-\\uAB16\\uAB20-\\uAB26\\uAB28-\\uAB2E\\uAB30-\\uAB5A\\uAB5C-\\uAB5F\\uAB64\\uAB65\\uABC0-\\uABE2\\uAC00-\\uD7A3\\uD7B0-\\uD7C6\\uD7CB-\\uD7FB\\uF900-\\uFA6D\\uFA70-\\uFAD9\\uFB00-\\uFB06\\uFB13-\\uFB17\\uFB1D\\uFB1F-\\uFB28\\uFB2A-\\uFB36\\uFB38-\\uFB3C\\uFB3E\\uFB40\\uFB41\\uFB43\\uFB44\\uFB46-\\uFBB1\\uFBD3-\\uFD3D\\uFD50-\\uFD8F\\uFD92-\\uFDC7\\uFDF0-\\uFDFB\\uFE70-\\uFE74\\uFE76-\\uFEFC\\uFF21-\\uFF3A\\uFF41-\\uFF5A\\uFF66-\\uFFBE\\uFFC2-\\uFFC7\\uFFCA-\\uFFCF\\uFFD2-\\uFFD7\\uFFDA-\\uFFDC]'),
+    // eslint-disable-next-line no-misleading-character-class
+build_vega_expression_module_RegexNonAsciiIdentifierPart = new RegExp('[\\xAA\\xB5\\xBA\\xC0-\\xD6\\xD8-\\xF6\\xF8-\\u02C1\\u02C6-\\u02D1\\u02E0-\\u02E4\\u02EC\\u02EE\\u0300-\\u0374\\u0376\\u0377\\u037A-\\u037D\\u037F\\u0386\\u0388-\\u038A\\u038C\\u038E-\\u03A1\\u03A3-\\u03F5\\u03F7-\\u0481\\u0483-\\u0487\\u048A-\\u052F\\u0531-\\u0556\\u0559\\u0561-\\u0587\\u0591-\\u05BD\\u05BF\\u05C1\\u05C2\\u05C4\\u05C5\\u05C7\\u05D0-\\u05EA\\u05F0-\\u05F2\\u0610-\\u061A\\u0620-\\u0669\\u066E-\\u06D3\\u06D5-\\u06DC\\u06DF-\\u06E8\\u06EA-\\u06FC\\u06FF\\u0710-\\u074A\\u074D-\\u07B1\\u07C0-\\u07F5\\u07FA\\u0800-\\u082D\\u0840-\\u085B\\u08A0-\\u08B2\\u08E4-\\u0963\\u0966-\\u096F\\u0971-\\u0983\\u0985-\\u098C\\u098F\\u0990\\u0993-\\u09A8\\u09AA-\\u09B0\\u09B2\\u09B6-\\u09B9\\u09BC-\\u09C4\\u09C7\\u09C8\\u09CB-\\u09CE\\u09D7\\u09DC\\u09DD\\u09DF-\\u09E3\\u09E6-\\u09F1\\u0A01-\\u0A03\\u0A05-\\u0A0A\\u0A0F\\u0A10\\u0A13-\\u0A28\\u0A2A-\\u0A30\\u0A32\\u0A33\\u0A35\\u0A36\\u0A38\\u0A39\\u0A3C\\u0A3E-\\u0A42\\u0A47\\u0A48\\u0A4B-\\u0A4D\\u0A51\\u0A59-\\u0A5C\\u0A5E\\u0A66-\\u0A75\\u0A81-\\u0A83\\u0A85-\\u0A8D\\u0A8F-\\u0A91\\u0A93-\\u0AA8\\u0AAA-\\u0AB0\\u0AB2\\u0AB3\\u0AB5-\\u0AB9\\u0ABC-\\u0AC5\\u0AC7-\\u0AC9\\u0ACB-\\u0ACD\\u0AD0\\u0AE0-\\u0AE3\\u0AE6-\\u0AEF\\u0B01-\\u0B03\\u0B05-\\u0B0C\\u0B0F\\u0B10\\u0B13-\\u0B28\\u0B2A-\\u0B30\\u0B32\\u0B33\\u0B35-\\u0B39\\u0B3C-\\u0B44\\u0B47\\u0B48\\u0B4B-\\u0B4D\\u0B56\\u0B57\\u0B5C\\u0B5D\\u0B5F-\\u0B63\\u0B66-\\u0B6F\\u0B71\\u0B82\\u0B83\\u0B85-\\u0B8A\\u0B8E-\\u0B90\\u0B92-\\u0B95\\u0B99\\u0B9A\\u0B9C\\u0B9E\\u0B9F\\u0BA3\\u0BA4\\u0BA8-\\u0BAA\\u0BAE-\\u0BB9\\u0BBE-\\u0BC2\\u0BC6-\\u0BC8\\u0BCA-\\u0BCD\\u0BD0\\u0BD7\\u0BE6-\\u0BEF\\u0C00-\\u0C03\\u0C05-\\u0C0C\\u0C0E-\\u0C10\\u0C12-\\u0C28\\u0C2A-\\u0C39\\u0C3D-\\u0C44\\u0C46-\\u0C48\\u0C4A-\\u0C4D\\u0C55\\u0C56\\u0C58\\u0C59\\u0C60-\\u0C63\\u0C66-\\u0C6F\\u0C81-\\u0C83\\u0C85-\\u0C8C\\u0C8E-\\u0C90\\u0C92-\\u0CA8\\u0CAA-\\u0CB3\\u0CB5-\\u0CB9\\u0CBC-\\u0CC4\\u0CC6-\\u0CC8\\u0CCA-\\u0CCD\\u0CD5\\u0CD6\\u0CDE\\u0CE0-\\u0CE3\\u0CE6-\\u0CEF\\u0CF1\\u0CF2\\u0D01-\\u0D03\\u0D05-\\u0D0C\\u0D0E-\\u0D10\\u0D12-\\u0D3A\\u0D3D-\\u0D44\\u0D46-\\u0D48\\u0D4A-\\u0D4E\\u0D57\\u0D60-\\u0D63\\u0D66-\\u0D6F\\u0D7A-\\u0D7F\\u0D82\\u0D83\\u0D85-\\u0D96\\u0D9A-\\u0DB1\\u0DB3-\\u0DBB\\u0DBD\\u0DC0-\\u0DC6\\u0DCA\\u0DCF-\\u0DD4\\u0DD6\\u0DD8-\\u0DDF\\u0DE6-\\u0DEF\\u0DF2\\u0DF3\\u0E01-\\u0E3A\\u0E40-\\u0E4E\\u0E50-\\u0E59\\u0E81\\u0E82\\u0E84\\u0E87\\u0E88\\u0E8A\\u0E8D\\u0E94-\\u0E97\\u0E99-\\u0E9F\\u0EA1-\\u0EA3\\u0EA5\\u0EA7\\u0EAA\\u0EAB\\u0EAD-\\u0EB9\\u0EBB-\\u0EBD\\u0EC0-\\u0EC4\\u0EC6\\u0EC8-\\u0ECD\\u0ED0-\\u0ED9\\u0EDC-\\u0EDF\\u0F00\\u0F18\\u0F19\\u0F20-\\u0F29\\u0F35\\u0F37\\u0F39\\u0F3E-\\u0F47\\u0F49-\\u0F6C\\u0F71-\\u0F84\\u0F86-\\u0F97\\u0F99-\\u0FBC\\u0FC6\\u1000-\\u1049\\u1050-\\u109D\\u10A0-\\u10C5\\u10C7\\u10CD\\u10D0-\\u10FA\\u10FC-\\u1248\\u124A-\\u124D\\u1250-\\u1256\\u1258\\u125A-\\u125D\\u1260-\\u1288\\u128A-\\u128D\\u1290-\\u12B0\\u12B2-\\u12B5\\u12B8-\\u12BE\\u12C0\\u12C2-\\u12C5\\u12C8-\\u12D6\\u12D8-\\u1310\\u1312-\\u1315\\u1318-\\u135A\\u135D-\\u135F\\u1380-\\u138F\\u13A0-\\u13F4\\u1401-\\u166C\\u166F-\\u167F\\u1681-\\u169A\\u16A0-\\u16EA\\u16EE-\\u16F8\\u1700-\\u170C\\u170E-\\u1714\\u1720-\\u1734\\u1740-\\u1753\\u1760-\\u176C\\u176E-\\u1770\\u1772\\u1773\\u1780-\\u17D3\\u17D7\\u17DC\\u17DD\\u17E0-\\u17E9\\u180B-\\u180D\\u1810-\\u1819\\u1820-\\u1877\\u1880-\\u18AA\\u18B0-\\u18F5\\u1900-\\u191E\\u1920-\\u192B\\u1930-\\u193B\\u1946-\\u196D\\u1970-\\u1974\\u1980-\\u19AB\\u19B0-\\u19C9\\u19D0-\\u19D9\\u1A00-\\u1A1B\\u1A20-\\u1A5E\\u1A60-\\u1A7C\\u1A7F-\\u1A89\\u1A90-\\u1A99\\u1AA7\\u1AB0-\\u1ABD\\u1B00-\\u1B4B\\u1B50-\\u1B59\\u1B6B-\\u1B73\\u1B80-\\u1BF3\\u1C00-\\u1C37\\u1C40-\\u1C49\\u1C4D-\\u1C7D\\u1CD0-\\u1CD2\\u1CD4-\\u1CF6\\u1CF8\\u1CF9\\u1D00-\\u1DF5\\u1DFC-\\u1F15\\u1F18-\\u1F1D\\u1F20-\\u1F45\\u1F48-\\u1F4D\\u1F50-\\u1F57\\u1F59\\u1F5B\\u1F5D\\u1F5F-\\u1F7D\\u1F80-\\u1FB4\\u1FB6-\\u1FBC\\u1FBE\\u1FC2-\\u1FC4\\u1FC6-\\u1FCC\\u1FD0-\\u1FD3\\u1FD6-\\u1FDB\\u1FE0-\\u1FEC\\u1FF2-\\u1FF4\\u1FF6-\\u1FFC\\u200C\\u200D\\u203F\\u2040\\u2054\\u2071\\u207F\\u2090-\\u209C\\u20D0-\\u20DC\\u20E1\\u20E5-\\u20F0\\u2102\\u2107\\u210A-\\u2113\\u2115\\u2119-\\u211D\\u2124\\u2126\\u2128\\u212A-\\u212D\\u212F-\\u2139\\u213C-\\u213F\\u2145-\\u2149\\u214E\\u2160-\\u2188\\u2C00-\\u2C2E\\u2C30-\\u2C5E\\u2C60-\\u2CE4\\u2CEB-\\u2CF3\\u2D00-\\u2D25\\u2D27\\u2D2D\\u2D30-\\u2D67\\u2D6F\\u2D7F-\\u2D96\\u2DA0-\\u2DA6\\u2DA8-\\u2DAE\\u2DB0-\\u2DB6\\u2DB8-\\u2DBE\\u2DC0-\\u2DC6\\u2DC8-\\u2DCE\\u2DD0-\\u2DD6\\u2DD8-\\u2DDE\\u2DE0-\\u2DFF\\u2E2F\\u3005-\\u3007\\u3021-\\u302F\\u3031-\\u3035\\u3038-\\u303C\\u3041-\\u3096\\u3099\\u309A\\u309D-\\u309F\\u30A1-\\u30FA\\u30FC-\\u30FF\\u3105-\\u312D\\u3131-\\u318E\\u31A0-\\u31BA\\u31F0-\\u31FF\\u3400-\\u4DB5\\u4E00-\\u9FCC\\uA000-\\uA48C\\uA4D0-\\uA4FD\\uA500-\\uA60C\\uA610-\\uA62B\\uA640-\\uA66F\\uA674-\\uA67D\\uA67F-\\uA69D\\uA69F-\\uA6F1\\uA717-\\uA71F\\uA722-\\uA788\\uA78B-\\uA78E\\uA790-\\uA7AD\\uA7B0\\uA7B1\\uA7F7-\\uA827\\uA840-\\uA873\\uA880-\\uA8C4\\uA8D0-\\uA8D9\\uA8E0-\\uA8F7\\uA8FB\\uA900-\\uA92D\\uA930-\\uA953\\uA960-\\uA97C\\uA980-\\uA9C0\\uA9CF-\\uA9D9\\uA9E0-\\uA9FE\\uAA00-\\uAA36\\uAA40-\\uAA4D\\uAA50-\\uAA59\\uAA60-\\uAA76\\uAA7A-\\uAAC2\\uAADB-\\uAADD\\uAAE0-\\uAAEF\\uAAF2-\\uAAF6\\uAB01-\\uAB06\\uAB09-\\uAB0E\\uAB11-\\uAB16\\uAB20-\\uAB26\\uAB28-\\uAB2E\\uAB30-\\uAB5A\\uAB5C-\\uAB5F\\uAB64\\uAB65\\uABC0-\\uABEA\\uABEC\\uABED\\uABF0-\\uABF9\\uAC00-\\uD7A3\\uD7B0-\\uD7C6\\uD7CB-\\uD7FB\\uF900-\\uFA6D\\uFA70-\\uFAD9\\uFB00-\\uFB06\\uFB13-\\uFB17\\uFB1D-\\uFB28\\uFB2A-\\uFB36\\uFB38-\\uFB3C\\uFB3E\\uFB40\\uFB41\\uFB43\\uFB44\\uFB46-\\uFBB1\\uFBD3-\\uFD3D\\uFD50-\\uFD8F\\uFD92-\\uFDC7\\uFDF0-\\uFDFB\\uFE00-\\uFE0F\\uFE20-\\uFE2D\\uFE33\\uFE34\\uFE4D-\\uFE4F\\uFE70-\\uFE74\\uFE76-\\uFEFC\\uFF10-\\uFF19\\uFF21-\\uFF3A\\uFF3F\\uFF41-\\uFF5A\\uFF66-\\uFFBE\\uFFC2-\\uFFC7\\uFFCA-\\uFFCF\\uFFD2-\\uFFD7\\uFFDA-\\uFFDC]'); // Ensure the condition is true, otherwise throw an error.
+// This is only to have a better contract semantic, i.e. another safety net
+// to catch a logic error. The condition shall be fulfilled in normal case.
+// Do NOT use this to enforce a certain condition on any user input.
+
+function build_vega_expression_module_assert(condition, message) {
+  /* istanbul ignore next */
+  if (!condition) {
+    throw new Error('ASSERT: ' + message);
+  }
+}
+
+function build_vega_expression_module_isDecimalDigit(ch) {
+  return ch >= 0x30 && ch <= 0x39; // 0..9
+}
+
+function build_vega_expression_module_isHexDigit(ch) {
+  return '0123456789abcdefABCDEF'.indexOf(ch) >= 0;
+}
+
+function build_vega_expression_module_isOctalDigit(ch) {
+  return '01234567'.indexOf(ch) >= 0;
+} // 7.2 White Space
+
+
+function build_vega_expression_module_isWhiteSpace(ch) {
+  return ch === 0x20 || ch === 0x09 || ch === 0x0B || ch === 0x0C || ch === 0xA0 || ch >= 0x1680 && [0x1680, 0x180E, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000, 0xFEFF].indexOf(ch) >= 0;
+} // 7.3 Line Terminators
+
+
+function build_vega_expression_module_isLineTerminator(ch) {
+  return ch === 0x0A || ch === 0x0D || ch === 0x2028 || ch === 0x2029;
+} // 7.6 Identifier Names and Identifiers
+
+
+function build_vega_expression_module_isIdentifierStart(ch) {
+  return ch === 0x24 || ch === 0x5F || // $ (dollar) and _ (underscore)
+  ch >= 0x41 && ch <= 0x5A || // A..Z
+  ch >= 0x61 && ch <= 0x7A || // a..z
+  ch === 0x5C || // \ (backslash)
+  ch >= 0x80 && build_vega_expression_module_RegexNonAsciiIdentifierStart.test(String.fromCharCode(ch));
+}
+
+function build_vega_expression_module_isIdentifierPart(ch) {
+  return ch === 0x24 || ch === 0x5F || // $ (dollar) and _ (underscore)
+  ch >= 0x41 && ch <= 0x5A || // A..Z
+  ch >= 0x61 && ch <= 0x7A || // a..z
+  ch >= 0x30 && ch <= 0x39 || // 0..9
+  ch === 0x5C || // \ (backslash)
+  ch >= 0x80 && build_vega_expression_module_RegexNonAsciiIdentifierPart.test(String.fromCharCode(ch));
+} // 7.6.1.1 Keywords
+
+
+const build_vega_expression_module_keywords = {
+  'if': 1,
+  'in': 1,
+  'do': 1,
+  'var': 1,
+  'for': 1,
+  'new': 1,
+  'try': 1,
+  'let': 1,
+  'this': 1,
+  'else': 1,
+  'case': 1,
+  'void': 1,
+  'with': 1,
+  'enum': 1,
+  'while': 1,
+  'break': 1,
+  'catch': 1,
+  'throw': 1,
+  'const': 1,
+  'yield': 1,
+  'class': 1,
+  'super': 1,
+  'return': 1,
+  'typeof': 1,
+  'delete': 1,
+  'switch': 1,
+  'export': 1,
+  'import': 1,
+  'public': 1,
+  'static': 1,
+  'default': 1,
+  'finally': 1,
+  'extends': 1,
+  'package': 1,
+  'private': 1,
+  'function': 1,
+  'continue': 1,
+  'debugger': 1,
+  'interface': 1,
+  'protected': 1,
+  'instanceof': 1,
+  'implements': 1
+};
+
+function build_vega_expression_module_skipComment() {
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    const ch = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index);
+
+    if (build_vega_expression_module_isWhiteSpace(ch) || build_vega_expression_module_isLineTerminator(ch)) {
+      ++vega_expression_build_vega_expression_module_index;
+    } else {
+      break;
+    }
+  }
+}
+
+function build_vega_expression_module_scanHexEscape(prefix) {
+  var i,
+      len,
+      ch,
+      code = 0;
+  len = prefix === 'u' ? 4 : 2;
+
+  for (i = 0; i < len; ++i) {
+    if (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length && build_vega_expression_module_isHexDigit(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index])) {
+      ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+      code = code * 16 + '0123456789abcdef'.indexOf(ch.toLowerCase());
+    } else {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+    }
+  }
+
+  return String.fromCharCode(code);
+}
+
+function build_vega_expression_module_scanUnicodeCodePointEscape() {
+  var ch, code, cu1, cu2;
+  ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+  code = 0; // At least, one hex digit is required.
+
+  if (ch === '}') {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  }
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+
+    if (!build_vega_expression_module_isHexDigit(ch)) {
+      break;
+    }
+
+    code = code * 16 + '0123456789abcdef'.indexOf(ch.toLowerCase());
+  }
+
+  if (code > 0x10FFFF || ch !== '}') {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  } // UTF-16 Encoding
+
+
+  if (code <= 0xFFFF) {
+    return String.fromCharCode(code);
+  }
+
+  cu1 = (code - 0x10000 >> 10) + 0xD800;
+  cu2 = (code - 0x10000 & 1023) + 0xDC00;
+  return String.fromCharCode(cu1, cu2);
+}
+
+function build_vega_expression_module_getEscapedIdentifier() {
+  var ch, id;
+  ch = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index++);
+  id = String.fromCharCode(ch); // '\u' (U+005C, U+0075) denotes an escaped character.
+
+  if (ch === 0x5C) {
+    if (vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index) !== 0x75) {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+    }
+
+    ++vega_expression_build_vega_expression_module_index;
+    ch = build_vega_expression_module_scanHexEscape('u');
+
+    if (!ch || ch === '\\' || !build_vega_expression_module_isIdentifierStart(ch.charCodeAt(0))) {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+    }
+
+    id = ch;
+  }
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    ch = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index);
+
+    if (!build_vega_expression_module_isIdentifierPart(ch)) {
+      break;
+    }
+
+    ++vega_expression_build_vega_expression_module_index;
+    id += String.fromCharCode(ch); // '\u' (U+005C, U+0075) denotes an escaped character.
+
+    if (ch === 0x5C) {
+      id = id.substr(0, id.length - 1);
+
+      if (vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index) !== 0x75) {
+        build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+      }
+
+      ++vega_expression_build_vega_expression_module_index;
+      ch = build_vega_expression_module_scanHexEscape('u');
+
+      if (!ch || ch === '\\' || !build_vega_expression_module_isIdentifierPart(ch.charCodeAt(0))) {
+        build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+      }
+
+      id += ch;
+    }
+  }
+
+  return id;
+}
+
+function build_vega_expression_module_getIdentifier() {
+  var start, ch;
+  start = vega_expression_build_vega_expression_module_index++;
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    ch = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index);
+
+    if (ch === 0x5C) {
+      // Blackslash (U+005C) marks Unicode escape sequence.
+      vega_expression_build_vega_expression_module_index = start;
+      return build_vega_expression_module_getEscapedIdentifier();
+    }
+
+    if (build_vega_expression_module_isIdentifierPart(ch)) {
+      ++vega_expression_build_vega_expression_module_index;
+    } else {
+      break;
+    }
+  }
+
+  return vega_expression_build_vega_expression_module_source.slice(start, vega_expression_build_vega_expression_module_index);
+}
+
+function build_vega_expression_module_scanIdentifier() {
+  var start, id, type;
+  start = vega_expression_build_vega_expression_module_index; // Backslash (U+005C) starts an escaped character.
+
+  id = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index) === 0x5C ? build_vega_expression_module_getEscapedIdentifier() : build_vega_expression_module_getIdentifier(); // There is no keyword or literal with only one character.
+  // Thus, it must be an identifier.
+
+  if (id.length === 1) {
+    type = build_vega_expression_module_TokenIdentifier;
+  } else if (build_vega_expression_module_keywords.hasOwnProperty(id)) {
+    // eslint-disable-line no-prototype-builtins
+    type = build_vega_expression_module_TokenKeyword;
+  } else if (id === 'null') {
+    type = build_vega_expression_module_TokenNullLiteral;
+  } else if (id === 'true' || id === 'false') {
+    type = build_vega_expression_module_TokenBooleanLiteral;
+  } else {
+    type = build_vega_expression_module_TokenIdentifier;
+  }
+
+  return {
+    type: type,
+    value: id,
+    start: start,
+    end: vega_expression_build_vega_expression_module_index
+  };
+} // 7.7 Punctuators
+
+
+function build_vega_expression_module_scanPunctuator() {
+  var start = vega_expression_build_vega_expression_module_index,
+      code = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index),
+      code2,
+      ch1 = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index],
+      ch2,
+      ch3,
+      ch4;
+
+  switch (code) {
+    // Check for most common single-character punctuators.
+    case 0x2E: // . dot
+
+    case 0x28: // ( open bracket
+
+    case 0x29: // ) close bracket
+
+    case 0x3B: // ; semicolon
+
+    case 0x2C: // , comma
+
+    case 0x7B: // { open curly brace
+
+    case 0x7D: // } close curly brace
+
+    case 0x5B: // [
+
+    case 0x5D: // ]
+
+    case 0x3A: // :
+
+    case 0x3F: // ?
+
+    case 0x7E:
+      // ~
+      ++vega_expression_build_vega_expression_module_index;
+      return {
+        type: build_vega_expression_module_TokenPunctuator,
+        value: String.fromCharCode(code),
+        start: start,
+        end: vega_expression_build_vega_expression_module_index
+      };
+
+    default:
+      code2 = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index + 1); // '=' (U+003D) marks an assignment or comparison operator.
+
+      if (code2 === 0x3D) {
+        switch (code) {
+          case 0x2B: // +
+
+          case 0x2D: // -
+
+          case 0x2F: // /
+
+          case 0x3C: // <
+
+          case 0x3E: // >
+
+          case 0x5E: // ^
+
+          case 0x7C: // |
+
+          case 0x25: // %
+
+          case 0x26: // &
+
+          case 0x2A:
+            // *
+            vega_expression_build_vega_expression_module_index += 2;
+            return {
+              type: build_vega_expression_module_TokenPunctuator,
+              value: String.fromCharCode(code) + String.fromCharCode(code2),
+              start: start,
+              end: vega_expression_build_vega_expression_module_index
+            };
+
+          case 0x21: // !
+
+          case 0x3D:
+            // =
+            vega_expression_build_vega_expression_module_index += 2; // !== and ===
+
+            if (vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index) === 0x3D) {
+              ++vega_expression_build_vega_expression_module_index;
+            }
+
+            return {
+              type: build_vega_expression_module_TokenPunctuator,
+              value: vega_expression_build_vega_expression_module_source.slice(start, vega_expression_build_vega_expression_module_index),
+              start: start,
+              end: vega_expression_build_vega_expression_module_index
+            };
+        }
+      }
+
+  } // 4-character punctuator: >>>=
+
+
+  ch4 = vega_expression_build_vega_expression_module_source.substr(vega_expression_build_vega_expression_module_index, 4);
+
+  if (ch4 === '>>>=') {
+    vega_expression_build_vega_expression_module_index += 4;
+    return {
+      type: build_vega_expression_module_TokenPunctuator,
+      value: ch4,
+      start: start,
+      end: vega_expression_build_vega_expression_module_index
+    };
+  } // 3-character punctuators: === !== >>> <<= >>=
+
+
+  ch3 = ch4.substr(0, 3);
+
+  if (ch3 === '>>>' || ch3 === '<<=' || ch3 === '>>=') {
+    vega_expression_build_vega_expression_module_index += 3;
+    return {
+      type: build_vega_expression_module_TokenPunctuator,
+      value: ch3,
+      start: start,
+      end: vega_expression_build_vega_expression_module_index
+    };
+  } // Other 2-character punctuators: ++ -- << >> && ||
+
+
+  ch2 = ch3.substr(0, 2);
+
+  if (ch1 === ch2[1] && '+-<>&|'.indexOf(ch1) >= 0 || ch2 === '=>') {
+    vega_expression_build_vega_expression_module_index += 2;
+    return {
+      type: build_vega_expression_module_TokenPunctuator,
+      value: ch2,
+      start: start,
+      end: vega_expression_build_vega_expression_module_index
+    };
+  }
+
+  if (ch2 === '//') {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  } // 1-character punctuators: < > = ! + - * % & | ^ /
+
+
+  if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
+    ++vega_expression_build_vega_expression_module_index;
+    return {
+      type: build_vega_expression_module_TokenPunctuator,
+      value: ch1,
+      start: start,
+      end: vega_expression_build_vega_expression_module_index
+    };
+  }
+
+  build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+} // 7.8.3 Numeric Literals
+
+
+function build_vega_expression_module_scanHexLiteral(start) {
+  let number = '';
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    if (!build_vega_expression_module_isHexDigit(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index])) {
+      break;
+    }
+
+    number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+  }
+
+  if (number.length === 0) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  }
+
+  if (build_vega_expression_module_isIdentifierStart(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: build_vega_expression_module_TokenNumericLiteral,
+    value: parseInt('0x' + number, 16),
+    start: start,
+    end: vega_expression_build_vega_expression_module_index
+  };
+}
+
+function build_vega_expression_module_scanOctalLiteral(start) {
+  let number = '0' + vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    if (!build_vega_expression_module_isOctalDigit(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index])) {
+      break;
+    }
+
+    number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+  }
+
+  if (build_vega_expression_module_isIdentifierStart(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index)) || build_vega_expression_module_isDecimalDigit(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: build_vega_expression_module_TokenNumericLiteral,
+    value: parseInt(number, 8),
+    octal: true,
+    start: start,
+    end: vega_expression_build_vega_expression_module_index
+  };
+}
+
+function build_vega_expression_module_scanNumericLiteral() {
+  var number, start, ch;
+  ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+  build_vega_expression_module_assert(build_vega_expression_module_isDecimalDigit(ch.charCodeAt(0)) || ch === '.', 'Numeric literal must start with a decimal digit or a decimal point');
+  start = vega_expression_build_vega_expression_module_index;
+  number = '';
+
+  if (ch !== '.') {
+    number = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index]; // Hex number starts with '0x'.
+    // Octal number starts with '0'.
+
+    if (number === '0') {
+      if (ch === 'x' || ch === 'X') {
+        ++vega_expression_build_vega_expression_module_index;
+        return build_vega_expression_module_scanHexLiteral(start);
+      }
+
+      if (build_vega_expression_module_isOctalDigit(ch)) {
+        return build_vega_expression_module_scanOctalLiteral(start);
+      } // decimal number starts with '0' such as '09' is illegal.
+
+
+      if (ch && build_vega_expression_module_isDecimalDigit(ch.charCodeAt(0))) {
+        build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+      }
+    }
+
+    while (build_vega_expression_module_isDecimalDigit(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+      number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+    }
+
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+  }
+
+  if (ch === '.') {
+    number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+
+    while (build_vega_expression_module_isDecimalDigit(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+      number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+    }
+
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+  }
+
+  if (ch === 'e' || ch === 'E') {
+    number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+
+    if (ch === '+' || ch === '-') {
+      number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+    }
+
+    if (build_vega_expression_module_isDecimalDigit(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+      while (build_vega_expression_module_isDecimalDigit(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+        number += vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+      }
+    } else {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+    }
+  }
+
+  if (build_vega_expression_module_isIdentifierStart(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index))) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: build_vega_expression_module_TokenNumericLiteral,
+    value: parseFloat(number),
+    start: start,
+    end: vega_expression_build_vega_expression_module_index
+  };
+} // 7.8.4 String Literals
+
+
+function build_vega_expression_module_scanStringLiteral() {
+  var str = '',
+      quote,
+      start,
+      ch,
+      code,
+      octal = false;
+  quote = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+  build_vega_expression_module_assert(quote === '\'' || quote === '"', 'String literal must starts with a quote');
+  start = vega_expression_build_vega_expression_module_index;
+  ++vega_expression_build_vega_expression_module_index;
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+
+    if (ch === quote) {
+      quote = '';
+      break;
+    } else if (ch === '\\') {
+      ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+
+      if (!ch || !build_vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+        switch (ch) {
+          case 'u':
+          case 'x':
+            if (vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index] === '{') {
+              ++vega_expression_build_vega_expression_module_index;
+              str += build_vega_expression_module_scanUnicodeCodePointEscape();
+            } else {
+              str += build_vega_expression_module_scanHexEscape(ch);
+            }
+
+            break;
+
+          case 'n':
+            str += '\n';
+            break;
+
+          case 'r':
+            str += '\r';
+            break;
+
+          case 't':
+            str += '\t';
+            break;
+
+          case 'b':
+            str += '\b';
+            break;
+
+          case 'f':
+            str += '\f';
+            break;
+
+          case 'v':
+            str += '\x0B';
+            break;
+
+          default:
+            if (build_vega_expression_module_isOctalDigit(ch)) {
+              code = '01234567'.indexOf(ch); // \0 is not octal escape sequence
+
+              if (code !== 0) {
+                octal = true;
+              }
+
+              if (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length && build_vega_expression_module_isOctalDigit(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index])) {
+                octal = true;
+                code = code * 8 + '01234567'.indexOf(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++]); // 3 digits are only allowed when string starts
+                // with 0, 1, 2, 3
+
+                if ('0123'.indexOf(ch) >= 0 && vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length && build_vega_expression_module_isOctalDigit(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index])) {
+                  code = code * 8 + '01234567'.indexOf(vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++]);
+                }
+              }
+
+              str += String.fromCharCode(code);
+            } else {
+              str += ch;
+            }
+
+            break;
+        }
+      } else {
+        if (ch === '\r' && vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index] === '\n') {
+          ++vega_expression_build_vega_expression_module_index;
+        }
+      }
+    } else if (build_vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+      break;
+    } else {
+      str += ch;
+    }
+  }
+
+  if (quote !== '') {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+  }
+
+  return {
+    type: build_vega_expression_module_TokenStringLiteral,
+    value: str,
+    octal: octal,
+    start: start,
+    end: vega_expression_build_vega_expression_module_index
+  };
+}
+
+function build_vega_expression_module_testRegExp(pattern, flags) {
+  let tmp = pattern;
+
+  if (flags.indexOf('u') >= 0) {
+    // Replace each astral symbol and every Unicode code point
+    // escape sequence with a single ASCII symbol to avoid throwing on
+    // regular expressions that are only valid in combination with the
+    // `/u` flag.
+    // Note: replacing with the ASCII symbol `x` might cause false
+    // negatives in unlikely scenarios. For example, `[\u{61}-b]` is a
+    // perfectly valid pattern that is equivalent to `[a-b]`, but it
+    // would be replaced by `[x-b]` which throws an error.
+    tmp = tmp.replace(/\\u\{([0-9a-fA-F]+)\}/g, ($0, $1) => {
+      if (parseInt($1, 16) <= 0x10FFFF) {
+        return 'x';
+      }
+
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageInvalidRegExp);
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, 'x');
+  } // First, detect invalid regular expressions.
+
+
+  try {
+    new RegExp(tmp);
+  } catch (e) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageInvalidRegExp);
+  } // Return a regular expression object for this pattern-flag pair, or
+  // `null` in case the current environment doesn't support the flags it
+  // uses.
+
+
+  try {
+    return new RegExp(pattern, flags);
+  } catch (exception) {
+    return null;
+  }
+}
+
+function build_vega_expression_module_scanRegExpBody() {
+  var ch, str, classMarker, terminated, body;
+  ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+  build_vega_expression_module_assert(ch === '/', 'Regular expression literal must start with a slash');
+  str = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+  classMarker = false;
+  terminated = false;
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++];
+    str += ch;
+
+    if (ch === '\\') {
+      ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index++]; // ECMA-262 7.8.5
+
+      if (build_vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+        build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnterminatedRegExp);
+      }
+
+      str += ch;
+    } else if (build_vega_expression_module_isLineTerminator(ch.charCodeAt(0))) {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnterminatedRegExp);
+    } else if (classMarker) {
+      if (ch === ']') {
+        classMarker = false;
+      }
+    } else {
+      if (ch === '/') {
+        terminated = true;
+        break;
+      } else if (ch === '[') {
+        classMarker = true;
+      }
+    }
+  }
+
+  if (!terminated) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnterminatedRegExp);
+  } // Exclude leading and trailing slash.
+
+
+  body = str.substr(1, str.length - 2);
+  return {
+    value: body,
+    literal: str
+  };
+}
+
+function build_vega_expression_module_scanRegExpFlags() {
+  var ch, str, flags;
+  str = '';
+  flags = '';
+
+  while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+    ch = vega_expression_build_vega_expression_module_source[vega_expression_build_vega_expression_module_index];
+
+    if (!build_vega_expression_module_isIdentifierPart(ch.charCodeAt(0))) {
+      break;
+    }
+
+    ++vega_expression_build_vega_expression_module_index;
+
+    if (ch === '\\' && vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageUnexpectedToken, build_vega_expression_module_ILLEGAL);
+    } else {
+      flags += ch;
+      str += ch;
+    }
+  }
+
+  if (flags.search(/[^gimuy]/g) >= 0) {
+    build_vega_expression_module_throwError({}, build_vega_expression_module_MessageInvalidRegExp, flags);
+  }
+
+  return {
+    value: flags,
+    literal: str
+  };
+}
+
+function build_vega_expression_module_scanRegExp() {
+  var start, body, flags, value;
+  build_vega_expression_module_lookahead = null;
+  build_vega_expression_module_skipComment();
+  start = vega_expression_build_vega_expression_module_index;
+  body = build_vega_expression_module_scanRegExpBody();
+  flags = build_vega_expression_module_scanRegExpFlags();
+  value = build_vega_expression_module_testRegExp(body.value, flags.value);
+  return {
+    literal: body.literal + flags.literal,
+    value: value,
+    regex: {
+      pattern: body.value,
+      flags: flags.value
+    },
+    start: start,
+    end: vega_expression_build_vega_expression_module_index
+  };
+}
+
+function build_vega_expression_module_isIdentifierName(token) {
+  return token.type === build_vega_expression_module_TokenIdentifier || token.type === build_vega_expression_module_TokenKeyword || token.type === build_vega_expression_module_TokenBooleanLiteral || token.type === build_vega_expression_module_TokenNullLiteral;
+}
+
+function build_vega_expression_module_advance() {
+  build_vega_expression_module_skipComment();
+
+  if (vega_expression_build_vega_expression_module_index >= vega_expression_build_vega_expression_module_length) {
+    return {
+      type: build_vega_expression_module_TokenEOF,
+      start: vega_expression_build_vega_expression_module_index,
+      end: vega_expression_build_vega_expression_module_index
+    };
+  }
+
+  const ch = vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index);
+
+  if (build_vega_expression_module_isIdentifierStart(ch)) {
+    return build_vega_expression_module_scanIdentifier();
+  } // Very common: ( and ) and ;
+
+
+  if (ch === 0x28 || ch === 0x29 || ch === 0x3B) {
+    return build_vega_expression_module_scanPunctuator();
+  } // String literal starts with single quote (U+0027) or double quote (U+0022).
+
+
+  if (ch === 0x27 || ch === 0x22) {
+    return build_vega_expression_module_scanStringLiteral();
+  } // Dot (.) U+002E can also start a floating-point number, hence the need
+  // to check the next character.
+
+
+  if (ch === 0x2E) {
+    if (build_vega_expression_module_isDecimalDigit(vega_expression_build_vega_expression_module_source.charCodeAt(vega_expression_build_vega_expression_module_index + 1))) {
+      return build_vega_expression_module_scanNumericLiteral();
+    }
+
+    return build_vega_expression_module_scanPunctuator();
+  }
+
+  if (build_vega_expression_module_isDecimalDigit(ch)) {
+    return build_vega_expression_module_scanNumericLiteral();
+  }
+
+  return build_vega_expression_module_scanPunctuator();
+}
+
+function build_vega_expression_module_lex() {
+  const token = build_vega_expression_module_lookahead;
+  vega_expression_build_vega_expression_module_index = token.end;
+  build_vega_expression_module_lookahead = build_vega_expression_module_advance();
+  vega_expression_build_vega_expression_module_index = token.end;
+  return token;
+}
+
+function build_vega_expression_module_peek() {
+  const pos = vega_expression_build_vega_expression_module_index;
+  build_vega_expression_module_lookahead = build_vega_expression_module_advance();
+  vega_expression_build_vega_expression_module_index = pos;
+}
+
+function build_vega_expression_module_finishArrayExpression(elements) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxArrayExpression);
+  node.elements = elements;
+  return node;
+}
+
+function build_vega_expression_module_finishBinaryExpression(operator, left, right) {
+  const node = new build_vega_expression_module_ASTNode(operator === '||' || operator === '&&' ? build_vega_expression_module_SyntaxLogicalExpression : build_vega_expression_module_SyntaxBinaryExpression);
+  node.operator = operator;
+  node.left = left;
+  node.right = right;
+  return node;
+}
+
+function build_vega_expression_module_finishCallExpression(callee, args) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxCallExpression);
+  node.callee = callee;
+  node.arguments = args;
+  return node;
+}
+
+function build_vega_expression_module_finishConditionalExpression(test, consequent, alternate) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxConditionalExpression);
+  node.test = test;
+  node.consequent = consequent;
+  node.alternate = alternate;
+  return node;
+}
+
+function build_vega_expression_module_finishIdentifier(name) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxIdentifier);
+  node.name = name;
+  return node;
+}
+
+function build_vega_expression_module_finishLiteral(token) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxLiteral);
+  node.value = token.value;
+  node.raw = vega_expression_build_vega_expression_module_source.slice(token.start, token.end);
+
+  if (token.regex) {
+    if (node.raw === '//') {
+      node.raw = '/(?:)/';
+    }
+
+    node.regex = token.regex;
+  }
+
+  return node;
+}
+
+function build_vega_expression_module_finishMemberExpression(accessor, object, property) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxMemberExpression);
+  node.computed = accessor === '[';
+  node.object = object;
+  node.property = property;
+  if (!node.computed) property.member = true;
+  return node;
+}
+
+function build_vega_expression_module_finishObjectExpression(properties) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxObjectExpression);
+  node.properties = properties;
+  return node;
+}
+
+function build_vega_expression_module_finishProperty(kind, key, value) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxProperty);
+  node.key = key;
+  node.value = value;
+  node.kind = kind;
+  return node;
+}
+
+function build_vega_expression_module_finishUnaryExpression(operator, argument) {
+  const node = new build_vega_expression_module_ASTNode(build_vega_expression_module_SyntaxUnaryExpression);
+  node.operator = operator;
+  node.argument = argument;
+  node.prefix = true;
+  return node;
+} // Throw an exception
+
+
+function build_vega_expression_module_throwError(token, messageFormat) {
+  var error,
+      args = Array.prototype.slice.call(arguments, 2),
+      msg = messageFormat.replace(/%(\d)/g, (whole, index) => {
+    build_vega_expression_module_assert(index < args.length, 'Message reference must be in range');
+    return args[index];
+  });
+  error = new Error(msg);
+  error.index = vega_expression_build_vega_expression_module_index;
+  error.description = msg;
+  throw error;
+} // Throw an exception because of the token.
+
+
+function build_vega_expression_module_throwUnexpected(token) {
+  if (token.type === build_vega_expression_module_TokenEOF) {
+    build_vega_expression_module_throwError(token, build_vega_expression_module_MessageUnexpectedEOS);
+  }
+
+  if (token.type === build_vega_expression_module_TokenNumericLiteral) {
+    build_vega_expression_module_throwError(token, build_vega_expression_module_MessageUnexpectedNumber);
+  }
+
+  if (token.type === build_vega_expression_module_TokenStringLiteral) {
+    build_vega_expression_module_throwError(token, build_vega_expression_module_MessageUnexpectedString);
+  }
+
+  if (token.type === build_vega_expression_module_TokenIdentifier) {
+    build_vega_expression_module_throwError(token, build_vega_expression_module_MessageUnexpectedIdentifier);
+  }
+
+  if (token.type === build_vega_expression_module_TokenKeyword) {
+    build_vega_expression_module_throwError(token, build_vega_expression_module_MessageUnexpectedReserved);
+  } // BooleanLiteral, NullLiteral, or Punctuator.
+
+
+  build_vega_expression_module_throwError(token, build_vega_expression_module_MessageUnexpectedToken, token.value);
+} // Expect the next token to match the specified punctuator.
+// If not, an exception will be thrown.
+
+
+function build_vega_expression_module_expect(value) {
+  const token = build_vega_expression_module_lex();
+
+  if (token.type !== build_vega_expression_module_TokenPunctuator || token.value !== value) {
+    build_vega_expression_module_throwUnexpected(token);
+  }
+} // Return true if the next token matches the specified punctuator.
+
+
+function build_vega_expression_module_match(value) {
+  return build_vega_expression_module_lookahead.type === build_vega_expression_module_TokenPunctuator && build_vega_expression_module_lookahead.value === value;
+} // Return true if the next token matches the specified keyword
+
+
+function build_vega_expression_module_matchKeyword(keyword) {
+  return build_vega_expression_module_lookahead.type === build_vega_expression_module_TokenKeyword && build_vega_expression_module_lookahead.value === keyword;
+} // 11.1.4 Array Initialiser
+
+
+function build_vega_expression_module_parseArrayInitialiser() {
+  const elements = [];
+  vega_expression_build_vega_expression_module_index = build_vega_expression_module_lookahead.start;
+  build_vega_expression_module_expect('[');
+
+  while (!build_vega_expression_module_match(']')) {
+    if (build_vega_expression_module_match(',')) {
+      build_vega_expression_module_lex();
+      elements.push(null);
+    } else {
+      elements.push(build_vega_expression_module_parseConditionalExpression());
+
+      if (!build_vega_expression_module_match(']')) {
+        build_vega_expression_module_expect(',');
+      }
+    }
+  }
+
+  build_vega_expression_module_lex();
+  return build_vega_expression_module_finishArrayExpression(elements);
+} // 11.1.5 Object Initialiser
+
+
+function build_vega_expression_module_parseObjectPropertyKey() {
+  vega_expression_build_vega_expression_module_index = build_vega_expression_module_lookahead.start;
+  const token = build_vega_expression_module_lex(); // Note: This function is called only from parseObjectProperty(), where
+  // EOF and Punctuator tokens are already filtered out.
+
+  if (token.type === build_vega_expression_module_TokenStringLiteral || token.type === build_vega_expression_module_TokenNumericLiteral) {
+    if (token.octal) {
+      build_vega_expression_module_throwError(token, build_vega_expression_module_MessageStrictOctalLiteral);
+    }
+
+    return build_vega_expression_module_finishLiteral(token);
+  }
+
+  return build_vega_expression_module_finishIdentifier(token.value);
+}
+
+function build_vega_expression_module_parseObjectProperty() {
+  var token, key, id, value;
+  vega_expression_build_vega_expression_module_index = build_vega_expression_module_lookahead.start;
+  token = build_vega_expression_module_lookahead;
+
+  if (token.type === build_vega_expression_module_TokenIdentifier) {
+    id = build_vega_expression_module_parseObjectPropertyKey();
+    build_vega_expression_module_expect(':');
+    value = build_vega_expression_module_parseConditionalExpression();
+    return build_vega_expression_module_finishProperty('init', id, value);
+  }
+
+  if (token.type === build_vega_expression_module_TokenEOF || token.type === build_vega_expression_module_TokenPunctuator) {
+    build_vega_expression_module_throwUnexpected(token);
+  } else {
+    key = build_vega_expression_module_parseObjectPropertyKey();
+    build_vega_expression_module_expect(':');
+    value = build_vega_expression_module_parseConditionalExpression();
+    return build_vega_expression_module_finishProperty('init', key, value);
+  }
+}
+
+function build_vega_expression_module_parseObjectInitialiser() {
+  var properties = [],
+      property,
+      name,
+      key,
+      map = {},
+      toString = String;
+  vega_expression_build_vega_expression_module_index = build_vega_expression_module_lookahead.start;
+  build_vega_expression_module_expect('{');
+
+  while (!build_vega_expression_module_match('}')) {
+    property = build_vega_expression_module_parseObjectProperty();
+
+    if (property.key.type === build_vega_expression_module_SyntaxIdentifier) {
+      name = property.key.name;
+    } else {
+      name = toString(property.key.value);
+    }
+
+    key = '$' + name;
+
+    if (Object.prototype.hasOwnProperty.call(map, key)) {
+      build_vega_expression_module_throwError({}, build_vega_expression_module_MessageStrictDuplicateProperty);
+    } else {
+      map[key] = true;
+    }
+
+    properties.push(property);
+
+    if (!build_vega_expression_module_match('}')) {
+      build_vega_expression_module_expect(',');
+    }
+  }
+
+  build_vega_expression_module_expect('}');
+  return build_vega_expression_module_finishObjectExpression(properties);
+} // 11.1.6 The Grouping Operator
+
+
+function build_vega_expression_module_parseGroupExpression() {
+  build_vega_expression_module_expect('(');
+  const expr = build_vega_expression_module_parseExpression();
+  build_vega_expression_module_expect(')');
+  return expr;
+} // 11.1 Primary Expressions
+
+
+const build_vega_expression_module_legalKeywords = {
+  'if': 1
+};
+
+function build_vega_expression_module_parsePrimaryExpression() {
+  var type, token, expr;
+
+  if (build_vega_expression_module_match('(')) {
+    return build_vega_expression_module_parseGroupExpression();
+  }
+
+  if (build_vega_expression_module_match('[')) {
+    return build_vega_expression_module_parseArrayInitialiser();
+  }
+
+  if (build_vega_expression_module_match('{')) {
+    return build_vega_expression_module_parseObjectInitialiser();
+  }
+
+  type = build_vega_expression_module_lookahead.type;
+  vega_expression_build_vega_expression_module_index = build_vega_expression_module_lookahead.start;
+
+  if (type === build_vega_expression_module_TokenIdentifier || build_vega_expression_module_legalKeywords[build_vega_expression_module_lookahead.value]) {
+    expr = build_vega_expression_module_finishIdentifier(build_vega_expression_module_lex().value);
+  } else if (type === build_vega_expression_module_TokenStringLiteral || type === build_vega_expression_module_TokenNumericLiteral) {
+    if (build_vega_expression_module_lookahead.octal) {
+      build_vega_expression_module_throwError(build_vega_expression_module_lookahead, build_vega_expression_module_MessageStrictOctalLiteral);
+    }
+
+    expr = build_vega_expression_module_finishLiteral(build_vega_expression_module_lex());
+  } else if (type === build_vega_expression_module_TokenKeyword) {
+    throw new Error(build_vega_expression_module_DISABLED);
+  } else if (type === build_vega_expression_module_TokenBooleanLiteral) {
+    token = build_vega_expression_module_lex();
+    token.value = token.value === 'true';
+    expr = build_vega_expression_module_finishLiteral(token);
+  } else if (type === build_vega_expression_module_TokenNullLiteral) {
+    token = build_vega_expression_module_lex();
+    token.value = null;
+    expr = build_vega_expression_module_finishLiteral(token);
+  } else if (build_vega_expression_module_match('/') || build_vega_expression_module_match('/=')) {
+    expr = build_vega_expression_module_finishLiteral(build_vega_expression_module_scanRegExp());
+    build_vega_expression_module_peek();
+  } else {
+    build_vega_expression_module_throwUnexpected(build_vega_expression_module_lex());
+  }
+
+  return expr;
+} // 11.2 Left-Hand-Side Expressions
+
+
+function build_vega_expression_module_parseArguments() {
+  const args = [];
+  build_vega_expression_module_expect('(');
+
+  if (!build_vega_expression_module_match(')')) {
+    while (vega_expression_build_vega_expression_module_index < vega_expression_build_vega_expression_module_length) {
+      args.push(build_vega_expression_module_parseConditionalExpression());
+
+      if (build_vega_expression_module_match(')')) {
+        break;
+      }
+
+      build_vega_expression_module_expect(',');
+    }
+  }
+
+  build_vega_expression_module_expect(')');
+  return args;
+}
+
+function build_vega_expression_module_parseNonComputedProperty() {
+  vega_expression_build_vega_expression_module_index = build_vega_expression_module_lookahead.start;
+  const token = build_vega_expression_module_lex();
+
+  if (!build_vega_expression_module_isIdentifierName(token)) {
+    build_vega_expression_module_throwUnexpected(token);
+  }
+
+  return build_vega_expression_module_finishIdentifier(token.value);
+}
+
+function build_vega_expression_module_parseNonComputedMember() {
+  build_vega_expression_module_expect('.');
+  return build_vega_expression_module_parseNonComputedProperty();
+}
+
+function build_vega_expression_module_parseComputedMember() {
+  build_vega_expression_module_expect('[');
+  const expr = build_vega_expression_module_parseExpression();
+  build_vega_expression_module_expect(']');
+  return expr;
+}
+
+function build_vega_expression_module_parseLeftHandSideExpressionAllowCall() {
+  var expr, args, property;
+  expr = build_vega_expression_module_parsePrimaryExpression();
+
+  for (;;) {
+    if (build_vega_expression_module_match('.')) {
+      property = build_vega_expression_module_parseNonComputedMember();
+      expr = build_vega_expression_module_finishMemberExpression('.', expr, property);
+    } else if (build_vega_expression_module_match('(')) {
+      args = build_vega_expression_module_parseArguments();
+      expr = build_vega_expression_module_finishCallExpression(expr, args);
+    } else if (build_vega_expression_module_match('[')) {
+      property = build_vega_expression_module_parseComputedMember();
+      expr = build_vega_expression_module_finishMemberExpression('[', expr, property);
+    } else {
+      break;
+    }
+  }
+
+  return expr;
+} // 11.3 Postfix Expressions
+
+
+function build_vega_expression_module_parsePostfixExpression() {
+  const expr = build_vega_expression_module_parseLeftHandSideExpressionAllowCall();
+
+  if (build_vega_expression_module_lookahead.type === build_vega_expression_module_TokenPunctuator) {
+    if (build_vega_expression_module_match('++') || build_vega_expression_module_match('--')) {
+      throw new Error(build_vega_expression_module_DISABLED);
+    }
+  }
+
+  return expr;
+} // 11.4 Unary Operators
+
+
+function build_vega_expression_module_parseUnaryExpression() {
+  var token, expr;
+
+  if (build_vega_expression_module_lookahead.type !== build_vega_expression_module_TokenPunctuator && build_vega_expression_module_lookahead.type !== build_vega_expression_module_TokenKeyword) {
+    expr = build_vega_expression_module_parsePostfixExpression();
+  } else if (build_vega_expression_module_match('++') || build_vega_expression_module_match('--')) {
+    throw new Error(build_vega_expression_module_DISABLED);
+  } else if (build_vega_expression_module_match('+') || build_vega_expression_module_match('-') || build_vega_expression_module_match('~') || build_vega_expression_module_match('!')) {
+    token = build_vega_expression_module_lex();
+    expr = build_vega_expression_module_parseUnaryExpression();
+    expr = build_vega_expression_module_finishUnaryExpression(token.value, expr);
+  } else if (build_vega_expression_module_matchKeyword('delete') || build_vega_expression_module_matchKeyword('void') || build_vega_expression_module_matchKeyword('typeof')) {
+    throw new Error(build_vega_expression_module_DISABLED);
+  } else {
+    expr = build_vega_expression_module_parsePostfixExpression();
+  }
+
+  return expr;
+}
+
+function build_vega_expression_module_binaryPrecedence(token) {
+  let prec = 0;
+
+  if (token.type !== build_vega_expression_module_TokenPunctuator && token.type !== build_vega_expression_module_TokenKeyword) {
+    return 0;
+  }
+
+  switch (token.value) {
+    case '||':
+      prec = 1;
+      break;
+
+    case '&&':
+      prec = 2;
+      break;
+
+    case '|':
+      prec = 3;
+      break;
+
+    case '^':
+      prec = 4;
+      break;
+
+    case '&':
+      prec = 5;
+      break;
+
+    case '==':
+    case '!=':
+    case '===':
+    case '!==':
+      prec = 6;
+      break;
+
+    case '<':
+    case '>':
+    case '<=':
+    case '>=':
+    case 'instanceof':
+    case 'in':
+      prec = 7;
+      break;
+
+    case '<<':
+    case '>>':
+    case '>>>':
+      prec = 8;
+      break;
+
+    case '+':
+    case '-':
+      prec = 9;
+      break;
+
+    case '*':
+    case '/':
+    case '%':
+      prec = 11;
+      break;
+  }
+
+  return prec;
+} // 11.5 Multiplicative Operators
+// 11.6 Additive Operators
+// 11.7 Bitwise Shift Operators
+// 11.8 Relational Operators
+// 11.9 Equality Operators
+// 11.10 Binary Bitwise Operators
+// 11.11 Binary Logical Operators
+
+
+function build_vega_expression_module_parseBinaryExpression() {
+  var marker, markers, expr, token, prec, stack, right, operator, left, i;
+  marker = build_vega_expression_module_lookahead;
+  left = build_vega_expression_module_parseUnaryExpression();
+  token = build_vega_expression_module_lookahead;
+  prec = build_vega_expression_module_binaryPrecedence(token);
+
+  if (prec === 0) {
+    return left;
+  }
+
+  token.prec = prec;
+  build_vega_expression_module_lex();
+  markers = [marker, build_vega_expression_module_lookahead];
+  right = build_vega_expression_module_parseUnaryExpression();
+  stack = [left, token, right];
+
+  while ((prec = build_vega_expression_module_binaryPrecedence(build_vega_expression_module_lookahead)) > 0) {
+    // Reduce: make a binary expression from the three topmost entries.
+    while (stack.length > 2 && prec <= stack[stack.length - 2].prec) {
+      right = stack.pop();
+      operator = stack.pop().value;
+      left = stack.pop();
+      markers.pop();
+      expr = build_vega_expression_module_finishBinaryExpression(operator, left, right);
+      stack.push(expr);
+    } // Shift.
+
+
+    token = build_vega_expression_module_lex();
+    token.prec = prec;
+    stack.push(token);
+    markers.push(build_vega_expression_module_lookahead);
+    expr = build_vega_expression_module_parseUnaryExpression();
+    stack.push(expr);
+  } // Final reduce to clean-up the stack.
+
+
+  i = stack.length - 1;
+  expr = stack[i];
+  markers.pop();
+
+  while (i > 1) {
+    markers.pop();
+    expr = build_vega_expression_module_finishBinaryExpression(stack[i - 1].value, stack[i - 2], expr);
+    i -= 2;
+  }
+
+  return expr;
+} // 11.12 Conditional Operator
+
+
+function build_vega_expression_module_parseConditionalExpression() {
+  var expr, consequent, alternate;
+  expr = build_vega_expression_module_parseBinaryExpression();
+
+  if (build_vega_expression_module_match('?')) {
+    build_vega_expression_module_lex();
+    consequent = build_vega_expression_module_parseConditionalExpression();
+    build_vega_expression_module_expect(':');
+    alternate = build_vega_expression_module_parseConditionalExpression();
+    expr = build_vega_expression_module_finishConditionalExpression(expr, consequent, alternate);
+  }
+
+  return expr;
+} // 11.14 Comma Operator
+
+
+function build_vega_expression_module_parseExpression() {
+  const expr = build_vega_expression_module_parseConditionalExpression();
+
+  if (build_vega_expression_module_match(',')) {
+    throw new Error(build_vega_expression_module_DISABLED); // no sequence expressions
+  }
+
+  return expr;
+}
+
+function build_vega_expression_module_parser (code) {
+  vega_expression_build_vega_expression_module_source = code;
+  vega_expression_build_vega_expression_module_index = 0;
+  vega_expression_build_vega_expression_module_length = vega_expression_build_vega_expression_module_source.length;
+  build_vega_expression_module_lookahead = null;
+  build_vega_expression_module_peek();
+  const expr = build_vega_expression_module_parseExpression();
+
+  if (build_vega_expression_module_lookahead.type !== build_vega_expression_module_TokenEOF) {
+    throw new Error('Unexpect token after expression.');
+  }
+
+  return expr;
+}
+
+var build_vega_expression_module_Constants = {
+  NaN: 'NaN',
+  E: 'Math.E',
+  LN2: 'Math.LN2',
+  LN10: 'Math.LN10',
+  LOG2E: 'Math.LOG2E',
+  LOG10E: 'Math.LOG10E',
+  PI: 'Math.PI',
+  SQRT1_2: 'Math.SQRT1_2',
+  SQRT2: 'Math.SQRT2',
+  MIN_VALUE: 'Number.MIN_VALUE',
+  MAX_VALUE: 'Number.MAX_VALUE'
+};
+
+function build_vega_expression_module_Functions (codegen) {
+  function fncall(name, args, cast, type) {
+    let obj = codegen(args[0]);
+
+    if (cast) {
+      obj = cast + '(' + obj + ')';
+      if (cast.lastIndexOf('new ', 0) === 0) obj = '(' + obj + ')';
+    }
+
+    return obj + '.' + name + (type < 0 ? '' : type === 0 ? '()' : '(' + args.slice(1).map(codegen).join(',') + ')');
+  }
+
+  function fn(name, cast, type) {
+    return args => fncall(name, args, cast, type);
+  }
+
+  const DATE = 'new Date',
+        STRING = 'String',
+        REGEXP = 'RegExp';
+  return {
+    // MATH functions
+    isNaN: 'Number.isNaN',
+    isFinite: 'Number.isFinite',
+    abs: 'Math.abs',
+    acos: 'Math.acos',
+    asin: 'Math.asin',
+    atan: 'Math.atan',
+    atan2: 'Math.atan2',
+    ceil: 'Math.ceil',
+    cos: 'Math.cos',
+    exp: 'Math.exp',
+    floor: 'Math.floor',
+    log: 'Math.log',
+    max: 'Math.max',
+    min: 'Math.min',
+    pow: 'Math.pow',
+    random: 'Math.random',
+    round: 'Math.round',
+    sin: 'Math.sin',
+    sqrt: 'Math.sqrt',
+    tan: 'Math.tan',
+    clamp: function (args) {
+      if (args.length < 3) Object(vega_util_module["o" /* error */])('Missing arguments to clamp function.');
+      if (args.length > 3) Object(vega_util_module["o" /* error */])('Too many arguments to clamp function.');
+      const a = args.map(codegen);
+      return 'Math.max(' + a[1] + ', Math.min(' + a[2] + ',' + a[0] + '))';
+    },
+    // DATE functions
+    now: 'Date.now',
+    utc: 'Date.UTC',
+    datetime: DATE,
+    date: fn('getDate', DATE, 0),
+    day: fn('getDay', DATE, 0),
+    year: fn('getFullYear', DATE, 0),
+    month: fn('getMonth', DATE, 0),
+    hours: fn('getHours', DATE, 0),
+    minutes: fn('getMinutes', DATE, 0),
+    seconds: fn('getSeconds', DATE, 0),
+    milliseconds: fn('getMilliseconds', DATE, 0),
+    time: fn('getTime', DATE, 0),
+    timezoneoffset: fn('getTimezoneOffset', DATE, 0),
+    utcdate: fn('getUTCDate', DATE, 0),
+    utcday: fn('getUTCDay', DATE, 0),
+    utcyear: fn('getUTCFullYear', DATE, 0),
+    utcmonth: fn('getUTCMonth', DATE, 0),
+    utchours: fn('getUTCHours', DATE, 0),
+    utcminutes: fn('getUTCMinutes', DATE, 0),
+    utcseconds: fn('getUTCSeconds', DATE, 0),
+    utcmilliseconds: fn('getUTCMilliseconds', DATE, 0),
+    // sequence functions
+    length: fn('length', null, -1),
+    // STRING functions
+    parseFloat: 'parseFloat',
+    parseInt: 'parseInt',
+    upper: fn('toUpperCase', STRING, 0),
+    lower: fn('toLowerCase', STRING, 0),
+    substring: fn('substring', STRING),
+    split: fn('split', STRING),
+    trim: fn('trim', STRING, 0),
+    // REGEXP functions
+    regexp: REGEXP,
+    test: fn('test', REGEXP),
+    // Control Flow functions
+    if: function (args) {
+      if (args.length < 3) Object(vega_util_module["o" /* error */])('Missing arguments to if function.');
+      if (args.length > 3) Object(vega_util_module["o" /* error */])('Too many arguments to if function.');
+      const a = args.map(codegen);
+      return '(' + a[0] + '?' + a[1] + ':' + a[2] + ')';
+    }
+  };
+}
+
+function build_vega_expression_module_stripQuotes(s) {
+  const n = s && s.length - 1;
+  return n && (s[0] === '"' && s[n] === '"' || s[0] === '\'' && s[n] === '\'') ? s.slice(1, -1) : s;
+}
+
+function vega_expression_build_vega_expression_module_codegen (opt) {
+  opt = opt || {};
+  const allowed = opt.allowed ? Object(vega_util_module["fb" /* toSet */])(opt.allowed) : {},
+        forbidden = opt.forbidden ? Object(vega_util_module["fb" /* toSet */])(opt.forbidden) : {},
+        constants = opt.constants || build_vega_expression_module_Constants,
+        functions = (opt.functions || build_vega_expression_module_Functions)(visit),
+        globalvar = opt.globalvar,
+        fieldvar = opt.fieldvar,
+        outputGlobal = Object(vega_util_module["E" /* isFunction */])(globalvar) ? globalvar : id => "".concat(globalvar, "[\"").concat(id, "\"]");
+  let globals = {},
+      fields = {},
+      memberDepth = 0;
+
+  function visit(ast) {
+    if (Object(vega_util_module["J" /* isString */])(ast)) return ast;
+    const generator = Generators[ast.type];
+    if (generator == null) Object(vega_util_module["o" /* error */])('Unsupported type: ' + ast.type);
+    return generator(ast);
+  }
+
+  const Generators = {
+    Literal: n => n.raw,
+    Identifier: n => {
+      const id = n.name;
+
+      if (memberDepth > 0) {
+        return id;
+      } else if (Object(vega_util_module["w" /* hasOwnProperty */])(forbidden, id)) {
+        return Object(vega_util_module["o" /* error */])('Illegal identifier: ' + id);
+      } else if (Object(vega_util_module["w" /* hasOwnProperty */])(constants, id)) {
+        return constants[id];
+      } else if (Object(vega_util_module["w" /* hasOwnProperty */])(allowed, id)) {
+        return id;
+      } else {
+        globals[id] = 1;
+        return outputGlobal(id);
+      }
+    },
+    MemberExpression: n => {
+      const d = !n.computed,
+            o = visit(n.object);
+      if (d) memberDepth += 1;
+      const p = visit(n.property);
+
+      if (o === fieldvar) {
+        // strip quotes to sanitize field name (#1653)
+        fields[build_vega_expression_module_stripQuotes(p)] = 1;
+      }
+
+      if (d) memberDepth -= 1;
+      return o + (d ? '.' + p : '[' + p + ']');
+    },
+    CallExpression: n => {
+      if (n.callee.type !== 'Identifier') {
+        Object(vega_util_module["o" /* error */])('Illegal callee type: ' + n.callee.type);
+      }
+
+      const callee = n.callee.name,
+            args = n.arguments,
+            fn = Object(vega_util_module["w" /* hasOwnProperty */])(functions, callee) && functions[callee];
+      if (!fn) Object(vega_util_module["o" /* error */])('Unrecognized function: ' + callee);
+      return Object(vega_util_module["E" /* isFunction */])(fn) ? fn(args) : fn + '(' + args.map(visit).join(',') + ')';
+    },
+    ArrayExpression: n => '[' + n.elements.map(visit).join(',') + ']',
+    BinaryExpression: n => '(' + visit(n.left) + ' ' + n.operator + ' ' + visit(n.right) + ')',
+    UnaryExpression: n => '(' + n.operator + visit(n.argument) + ')',
+    ConditionalExpression: n => '(' + visit(n.test) + '?' + visit(n.consequent) + ':' + visit(n.alternate) + ')',
+    LogicalExpression: n => '(' + visit(n.left) + n.operator + visit(n.right) + ')',
+    ObjectExpression: n => '{' + n.properties.map(visit).join(',') + '}',
+    Property: n => {
+      memberDepth += 1;
+      const k = visit(n.key);
+      memberDepth -= 1;
+      return k + ':' + visit(n.value);
+    }
+  };
+
+  function codegen(ast) {
+    const result = {
+      code: visit(ast),
+      globals: Object.keys(globals),
+      fields: Object.keys(fields)
+    };
+    globals = {};
+    fields = {};
+    return result;
+  }
+
+  codegen.functions = functions;
+  codegen.constants = constants;
+  return codegen;
+}
+
+
+
+// CONCATENATED MODULE: ./node_modules/vega-event-selector/build/vega-event-selector.module.js
+const build_vega_event_selector_module_VIEW = 'view',
+      vega_event_selector_module_LBRACK = '[',
+      vega_event_selector_module_RBRACK = ']',
+      vega_event_selector_module_LBRACE = '{',
+      vega_event_selector_module_RBRACE = '}',
+      vega_event_selector_module_COLON = ':',
+      vega_event_selector_module_COMMA = ',',
+      vega_event_selector_module_NAME = '@',
+      vega_event_selector_module_GT = '>',
+      build_vega_event_selector_module_ILLEGAL = /[[\]{}]/,
+      vega_event_selector_module_DEFAULT_MARKS = {
+  '*': 1,
+  arc: 1,
+  area: 1,
+  group: 1,
+  image: 1,
+  line: 1,
+  path: 1,
+  rect: 1,
+  rule: 1,
+  shape: 1,
+  symbol: 1,
+  text: 1,
+  trail: 1
+};
+let vega_event_selector_module_DEFAULT_SOURCE, vega_event_selector_module_MARKS;
+/**
+ * Parse an event selector string.
+ * Returns an array of event stream definitions.
+ */
+
+function vega_event_selector_module_eventSelector (selector, source, marks) {
+  vega_event_selector_module_DEFAULT_SOURCE = source || build_vega_event_selector_module_VIEW;
+  vega_event_selector_module_MARKS = marks || vega_event_selector_module_DEFAULT_MARKS;
+  return vega_event_selector_module_parseMerge(selector.trim()).map(vega_event_selector_module_parseSelector);
+}
+
+function vega_event_selector_module_isMarkType(type) {
+  return vega_event_selector_module_MARKS[type];
+}
+
+function build_vega_event_selector_module_find(s, i, endChar, pushChar, popChar) {
+  const n = s.length;
+  let count = 0,
+      c;
+
+  for (; i < n; ++i) {
+    c = s[i];
+    if (!count && c === endChar) return i;else if (popChar && popChar.indexOf(c) >= 0) --count;else if (pushChar && pushChar.indexOf(c) >= 0) ++count;
+  }
+
+  return i;
+}
+
+function vega_event_selector_module_parseMerge(s) {
+  const output = [],
+        n = s.length;
+  let start = 0,
+      i = 0;
+
+  while (i < n) {
+    i = build_vega_event_selector_module_find(s, i, vega_event_selector_module_COMMA, vega_event_selector_module_LBRACK + vega_event_selector_module_LBRACE, vega_event_selector_module_RBRACK + vega_event_selector_module_RBRACE);
+    output.push(s.substring(start, i).trim());
+    start = ++i;
+  }
+
+  if (output.length === 0) {
+    throw 'Empty event selector: ' + s;
+  }
+
+  return output;
+}
+
+function vega_event_selector_module_parseSelector(s) {
+  return s[0] === '[' ? vega_event_selector_module_parseBetween(s) : build_vega_event_selector_module_parseStream(s);
+}
+
+function vega_event_selector_module_parseBetween(s) {
+  const n = s.length;
+  let i = 1,
+      b;
+  i = build_vega_event_selector_module_find(s, i, vega_event_selector_module_RBRACK, vega_event_selector_module_LBRACK, vega_event_selector_module_RBRACK);
+
+  if (i === n) {
+    throw 'Empty between selector: ' + s;
+  }
+
+  b = vega_event_selector_module_parseMerge(s.substring(1, i));
+
+  if (b.length !== 2) {
+    throw 'Between selector must have two elements: ' + s;
+  }
+
+  s = s.slice(i + 1).trim();
+
+  if (s[0] !== vega_event_selector_module_GT) {
+    throw 'Expected \'>\' after between selector: ' + s;
+  }
+
+  b = b.map(vega_event_selector_module_parseSelector);
+  const stream = vega_event_selector_module_parseSelector(s.slice(1).trim());
+
+  if (stream.between) {
+    return {
+      between: b,
+      stream: stream
+    };
+  } else {
+    stream.between = b;
+  }
+
+  return stream;
+}
+
+function build_vega_event_selector_module_parseStream(s) {
+  const stream = {
+    source: vega_event_selector_module_DEFAULT_SOURCE
+  },
+        source = [];
+  let throttle = [0, 0],
+      markname = 0,
+      start = 0,
+      n = s.length,
+      i = 0,
+      j,
+      filter; // extract throttle from end
+
+  if (s[n - 1] === vega_event_selector_module_RBRACE) {
+    i = s.lastIndexOf(vega_event_selector_module_LBRACE);
+
+    if (i >= 0) {
+      try {
+        throttle = vega_event_selector_module_parseThrottle(s.substring(i + 1, n - 1));
+      } catch (e) {
+        throw 'Invalid throttle specification: ' + s;
+      }
+
+      s = s.slice(0, i).trim();
+      n = s.length;
+    } else throw 'Unmatched right brace: ' + s;
+
+    i = 0;
+  }
+
+  if (!n) throw s; // set name flag based on first char
+
+  if (s[0] === vega_event_selector_module_NAME) markname = ++i; // extract first part of multi-part stream selector
+
+  j = build_vega_event_selector_module_find(s, i, vega_event_selector_module_COLON);
+
+  if (j < n) {
+    source.push(s.substring(start, j).trim());
+    start = i = ++j;
+  } // extract remaining part of stream selector
+
+
+  i = build_vega_event_selector_module_find(s, i, vega_event_selector_module_LBRACK);
+
+  if (i === n) {
+    source.push(s.substring(start, n).trim());
+  } else {
+    source.push(s.substring(start, i).trim());
+    filter = [];
+    start = ++i;
+    if (start === n) throw 'Unmatched left bracket: ' + s;
+  } // extract filters
+
+
+  while (i < n) {
+    i = build_vega_event_selector_module_find(s, i, vega_event_selector_module_RBRACK);
+    if (i === n) throw 'Unmatched left bracket: ' + s;
+    filter.push(s.substring(start, i).trim());
+    if (i < n - 1 && s[++i] !== vega_event_selector_module_LBRACK) throw 'Expected left bracket: ' + s;
+    start = ++i;
+  } // marshall event stream specification
+
+
+  if (!(n = source.length) || build_vega_event_selector_module_ILLEGAL.test(source[n - 1])) {
+    throw 'Invalid event selector: ' + s;
+  }
+
+  if (n > 1) {
+    stream.type = source[1];
+
+    if (markname) {
+      stream.markname = source[0].slice(1);
+    } else if (vega_event_selector_module_isMarkType(source[0])) {
+      stream.marktype = source[0];
+    } else {
+      stream.source = source[0];
+    }
+  } else {
+    stream.type = source[0];
+  }
+
+  if (stream.type.slice(-1) === '!') {
+    stream.consume = true;
+    stream.type = stream.type.slice(0, -1);
+  }
+
+  if (filter != null) stream.filter = filter;
+  if (throttle[0]) stream.throttle = throttle[0];
+  if (throttle[1]) stream.debounce = throttle[1];
+  return stream;
+}
+
+function vega_event_selector_module_parseThrottle(s) {
+  const a = s.split(vega_event_selector_module_COMMA);
+  if (!s.length || a.length > 2) throw s;
+  return a.map(_ => {
+    const x = +_;
+    if (x !== x) throw s;
+    return x;
+  });
 }
 
 
@@ -62071,16 +66487,16 @@ var es_object_create = __webpack_require__("b8bf");
   return (left ? r0 <= value : r0 < value) && (right ? value <= r1 : value < r1);
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-util/src/isBoolean.js
-/* harmony default export */ var src_isBoolean = (function (_) {
+/* harmony default export */ var isBoolean = (function (_) {
   return typeof _ === 'boolean';
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-util/src/isDate.js
 
-/* harmony default export */ var src_isDate = (function (_) {
+/* harmony default export */ var isDate = (function (_) {
   return Object.prototype.toString.call(_) === '[object Date]';
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-util/src/isNumber.js
-/* harmony default export */ var src_isNumber = (function (_) {
+/* harmony default export */ var isNumber = (function (_) {
   return typeof _ === 'number';
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-util/src/isRegExp.js
@@ -62158,7 +66574,7 @@ var DEFAULT_MAX_SIZE = 10000; // adapted from https://github.com/dominictarr/has
   };
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-util/src/merge.js
-/* harmony default export */ var vega_util_src_merge = (function (compare, array0, array1, output) {
+/* harmony default export */ var src_merge = (function (compare, array0, array1, output) {
   var n0 = array0.length,
       n1 = array1.length;
   if (!n1) return array0;
@@ -62220,7 +66636,7 @@ var DEFAULT_MAX_SIZE = 10000; // adapted from https://github.com/dominictarr/has
 
 
 function defaultParser(_) {
-  return src_isNumber(_) ? _ : src_isDate(_) ? _ : Date.parse(_);
+  return isNumber(_) ? _ : isDate(_) ? _ : Date.parse(_);
 }
 
 /* harmony default export */ var toDate = (function (_, parser) {
@@ -62972,7 +67388,7 @@ function scaleBinOrdinal_scaleBinOrdinal() {
       range = [];
 
   function scale(x) {
-    return x == null || x !== x ? undefined : range[(d3_array_src_bisect(domain, x) - 1) % range.length];
+    return x == null || x !== x ? undefined : range[(src_bisect(domain, x) - 1) % range.length];
   }
 
   scale.domain = function (_) {
@@ -63068,7 +67484,7 @@ scales_scale("".concat(types_Diverging, "-").concat(types_Sqrt), divergingSqrt, 
 scales_scale("".concat(types_Diverging, "-").concat(types_Symlog), divergingSymlog, [types_Continuous, types_Interpolating]); // discretizing scales
 
 scales_scale(types_Quantile, src_quantile_quantile, [types_Discretizing, types_Quantile]);
-scales_scale(types_Quantize, quantize_quantize, types_Discretizing);
+scales_scale(types_Quantize, quantize, types_Discretizing);
 scales_scale(types_Threshold, threshold_threshold, types_Discretizing); // discrete scales
 
 scales_scale(types_BinOrdinal, scaleBinOrdinal_scaleBinOrdinal, [types_Discrete, types_Discretizing]);
@@ -63720,7 +68136,7 @@ function array_genericArray(a, b) {
   };
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-interpolate/src/number.js
-/* harmony default export */ var node_modules_d3_interpolate_src_number = (function (a, b) {
+/* harmony default export */ var d3_interpolate_src_number = (function (a, b) {
   return a = +a, b = +b, function (t) {
     return a * (1 - t) + b * t;
   };
@@ -63808,7 +68224,7 @@ function string_one(b) {
       s[++i] = null;
       q.push({
         i: i,
-        x: node_modules_d3_interpolate_src_number(am, bm)
+        x: d3_interpolate_src_number(am, bm)
       });
     }
 
@@ -63851,7 +68267,7 @@ function string_one(b) {
   var t = _typeof(b),
       c;
 
-  return b == null || t === "boolean" ? node_modules_d3_interpolate_src_constant(b) : (t === "number" ? node_modules_d3_interpolate_src_number : t === "string" ? (c = src_color_color(b)) ? (b = c, d3_interpolate_src_rgb) : d3_interpolate_src_string : b instanceof src_color_color ? d3_interpolate_src_rgb : b instanceof Date ? d3_interpolate_src_date : numberArray_isNumberArray(b) ? src_numberArray : Array.isArray(b) ? array_genericArray : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? d3_interpolate_src_object : node_modules_d3_interpolate_src_number)(a, b);
+  return b == null || t === "boolean" ? node_modules_d3_interpolate_src_constant(b) : (t === "number" ? d3_interpolate_src_number : t === "string" ? (c = src_color_color(b)) ? (b = c, d3_interpolate_src_rgb) : d3_interpolate_src_string : b instanceof src_color_color ? d3_interpolate_src_rgb : b instanceof Date ? d3_interpolate_src_date : numberArray_isNumberArray(b) ? src_numberArray : Array.isArray(b) ? array_genericArray : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? d3_interpolate_src_object : d3_interpolate_src_number)(a, b);
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-interpolate/src/discrete.js
 /* harmony default export */ var src_discrete = (function (range) {
@@ -63938,10 +68354,10 @@ function transform_interpolateTransform(parse, pxComma, pxParen, degParen) {
       var i = s.push("translate(", null, pxComma, null, pxParen);
       q.push({
         i: i - 4,
-        x: node_modules_d3_interpolate_src_number(xa, xb)
+        x: d3_interpolate_src_number(xa, xb)
       }, {
         i: i - 2,
-        x: node_modules_d3_interpolate_src_number(ya, yb)
+        x: d3_interpolate_src_number(ya, yb)
       });
     } else if (xb || yb) {
       s.push("translate(" + xb + pxComma + yb + pxParen);
@@ -63954,7 +68370,7 @@ function transform_interpolateTransform(parse, pxComma, pxParen, degParen) {
 
       q.push({
         i: s.push(pop(s) + "rotate(", null, degParen) - 2,
-        x: node_modules_d3_interpolate_src_number(a, b)
+        x: d3_interpolate_src_number(a, b)
       });
     } else if (b) {
       s.push(pop(s) + "rotate(" + b + degParen);
@@ -63965,7 +68381,7 @@ function transform_interpolateTransform(parse, pxComma, pxParen, degParen) {
     if (a !== b) {
       q.push({
         i: s.push(pop(s) + "skewX(", null, degParen) - 2,
-        x: node_modules_d3_interpolate_src_number(a, b)
+        x: d3_interpolate_src_number(a, b)
       });
     } else if (b) {
       s.push(pop(s) + "skewX(" + b + degParen);
@@ -63977,10 +68393,10 @@ function transform_interpolateTransform(parse, pxComma, pxParen, degParen) {
       var i = s.push(pop(s) + "scale(", null, ",", null, ")");
       q.push({
         i: i - 4,
-        x: node_modules_d3_interpolate_src_number(xa, xb)
+        x: d3_interpolate_src_number(xa, xb)
       }, {
         i: i - 2,
-        x: node_modules_d3_interpolate_src_number(ya, yb)
+        x: d3_interpolate_src_number(ya, yb)
       });
     } else if (xb !== 1 || yb !== 1) {
       s.push(pop(s) + "scale(" + xb + "," + yb + ")");
@@ -64427,7 +68843,7 @@ function interpolate_scaleFraction(scale, min, max) {
   }
 }
 function interpolate_interpolate(type, gamma) {
-  var interp = node_modules_d3_interpolate_src_namespaceObject[interpolate_method(type)];
+  var interp = d3_interpolate_src_namespaceObject[interpolate_method(type)];
   return gamma != null && interp && interp.gamma ? interp.gamma(gamma) : interp;
 }
 
@@ -64567,19 +68983,19 @@ var es_array_sort = __webpack_require__("4e82");
 
 
 
-var units_YEAR = 'year';
-var units_QUARTER = 'quarter';
-var units_MONTH = 'month';
-var units_WEEK = 'week';
+var YEAR = 'year';
+var QUARTER = 'quarter';
+var MONTH = 'month';
+var WEEK = 'week';
 var units_DATE = 'date';
-var units_DAY = 'day';
-var units_DAYOFYEAR = 'dayofyear';
-var units_HOURS = 'hours';
-var units_MINUTES = 'minutes';
-var units_SECONDS = 'seconds';
-var units_MILLISECONDS = 'milliseconds';
-var units_TIME_UNITS = [units_YEAR, units_QUARTER, units_MONTH, units_WEEK, units_DATE, units_DAY, units_DAYOFYEAR, units_HOURS, units_MINUTES, units_SECONDS, units_MILLISECONDS];
-var units_UNITS = units_TIME_UNITS.reduce(function (o, u, i) {
+var DAY = 'day';
+var DAYOFYEAR = 'dayofyear';
+var HOURS = 'hours';
+var MINUTES = 'minutes';
+var SECONDS = 'seconds';
+var MILLISECONDS = 'milliseconds';
+var TIME_UNITS = [YEAR, QUARTER, MONTH, WEEK, units_DATE, DAY, DAYOFYEAR, HOURS, MINUTES, SECONDS, MILLISECONDS];
+var UNITS = TIME_UNITS.reduce(function (o, u, i) {
   return o[u] = 1 + i, o;
 }, {});
 function units_timeUnits(units) {
@@ -64588,13 +69004,13 @@ function units_timeUnits(units) {
 
   if (!u.length) src_error('Missing time unit.');
   u.forEach(function (unit) {
-    if (src_hasOwnProperty(units_UNITS, unit)) {
+    if (src_hasOwnProperty(UNITS, unit)) {
       m[unit] = 1;
     } else {
       src_error("Invalid time unit: ".concat(unit, "."));
     }
   });
-  var numTypes = (m[units_WEEK] || m[units_DAY] ? 1 : 0) + (m[units_QUARTER] || m[units_MONTH] || m[units_DATE] ? 1 : 0) + (m[units_DAYOFYEAR] ? 1 : 0);
+  var numTypes = (m[WEEK] || m[DAY] ? 1 : 0) + (m[QUARTER] || m[MONTH] || m[units_DATE] ? 1 : 0) + (m[DAYOFYEAR] ? 1 : 0);
 
   if (numTypes > 1) {
     src_error("Incompatible time units: ".concat(units));
@@ -64602,7 +69018,7 @@ function units_timeUnits(units) {
 
 
   u.sort(function (a, b) {
-    return units_UNITS[a] - units_UNITS[b];
+    return UNITS[a] - UNITS[b];
   });
   return u;
 }
@@ -64610,9 +69026,9 @@ function units_timeUnits(units) {
 
 
 
-var src_interval_t0 = new Date(),
-    src_interval_t1 = new Date();
-function interval_newInterval(floori, offseti, count, field) {
+var interval_t0 = new Date(),
+    interval_t1 = new Date();
+function newInterval(floori, offseti, count, field) {
   function interval(date) {
     return floori(date = arguments.length === 0 ? new Date() : new Date(+date)), date;
   }
@@ -64650,7 +69066,7 @@ function interval_newInterval(floori, offseti, count, field) {
   };
 
   interval.filter = function (test) {
-    return interval_newInterval(function (date) {
+    return newInterval(function (date) {
       if (date >= date) while (floori(date), !test(date)) {
         date.setTime(date - 1);
       }
@@ -64669,9 +69085,9 @@ function interval_newInterval(floori, offseti, count, field) {
 
   if (count) {
     interval.count = function (start, end) {
-      src_interval_t0.setTime(+start), src_interval_t1.setTime(+end);
-      floori(src_interval_t0), floori(src_interval_t1);
-      return Math.floor(count(src_interval_t0, src_interval_t1));
+      interval_t0.setTime(+start), interval_t1.setTime(+end);
+      floori(interval_t0), floori(interval_t1);
+      return Math.floor(count(interval_t0, interval_t1));
     };
 
     interval.every = function (step) {
@@ -64687,103 +69103,103 @@ function interval_newInterval(floori, offseti, count, field) {
   return interval;
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/duration.js
-var duration_durationSecond = 1e3;
-var duration_durationMinute = 6e4;
-var duration_durationHour = 36e5;
-var duration_durationDay = 864e5;
-var duration_durationWeek = 6048e5;
+var durationSecond = 1e3;
+var durationMinute = 6e4;
+var durationHour = 36e5;
+var durationDay = 864e5;
+var durationWeek = 6048e5;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/day.js
 
 
-var src_day_day = interval_newInterval(function (date) {
+var day_day = newInterval(function (date) {
   date.setHours(0, 0, 0, 0);
 }, function (date, step) {
   date.setDate(date.getDate() + step);
 }, function (start, end) {
-  return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * duration_durationMinute) / duration_durationDay;
+  return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * durationMinute) / durationDay;
 }, function (date) {
   return date.getDate() - 1;
 });
-/* harmony default export */ var d3_time_src_day = (src_day_day);
-var day_days = src_day_day.range;
+/* harmony default export */ var d3_time_src_day = (day_day);
+var days = day_day.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/week.js
 
 
 
-function week_weekday(i) {
-  return interval_newInterval(function (date) {
+function weekday(i) {
+  return newInterval(function (date) {
     date.setDate(date.getDate() - (date.getDay() + 7 - i) % 7);
     date.setHours(0, 0, 0, 0);
   }, function (date, step) {
     date.setDate(date.getDate() + step * 7);
   }, function (start, end) {
-    return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * duration_durationMinute) / duration_durationWeek;
+    return (end - start - (end.getTimezoneOffset() - start.getTimezoneOffset()) * durationMinute) / durationWeek;
   });
 }
 
-var week_sunday = week_weekday(0);
-var week_monday = week_weekday(1);
-var week_tuesday = week_weekday(2);
-var week_wednesday = week_weekday(3);
-var week_thursday = week_weekday(4);
-var week_friday = week_weekday(5);
-var week_saturday = week_weekday(6);
-var week_sundays = week_sunday.range;
-var week_mondays = week_monday.range;
-var week_tuesdays = week_tuesday.range;
-var week_wednesdays = week_wednesday.range;
-var week_thursdays = week_thursday.range;
-var week_fridays = week_friday.range;
-var week_saturdays = week_saturday.range;
+var sunday = weekday(0);
+var monday = weekday(1);
+var tuesday = weekday(2);
+var wednesday = weekday(3);
+var thursday = weekday(4);
+var friday = weekday(5);
+var saturday = weekday(6);
+var sundays = sunday.range;
+var mondays = monday.range;
+var tuesdays = tuesday.range;
+var wednesdays = wednesday.range;
+var thursdays = thursday.range;
+var fridays = friday.range;
+var saturdays = saturday.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/utcDay.js
 
 
-var utcDay_utcDay = interval_newInterval(function (date) {
+var utcDay_utcDay = newInterval(function (date) {
   date.setUTCHours(0, 0, 0, 0);
 }, function (date, step) {
   date.setUTCDate(date.getUTCDate() + step);
 }, function (start, end) {
-  return (end - start) / duration_durationDay;
+  return (end - start) / durationDay;
 }, function (date) {
   return date.getUTCDate() - 1;
 });
-/* harmony default export */ var d3_time_src_utcDay = (utcDay_utcDay);
-var utcDay_utcDays = utcDay_utcDay.range;
+/* harmony default export */ var src_utcDay = (utcDay_utcDay);
+var utcDays = utcDay_utcDay.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/utcWeek.js
 
 
 
-function utcWeek_utcWeekday(i) {
-  return interval_newInterval(function (date) {
+function utcWeekday(i) {
+  return newInterval(function (date) {
     date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 7 - i) % 7);
     date.setUTCHours(0, 0, 0, 0);
   }, function (date, step) {
     date.setUTCDate(date.getUTCDate() + step * 7);
   }, function (start, end) {
-    return (end - start) / duration_durationWeek;
+    return (end - start) / durationWeek;
   });
 }
 
-var utcWeek_utcSunday = utcWeek_utcWeekday(0);
-var utcWeek_utcMonday = utcWeek_utcWeekday(1);
-var utcWeek_utcTuesday = utcWeek_utcWeekday(2);
-var utcWeek_utcWednesday = utcWeek_utcWeekday(3);
-var utcWeek_utcThursday = utcWeek_utcWeekday(4);
-var utcWeek_utcFriday = utcWeek_utcWeekday(5);
-var utcWeek_utcSaturday = utcWeek_utcWeekday(6);
-var utcWeek_utcSundays = utcWeek_utcSunday.range;
-var utcWeek_utcMondays = utcWeek_utcMonday.range;
-var utcWeek_utcTuesdays = utcWeek_utcTuesday.range;
-var utcWeek_utcWednesdays = utcWeek_utcWednesday.range;
-var utcWeek_utcThursdays = utcWeek_utcThursday.range;
-var utcWeek_utcFridays = utcWeek_utcFriday.range;
-var utcWeek_utcSaturdays = utcWeek_utcSaturday.range;
+var utcSunday = utcWeekday(0);
+var utcMonday = utcWeekday(1);
+var utcTuesday = utcWeekday(2);
+var utcWednesday = utcWeekday(3);
+var utcThursday = utcWeekday(4);
+var utcFriday = utcWeekday(5);
+var utcSaturday = utcWeekday(6);
+var utcSundays = utcSunday.range;
+var utcMondays = utcMonday.range;
+var utcTuesdays = utcTuesday.range;
+var utcWednesdays = utcWednesday.range;
+var utcThursdays = utcThursday.range;
+var utcFridays = utcFriday.range;
+var utcSaturdays = utcSaturday.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-time/src/util.js
 
 
 var util_t0 = new Date();
 
-function util_localYear(y) {
+function localYear(y) {
   util_t0.setFullYear(y);
   util_t0.setMonth(0);
   util_t0.setDate(1);
@@ -64791,22 +69207,22 @@ function util_localYear(y) {
   return util_t0;
 }
 
-function util_dayofyear(d) {
-  return util_localDayOfYear(new Date(d));
+function dayofyear(d) {
+  return localDayOfYear(new Date(d));
 }
 function util_week(d) {
-  return util_localWeekNum(new Date(d));
+  return localWeekNum(new Date(d));
 }
-function util_localDayOfYear(d) {
-  return d3_time_src_day.count(util_localYear(d.getFullYear()) - 1, d);
+function localDayOfYear(d) {
+  return d3_time_src_day.count(localYear(d.getFullYear()) - 1, d);
 }
-function util_localWeekNum(d) {
-  return week_sunday.count(util_localYear(d.getFullYear()) - 1, d);
+function localWeekNum(d) {
+  return sunday.count(localYear(d.getFullYear()) - 1, d);
 }
-function util_localFirst(y) {
-  return util_localYear(y).getDay();
+function localFirst(y) {
+  return localYear(y).getDay();
 }
-function util_localDate(y, m, d, H, M, S, L) {
+function localDate(y, m, d, H, M, S, L) {
   if (0 <= y && y < 100) {
     var date = new Date(-1, m, d, H, M, S, L);
     date.setFullYear(y);
@@ -64815,25 +69231,25 @@ function util_localDate(y, m, d, H, M, S, L) {
 
   return new Date(y, m, d, H, M, S, L);
 }
-function util_utcdayofyear(d) {
-  return util_utcDayOfYear(new Date(d));
+function utcdayofyear(d) {
+  return utcDayOfYear(new Date(d));
 }
-function util_utcweek(d) {
-  return util_utcWeekNum(new Date(d));
+function utcweek(d) {
+  return utcWeekNum(new Date(d));
 }
-function util_utcDayOfYear(d) {
+function utcDayOfYear(d) {
   var y = Date.UTC(d.getUTCFullYear(), 0, 1);
-  return d3_time_src_utcDay.count(y - 1, d);
+  return src_utcDay.count(y - 1, d);
 }
-function util_utcWeekNum(d) {
+function utcWeekNum(d) {
   var y = Date.UTC(d.getUTCFullYear(), 0, 1);
-  return utcWeek_utcSunday.count(y - 1, d);
+  return utcSunday.count(y - 1, d);
 }
-function util_utcFirst(y) {
+function utcFirst(y) {
   util_t0.setTime(Date.UTC(y, 0, 1));
   return util_t0.getUTCDay();
 }
-function util_utcDate(y, m, d, H, M, S, L) {
+function utcDate(y, m, d, H, M, S, L) {
   if (0 <= y && y < 100) {
     var date = new Date(Date.UTC(-1, m, d, H, M, S, L));
     date.setUTCFullYear(d.y);
@@ -64876,18 +69292,18 @@ function floor_floor(units, step, get, inv, newDate) {
       b = src_peek(units),
       _ = function _(unit, p, key) {
     key = key || unit;
-    return floor_getUnit(get[key], inv[key], unit === b && s, p);
+    return getUnit(get[key], inv[key], unit === b && s, p);
   };
 
   var t = new Date(),
       u = toSet(units),
-      y = u[units_YEAR] ? _(units_YEAR) : vega_util_src_constant(2012),
-      m = u[units_MONTH] ? _(units_MONTH) : u[units_QUARTER] ? _(units_QUARTER) : accessors_zero,
-      d = u[units_WEEK] && u[units_DAY] ? _(units_DAY, 1, units_WEEK + units_DAY) : u[units_WEEK] ? _(units_WEEK, 1) : u[units_DAY] ? _(units_DAY, 1) : u[units_DATE] ? _(units_DATE, 1) : u[units_DAYOFYEAR] ? _(units_DAYOFYEAR, 1) : accessors_one,
-      H = u[units_HOURS] ? _(units_HOURS) : accessors_zero,
-      M = u[units_MINUTES] ? _(units_MINUTES) : accessors_zero,
-      S = u[units_SECONDS] ? _(units_SECONDS) : accessors_zero,
-      L = u[units_MILLISECONDS] ? _(units_MILLISECONDS) : accessors_zero;
+      y = u[YEAR] ? _(YEAR) : vega_util_src_constant(2012),
+      m = u[MONTH] ? _(MONTH) : u[QUARTER] ? _(QUARTER) : accessors_zero,
+      d = u[WEEK] && u[DAY] ? _(DAY, 1, WEEK + DAY) : u[WEEK] ? _(WEEK, 1) : u[DAY] ? _(DAY, 1) : u[units_DATE] ? _(units_DATE, 1) : u[DAYOFYEAR] ? _(DAYOFYEAR, 1) : accessors_one,
+      H = u[HOURS] ? _(HOURS) : accessors_zero,
+      M = u[MINUTES] ? _(MINUTES) : accessors_zero,
+      S = u[SECONDS] ? _(SECONDS) : accessors_zero,
+      L = u[MILLISECONDS] ? _(MILLISECONDS) : accessors_zero;
   return function (v) {
     t.setTime(+v);
     var year = y(t);
@@ -64895,7 +69311,7 @@ function floor_floor(units, step, get, inv, newDate) {
   };
 }
 
-function floor_getUnit(f, inv, step, phase) {
+function getUnit(f, inv, step, phase) {
   var u = step <= 1 ? f : phase ? function (d, y) {
     return phase + step * Math.floor((f(d, y) - phase) / step);
   } : function (d, y) {
@@ -64913,77 +69329,77 @@ function floor_weekday(week, day, firstDay) {
 } // -- LOCAL TIME --
 
 
-var floor_localGet = (_localGet = {}, _defineProperty(_localGet, units_YEAR, function (d) {
+var localGet = (_localGet = {}, _defineProperty(_localGet, YEAR, function (d) {
   return d.getFullYear();
-}), _defineProperty(_localGet, units_QUARTER, function (d) {
+}), _defineProperty(_localGet, QUARTER, function (d) {
   return Math.floor(d.getMonth() / 3);
-}), _defineProperty(_localGet, units_MONTH, function (d) {
+}), _defineProperty(_localGet, MONTH, function (d) {
   return d.getMonth();
 }), _defineProperty(_localGet, units_DATE, function (d) {
   return d.getDate();
-}), _defineProperty(_localGet, units_HOURS, function (d) {
+}), _defineProperty(_localGet, HOURS, function (d) {
   return d.getHours();
-}), _defineProperty(_localGet, units_MINUTES, function (d) {
+}), _defineProperty(_localGet, MINUTES, function (d) {
   return d.getMinutes();
-}), _defineProperty(_localGet, units_SECONDS, function (d) {
+}), _defineProperty(_localGet, SECONDS, function (d) {
   return d.getSeconds();
-}), _defineProperty(_localGet, units_MILLISECONDS, function (d) {
+}), _defineProperty(_localGet, MILLISECONDS, function (d) {
   return d.getMilliseconds();
-}), _defineProperty(_localGet, units_DAYOFYEAR, function (d) {
-  return util_localDayOfYear(d);
-}), _defineProperty(_localGet, units_WEEK, function (d) {
-  return util_localWeekNum(d);
-}), _defineProperty(_localGet, units_WEEK + units_DAY, function (d, y) {
-  return floor_weekday(util_localWeekNum(d), d.getDay(), util_localFirst(y));
-}), _defineProperty(_localGet, units_DAY, function (d, y) {
-  return floor_weekday(1, d.getDay(), util_localFirst(y));
+}), _defineProperty(_localGet, DAYOFYEAR, function (d) {
+  return localDayOfYear(d);
+}), _defineProperty(_localGet, WEEK, function (d) {
+  return localWeekNum(d);
+}), _defineProperty(_localGet, WEEK + DAY, function (d, y) {
+  return floor_weekday(localWeekNum(d), d.getDay(), localFirst(y));
+}), _defineProperty(_localGet, DAY, function (d, y) {
+  return floor_weekday(1, d.getDay(), localFirst(y));
 }), _localGet);
-var floor_localInv = (_localInv = {}, _defineProperty(_localInv, units_QUARTER, function (q) {
+var localInv = (_localInv = {}, _defineProperty(_localInv, QUARTER, function (q) {
   return 3 * q;
-}), _defineProperty(_localInv, units_WEEK, function (w, y) {
-  return floor_weekday(w, 0, util_localFirst(y));
+}), _defineProperty(_localInv, WEEK, function (w, y) {
+  return floor_weekday(w, 0, localFirst(y));
 }), _localInv);
-function floor_timeFloor(units, step) {
-  return floor_floor(units, step || 1, floor_localGet, floor_localInv, util_localDate);
+function timeFloor(units, step) {
+  return floor_floor(units, step || 1, localGet, localInv, localDate);
 } // -- UTC TIME --
 
-var floor_utcGet = (_utcGet = {}, _defineProperty(_utcGet, units_YEAR, function (d) {
+var utcGet = (_utcGet = {}, _defineProperty(_utcGet, YEAR, function (d) {
   return d.getUTCFullYear();
-}), _defineProperty(_utcGet, units_QUARTER, function (d) {
+}), _defineProperty(_utcGet, QUARTER, function (d) {
   return Math.floor(d.getUTCMonth() / 3);
-}), _defineProperty(_utcGet, units_MONTH, function (d) {
+}), _defineProperty(_utcGet, MONTH, function (d) {
   return d.getUTCMonth();
 }), _defineProperty(_utcGet, units_DATE, function (d) {
   return d.getUTCDate();
-}), _defineProperty(_utcGet, units_HOURS, function (d) {
+}), _defineProperty(_utcGet, HOURS, function (d) {
   return d.getUTCHours();
-}), _defineProperty(_utcGet, units_MINUTES, function (d) {
+}), _defineProperty(_utcGet, MINUTES, function (d) {
   return d.getUTCMinutes();
-}), _defineProperty(_utcGet, units_SECONDS, function (d) {
+}), _defineProperty(_utcGet, SECONDS, function (d) {
   return d.getUTCSeconds();
-}), _defineProperty(_utcGet, units_MILLISECONDS, function (d) {
+}), _defineProperty(_utcGet, MILLISECONDS, function (d) {
   return d.getUTCMilliseconds();
-}), _defineProperty(_utcGet, units_DAYOFYEAR, function (d) {
-  return util_utcDayOfYear(d);
-}), _defineProperty(_utcGet, units_WEEK, function (d) {
-  return util_utcWeekNum(d);
-}), _defineProperty(_utcGet, units_DAY, function (d, y) {
-  return floor_weekday(1, d.getUTCDay(), util_utcFirst(y));
-}), _defineProperty(_utcGet, units_WEEK + units_DAY, function (d, y) {
-  return floor_weekday(util_utcWeekNum(d), d.getUTCDay(), util_utcFirst(y));
+}), _defineProperty(_utcGet, DAYOFYEAR, function (d) {
+  return utcDayOfYear(d);
+}), _defineProperty(_utcGet, WEEK, function (d) {
+  return utcWeekNum(d);
+}), _defineProperty(_utcGet, DAY, function (d, y) {
+  return floor_weekday(1, d.getUTCDay(), utcFirst(y));
+}), _defineProperty(_utcGet, WEEK + DAY, function (d, y) {
+  return floor_weekday(utcWeekNum(d), d.getUTCDay(), utcFirst(y));
 }), _utcGet);
-var floor_utcInv = (_utcInv = {}, _defineProperty(_utcInv, units_QUARTER, function (q) {
+var utcInv = (_utcInv = {}, _defineProperty(_utcInv, QUARTER, function (q) {
   return 3 * q;
-}), _defineProperty(_utcInv, units_WEEK, function (w, y) {
-  return floor_weekday(w, 0, util_utcFirst(y));
+}), _defineProperty(_utcInv, WEEK, function (w, y) {
+  return floor_weekday(w, 0, utcFirst(y));
 }), _utcInv);
-function floor_utcFloor(units, step) {
-  return floor_floor(units, step || 1, floor_utcGet, floor_utcInv, util_utcDate);
+function utcFloor(units, step) {
+  return floor_floor(units, step || 1, utcGet, utcInv, utcDate);
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/year.js
 
 
-var src_year_year = interval_newInterval(function (date) {
+var year_year = newInterval(function (date) {
   date.setMonth(0, 1);
   date.setHours(0, 0, 0, 0);
 }, function (date, step) {
@@ -64994,8 +69410,8 @@ var src_year_year = interval_newInterval(function (date) {
   return date.getFullYear();
 }); // An optimized implementation for this simple case.
 
-src_year_year.every = function (k) {
-  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : interval_newInterval(function (date) {
+year_year.every = function (k) {
+  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function (date) {
     date.setFullYear(Math.floor(date.getFullYear() / k) * k);
     date.setMonth(0, 1);
     date.setHours(0, 0, 0, 0);
@@ -65004,11 +69420,11 @@ src_year_year.every = function (k) {
   });
 };
 
-/* harmony default export */ var d3_time_src_year = (src_year_year);
-var year_years = src_year_year.range;
+/* harmony default export */ var d3_time_src_year = (year_year);
+var years = year_year.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/month.js
 
-var src_month_month = interval_newInterval(function (date) {
+var month_month = newInterval(function (date) {
   date.setDate(1);
   date.setHours(0, 0, 0, 0);
 }, function (date, step) {
@@ -65018,54 +69434,54 @@ var src_month_month = interval_newInterval(function (date) {
 }, function (date) {
   return date.getMonth();
 });
-/* harmony default export */ var d3_time_src_month = (src_month_month);
-var month_months = src_month_month.range;
+/* harmony default export */ var d3_time_src_month = (month_month);
+var months = month_month.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/hour.js
 
 
-var src_hour_hour = interval_newInterval(function (date) {
-  date.setTime(date - date.getMilliseconds() - date.getSeconds() * duration_durationSecond - date.getMinutes() * duration_durationMinute);
+var hour_hour = newInterval(function (date) {
+  date.setTime(date - date.getMilliseconds() - date.getSeconds() * durationSecond - date.getMinutes() * durationMinute);
 }, function (date, step) {
-  date.setTime(+date + step * duration_durationHour);
+  date.setTime(+date + step * durationHour);
 }, function (start, end) {
-  return (end - start) / duration_durationHour;
+  return (end - start) / durationHour;
 }, function (date) {
   return date.getHours();
 });
-/* harmony default export */ var d3_time_src_hour = (src_hour_hour);
-var hour_hours = src_hour_hour.range;
+/* harmony default export */ var d3_time_src_hour = (hour_hour);
+var hours = hour_hour.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/minute.js
 
 
-var src_minute_minute = interval_newInterval(function (date) {
-  date.setTime(date - date.getMilliseconds() - date.getSeconds() * duration_durationSecond);
+var minute_minute = newInterval(function (date) {
+  date.setTime(date - date.getMilliseconds() - date.getSeconds() * durationSecond);
 }, function (date, step) {
-  date.setTime(+date + step * duration_durationMinute);
+  date.setTime(+date + step * durationMinute);
 }, function (start, end) {
-  return (end - start) / duration_durationMinute;
+  return (end - start) / durationMinute;
 }, function (date) {
   return date.getMinutes();
 });
-/* harmony default export */ var d3_time_src_minute = (src_minute_minute);
-var minute_minutes = src_minute_minute.range;
+/* harmony default export */ var d3_time_src_minute = (minute_minute);
+var minutes = minute_minute.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/second.js
 
 
-var src_second_second = interval_newInterval(function (date) {
+var second_second = newInterval(function (date) {
   date.setTime(date - date.getMilliseconds());
 }, function (date, step) {
-  date.setTime(+date + step * duration_durationSecond);
+  date.setTime(+date + step * durationSecond);
 }, function (start, end) {
-  return (end - start) / duration_durationSecond;
+  return (end - start) / durationSecond;
 }, function (date) {
   return date.getUTCSeconds();
 });
-/* harmony default export */ var d3_time_src_second = (src_second_second);
-var second_seconds = src_second_second.range;
+/* harmony default export */ var d3_time_src_second = (second_second);
+var seconds = second_second.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/millisecond.js
 
 
-var millisecond_millisecond = interval_newInterval(function () {// noop
+var millisecond_millisecond = newInterval(function () {// noop
 }, function (date, step) {
   date.setTime(+date + step);
 }, function (start, end) {
@@ -65076,7 +69492,7 @@ millisecond_millisecond.every = function (k) {
   k = Math.floor(k);
   if (!isFinite(k) || !(k > 0)) return null;
   if (!(k > 1)) return millisecond_millisecond;
-  return interval_newInterval(function (date) {
+  return newInterval(function (date) {
     date.setTime(Math.floor(date / k) * k);
   }, function (date, step) {
     date.setTime(+date + step * k);
@@ -65085,12 +69501,12 @@ millisecond_millisecond.every = function (k) {
   });
 };
 
-/* harmony default export */ var d3_time_src_millisecond = (millisecond_millisecond);
-var millisecond_milliseconds = millisecond_millisecond.range;
+/* harmony default export */ var src_millisecond = (millisecond_millisecond);
+var milliseconds = millisecond_millisecond.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/utcYear.js
 
 
-var utcYear_utcYear = interval_newInterval(function (date) {
+var utcYear_utcYear = newInterval(function (date) {
   date.setUTCMonth(0, 1);
   date.setUTCHours(0, 0, 0, 0);
 }, function (date, step) {
@@ -65102,7 +69518,7 @@ var utcYear_utcYear = interval_newInterval(function (date) {
 }); // An optimized implementation for this simple case.
 
 utcYear_utcYear.every = function (k) {
-  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : interval_newInterval(function (date) {
+  return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function (date) {
     date.setUTCFullYear(Math.floor(date.getUTCFullYear() / k) * k);
     date.setUTCMonth(0, 1);
     date.setUTCHours(0, 0, 0, 0);
@@ -65111,11 +69527,11 @@ utcYear_utcYear.every = function (k) {
   });
 };
 
-/* harmony default export */ var d3_time_src_utcYear = (utcYear_utcYear);
-var utcYear_utcYears = utcYear_utcYear.range;
+/* harmony default export */ var src_utcYear = (utcYear_utcYear);
+var utcYears = utcYear_utcYear.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/utcMonth.js
 
-var utcMonth_utcMonth = interval_newInterval(function (date) {
+var utcMonth_utcMonth = newInterval(function (date) {
   date.setUTCDate(1);
   date.setUTCHours(0, 0, 0, 0);
 }, function (date, step) {
@@ -65125,36 +69541,36 @@ var utcMonth_utcMonth = interval_newInterval(function (date) {
 }, function (date) {
   return date.getUTCMonth();
 });
-/* harmony default export */ var d3_time_src_utcMonth = (utcMonth_utcMonth);
-var utcMonth_utcMonths = utcMonth_utcMonth.range;
+/* harmony default export */ var src_utcMonth = (utcMonth_utcMonth);
+var utcMonths = utcMonth_utcMonth.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/utcHour.js
 
 
-var utcHour_utcHour = interval_newInterval(function (date) {
+var utcHour_utcHour = newInterval(function (date) {
   date.setUTCMinutes(0, 0, 0);
 }, function (date, step) {
-  date.setTime(+date + step * duration_durationHour);
+  date.setTime(+date + step * durationHour);
 }, function (start, end) {
-  return (end - start) / duration_durationHour;
+  return (end - start) / durationHour;
 }, function (date) {
   return date.getUTCHours();
 });
-/* harmony default export */ var d3_time_src_utcHour = (utcHour_utcHour);
-var utcHour_utcHours = utcHour_utcHour.range;
+/* harmony default export */ var src_utcHour = (utcHour_utcHour);
+var utcHours = utcHour_utcHour.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time/src/utcMinute.js
 
 
-var utcMinute_utcMinute = interval_newInterval(function (date) {
+var utcMinute_utcMinute = newInterval(function (date) {
   date.setUTCSeconds(0, 0);
 }, function (date, step) {
-  date.setTime(+date + step * duration_durationMinute);
+  date.setTime(+date + step * durationMinute);
 }, function (start, end) {
-  return (end - start) / duration_durationMinute;
+  return (end - start) / durationMinute;
 }, function (date) {
   return date.getUTCMinutes();
 });
-/* harmony default export */ var d3_time_src_utcMinute = (utcMinute_utcMinute);
-var utcMinute_utcMinutes = utcMinute_utcMinute.range;
+/* harmony default export */ var src_utcMinute = (utcMinute_utcMinute);
+var utcMinutes = utcMinute_utcMinute.range;
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-time/src/interval.js
 
 
@@ -65163,35 +69579,35 @@ var _timeIntervals, _utcIntervals;
 
 
 
-var interval_timeIntervals = (_timeIntervals = {}, _defineProperty(_timeIntervals, units_YEAR, d3_time_src_year), _defineProperty(_timeIntervals, units_QUARTER, d3_time_src_month.every(3)), _defineProperty(_timeIntervals, units_MONTH, d3_time_src_month), _defineProperty(_timeIntervals, units_WEEK, week_sunday), _defineProperty(_timeIntervals, units_DATE, d3_time_src_day), _defineProperty(_timeIntervals, units_DAY, d3_time_src_day), _defineProperty(_timeIntervals, units_DAYOFYEAR, d3_time_src_day), _defineProperty(_timeIntervals, units_HOURS, d3_time_src_hour), _defineProperty(_timeIntervals, units_MINUTES, d3_time_src_minute), _defineProperty(_timeIntervals, units_SECONDS, d3_time_src_second), _defineProperty(_timeIntervals, units_MILLISECONDS, d3_time_src_millisecond), _timeIntervals);
-var interval_utcIntervals = (_utcIntervals = {}, _defineProperty(_utcIntervals, units_YEAR, d3_time_src_utcYear), _defineProperty(_utcIntervals, units_QUARTER, d3_time_src_utcMonth.every(3)), _defineProperty(_utcIntervals, units_MONTH, d3_time_src_utcMonth), _defineProperty(_utcIntervals, units_WEEK, utcWeek_utcSunday), _defineProperty(_utcIntervals, units_DATE, d3_time_src_utcDay), _defineProperty(_utcIntervals, units_DAY, d3_time_src_utcDay), _defineProperty(_utcIntervals, units_DAYOFYEAR, d3_time_src_utcDay), _defineProperty(_utcIntervals, units_HOURS, d3_time_src_utcHour), _defineProperty(_utcIntervals, units_MINUTES, d3_time_src_utcMinute), _defineProperty(_utcIntervals, units_SECONDS, d3_time_src_second), _defineProperty(_utcIntervals, units_MILLISECONDS, d3_time_src_millisecond), _utcIntervals);
-function interval_timeInterval(unit) {
-  return interval_timeIntervals[unit];
+var timeIntervals = (_timeIntervals = {}, _defineProperty(_timeIntervals, YEAR, d3_time_src_year), _defineProperty(_timeIntervals, QUARTER, d3_time_src_month.every(3)), _defineProperty(_timeIntervals, MONTH, d3_time_src_month), _defineProperty(_timeIntervals, WEEK, sunday), _defineProperty(_timeIntervals, units_DATE, d3_time_src_day), _defineProperty(_timeIntervals, DAY, d3_time_src_day), _defineProperty(_timeIntervals, DAYOFYEAR, d3_time_src_day), _defineProperty(_timeIntervals, HOURS, d3_time_src_hour), _defineProperty(_timeIntervals, MINUTES, d3_time_src_minute), _defineProperty(_timeIntervals, SECONDS, d3_time_src_second), _defineProperty(_timeIntervals, MILLISECONDS, src_millisecond), _timeIntervals);
+var utcIntervals = (_utcIntervals = {}, _defineProperty(_utcIntervals, YEAR, src_utcYear), _defineProperty(_utcIntervals, QUARTER, src_utcMonth.every(3)), _defineProperty(_utcIntervals, MONTH, src_utcMonth), _defineProperty(_utcIntervals, WEEK, utcSunday), _defineProperty(_utcIntervals, units_DATE, src_utcDay), _defineProperty(_utcIntervals, DAY, src_utcDay), _defineProperty(_utcIntervals, DAYOFYEAR, src_utcDay), _defineProperty(_utcIntervals, HOURS, src_utcHour), _defineProperty(_utcIntervals, MINUTES, src_utcMinute), _defineProperty(_utcIntervals, SECONDS, d3_time_src_second), _defineProperty(_utcIntervals, MILLISECONDS, src_millisecond), _utcIntervals);
+function timeInterval(unit) {
+  return timeIntervals[unit];
 }
-function interval_utcInterval(unit) {
-  return interval_utcIntervals[unit];
+function utcInterval(unit) {
+  return utcIntervals[unit];
 }
 
 function interval_offset(ival, date, step) {
   return ival ? ival.offset(date, step) : undefined;
 }
 
-function interval_timeOffset(unit, date, step) {
-  return interval_offset(interval_timeInterval(unit), date, step);
+function timeOffset(unit, date, step) {
+  return interval_offset(timeInterval(unit), date, step);
 }
-function interval_utcOffset(unit, date, step) {
-  return interval_offset(interval_utcInterval(unit), date, step);
+function utcOffset(unit, date, step) {
+  return interval_offset(utcInterval(unit), date, step);
 }
 
 function interval_sequence(ival, start, stop, step) {
   return ival ? ival.range(start, stop, step) : undefined;
 }
 
-function interval_timeSequence(unit, start, stop, step) {
-  return interval_sequence(interval_timeInterval(unit), start, stop, step);
+function timeSequence(unit, start, stop, step) {
+  return interval_sequence(timeInterval(unit), start, stop, step);
 }
-function interval_utcSequence(unit, start, stop, step) {
-  return interval_sequence(interval_utcInterval(unit), start, stop, step);
+function utcSequence(unit, start, stop, step) {
+  return interval_sequence(utcInterval(unit), start, stop, step);
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time-format/src/locale.js
 
@@ -65205,7 +69621,7 @@ function interval_utcSequence(unit, start, stop, step) {
 
 
 
-function src_locale_localDate(d) {
+function locale_localDate(d) {
   if (0 <= d.y && d.y < 100) {
     var date = new Date(-1, d.m, d.d, d.H, d.M, d.S, d.L);
     date.setFullYear(d.y);
@@ -65215,7 +69631,7 @@ function src_locale_localDate(d) {
   return new Date(d.y, d.m, d.d, d.H, d.M, d.S, d.L);
 }
 
-function src_locale_utcDate(d) {
+function locale_utcDate(d) {
   if (0 <= d.y && d.y < 100) {
     var date = new Date(Date.UTC(-1, d.m, d.d, d.H, d.M, d.S, d.L));
     date.setUTCFullYear(d.y);
@@ -65225,7 +69641,7 @@ function src_locale_utcDate(d) {
   return new Date(Date.UTC(d.y, d.m, d.d, d.H, d.M, d.S, d.L));
 }
 
-function src_locale_newDate(y, m, d) {
+function locale_newDate(y, m, d) {
   return {
     y: y,
     m: m,
@@ -65237,7 +69653,7 @@ function src_locale_newDate(y, m, d) {
   };
 }
 
-function locale_formatLocale(locale) {
+function formatLocale(locale) {
   var locale_dateTime = locale.dateTime,
       locale_date = locale.date,
       locale_time = locale.time,
@@ -65246,49 +69662,49 @@ function locale_formatLocale(locale) {
       locale_shortWeekdays = locale.shortDays,
       locale_months = locale.months,
       locale_shortMonths = locale.shortMonths;
-  var periodRe = locale_formatRe(locale_periods),
-      periodLookup = locale_formatLookup(locale_periods),
-      weekdayRe = locale_formatRe(locale_weekdays),
-      weekdayLookup = locale_formatLookup(locale_weekdays),
-      shortWeekdayRe = locale_formatRe(locale_shortWeekdays),
-      shortWeekdayLookup = locale_formatLookup(locale_shortWeekdays),
-      monthRe = locale_formatRe(locale_months),
-      monthLookup = locale_formatLookup(locale_months),
-      shortMonthRe = locale_formatRe(locale_shortMonths),
-      shortMonthLookup = locale_formatLookup(locale_shortMonths);
+  var periodRe = formatRe(locale_periods),
+      periodLookup = formatLookup(locale_periods),
+      weekdayRe = formatRe(locale_weekdays),
+      weekdayLookup = formatLookup(locale_weekdays),
+      shortWeekdayRe = formatRe(locale_shortWeekdays),
+      shortWeekdayLookup = formatLookup(locale_shortWeekdays),
+      monthRe = formatRe(locale_months),
+      monthLookup = formatLookup(locale_months),
+      shortMonthRe = formatRe(locale_shortMonths),
+      shortMonthLookup = formatLookup(locale_shortMonths);
   var formats = {
     "a": formatShortWeekday,
     "A": formatWeekday,
     "b": formatShortMonth,
     "B": formatMonth,
     "c": null,
-    "d": locale_formatDayOfMonth,
-    "e": locale_formatDayOfMonth,
-    "f": locale_formatMicroseconds,
-    "g": locale_formatYearISO,
-    "G": locale_formatFullYearISO,
-    "H": locale_formatHour24,
-    "I": locale_formatHour12,
-    "j": locale_formatDayOfYear,
-    "L": locale_formatMilliseconds,
-    "m": locale_formatMonthNumber,
-    "M": locale_formatMinutes,
+    "d": formatDayOfMonth,
+    "e": formatDayOfMonth,
+    "f": formatMicroseconds,
+    "g": formatYearISO,
+    "G": formatFullYearISO,
+    "H": formatHour24,
+    "I": formatHour12,
+    "j": formatDayOfYear,
+    "L": formatMilliseconds,
+    "m": formatMonthNumber,
+    "M": formatMinutes,
     "p": formatPeriod,
     "q": formatQuarter,
-    "Q": locale_formatUnixTimestamp,
-    "s": locale_formatUnixTimestampSeconds,
-    "S": locale_formatSeconds,
-    "u": locale_formatWeekdayNumberMonday,
-    "U": locale_formatWeekNumberSunday,
-    "V": locale_formatWeekNumberISO,
-    "w": locale_formatWeekdayNumberSunday,
-    "W": locale_formatWeekNumberMonday,
+    "Q": formatUnixTimestamp,
+    "s": formatUnixTimestampSeconds,
+    "S": formatSeconds,
+    "u": formatWeekdayNumberMonday,
+    "U": formatWeekNumberSunday,
+    "V": formatWeekNumberISO,
+    "w": formatWeekdayNumberSunday,
+    "W": formatWeekNumberMonday,
     "x": null,
     "X": null,
-    "y": src_locale_formatYear,
-    "Y": locale_formatFullYear,
-    "Z": locale_formatZone,
-    "%": locale_formatLiteralPercent
+    "y": locale_formatYear,
+    "Y": formatFullYear,
+    "Z": formatZone,
+    "%": formatLiteralPercent
   };
   var utcFormats = {
     "a": formatUTCShortWeekday,
@@ -65296,33 +69712,33 @@ function locale_formatLocale(locale) {
     "b": formatUTCShortMonth,
     "B": formatUTCMonth,
     "c": null,
-    "d": locale_formatUTCDayOfMonth,
-    "e": locale_formatUTCDayOfMonth,
-    "f": locale_formatUTCMicroseconds,
-    "g": locale_formatUTCYearISO,
-    "G": locale_formatUTCFullYearISO,
-    "H": locale_formatUTCHour24,
-    "I": locale_formatUTCHour12,
-    "j": locale_formatUTCDayOfYear,
-    "L": locale_formatUTCMilliseconds,
-    "m": locale_formatUTCMonthNumber,
-    "M": locale_formatUTCMinutes,
+    "d": formatUTCDayOfMonth,
+    "e": formatUTCDayOfMonth,
+    "f": formatUTCMicroseconds,
+    "g": formatUTCYearISO,
+    "G": formatUTCFullYearISO,
+    "H": formatUTCHour24,
+    "I": formatUTCHour12,
+    "j": formatUTCDayOfYear,
+    "L": formatUTCMilliseconds,
+    "m": formatUTCMonthNumber,
+    "M": formatUTCMinutes,
     "p": formatUTCPeriod,
     "q": formatUTCQuarter,
-    "Q": locale_formatUnixTimestamp,
-    "s": locale_formatUnixTimestampSeconds,
-    "S": locale_formatUTCSeconds,
-    "u": locale_formatUTCWeekdayNumberMonday,
-    "U": locale_formatUTCWeekNumberSunday,
-    "V": locale_formatUTCWeekNumberISO,
-    "w": locale_formatUTCWeekdayNumberSunday,
-    "W": locale_formatUTCWeekNumberMonday,
+    "Q": formatUnixTimestamp,
+    "s": formatUnixTimestampSeconds,
+    "S": formatUTCSeconds,
+    "u": formatUTCWeekdayNumberMonday,
+    "U": formatUTCWeekNumberSunday,
+    "V": formatUTCWeekNumberISO,
+    "w": formatUTCWeekdayNumberSunday,
+    "W": formatUTCWeekNumberMonday,
     "x": null,
     "X": null,
-    "y": locale_formatUTCYear,
-    "Y": locale_formatUTCFullYear,
-    "Z": locale_formatUTCZone,
-    "%": locale_formatLiteralPercent
+    "y": formatUTCYear,
+    "Y": formatUTCFullYear,
+    "Z": formatUTCZone,
+    "%": formatLiteralPercent
   };
   var parses = {
     "a": parseShortWeekday,
@@ -65330,33 +69746,33 @@ function locale_formatLocale(locale) {
     "b": parseShortMonth,
     "B": parseMonth,
     "c": parseLocaleDateTime,
-    "d": locale_parseDayOfMonth,
-    "e": locale_parseDayOfMonth,
-    "f": locale_parseMicroseconds,
-    "g": locale_parseYear,
-    "G": locale_parseFullYear,
-    "H": locale_parseHour24,
-    "I": locale_parseHour24,
-    "j": locale_parseDayOfYear,
-    "L": locale_parseMilliseconds,
-    "m": locale_parseMonthNumber,
-    "M": locale_parseMinutes,
+    "d": parseDayOfMonth,
+    "e": parseDayOfMonth,
+    "f": parseMicroseconds,
+    "g": parseYear,
+    "G": parseFullYear,
+    "H": parseHour24,
+    "I": parseHour24,
+    "j": parseDayOfYear,
+    "L": parseMilliseconds,
+    "m": parseMonthNumber,
+    "M": parseMinutes,
     "p": parsePeriod,
-    "q": locale_parseQuarter,
-    "Q": locale_parseUnixTimestamp,
-    "s": locale_parseUnixTimestampSeconds,
-    "S": locale_parseSeconds,
-    "u": locale_parseWeekdayNumberMonday,
-    "U": locale_parseWeekNumberSunday,
-    "V": locale_parseWeekNumberISO,
-    "w": locale_parseWeekdayNumberSunday,
-    "W": locale_parseWeekNumberMonday,
+    "q": parseQuarter,
+    "Q": parseUnixTimestamp,
+    "s": parseUnixTimestampSeconds,
+    "S": parseSeconds,
+    "u": parseWeekdayNumberMonday,
+    "U": parseWeekNumberSunday,
+    "V": parseWeekNumberISO,
+    "w": parseWeekdayNumberSunday,
+    "W": parseWeekNumberMonday,
     "x": parseLocaleDate,
     "X": parseLocaleTime,
-    "y": locale_parseYear,
-    "Y": locale_parseFullYear,
-    "Z": locale_parseZone,
-    "%": locale_parseLiteralPercent
+    "y": parseYear,
+    "Y": parseFullYear,
+    "Z": parseZone,
+    "%": parseLiteralPercent
   }; // These recursive directive definitions must be deferred.
 
   formats.x = newFormat(locale_date, formats);
@@ -65380,7 +69796,7 @@ function locale_formatLocale(locale) {
       while (++i < n) {
         if (specifier.charCodeAt(i) === 37) {
           string.push(specifier.slice(j, i));
-          if ((pad = locale_pads[c = specifier.charAt(++i)]) != null) c = specifier.charAt(++i);else pad = c === "e" ? " " : "0";
+          if ((pad = pads[c = specifier.charAt(++i)]) != null) c = specifier.charAt(++i);else pad = c === "e" ? " " : "0";
           if (format = formats[c]) c = format(date, pad);
           string.push(c);
           j = i + 1;
@@ -65394,7 +69810,7 @@ function locale_formatLocale(locale) {
 
   function newParse(specifier, Z) {
     return function (string) {
-      var d = src_locale_newDate(1900, undefined, 1),
+      var d = locale_newDate(1900, undefined, 1),
           i = parseSpecifier(d, specifier, string += "", 0),
           week,
           day;
@@ -65414,15 +69830,15 @@ function locale_formatLocale(locale) {
         if (!("w" in d)) d.w = 1;
 
         if ("Z" in d) {
-          week = src_locale_utcDate(src_locale_newDate(d.y, 0, 1)), day = week.getUTCDay();
-          week = day > 4 || day === 0 ? utcWeek_utcMonday.ceil(week) : utcWeek_utcMonday(week);
-          week = d3_time_src_utcDay.offset(week, (d.V - 1) * 7);
+          week = locale_utcDate(locale_newDate(d.y, 0, 1)), day = week.getUTCDay();
+          week = day > 4 || day === 0 ? utcMonday.ceil(week) : utcMonday(week);
+          week = src_utcDay.offset(week, (d.V - 1) * 7);
           d.y = week.getUTCFullYear();
           d.m = week.getUTCMonth();
           d.d = week.getUTCDate() + (d.w + 6) % 7;
         } else {
-          week = src_locale_localDate(src_locale_newDate(d.y, 0, 1)), day = week.getDay();
-          week = day > 4 || day === 0 ? week_monday.ceil(week) : week_monday(week);
+          week = locale_localDate(locale_newDate(d.y, 0, 1)), day = week.getDay();
+          week = day > 4 || day === 0 ? monday.ceil(week) : monday(week);
           week = d3_time_src_day.offset(week, (d.V - 1) * 7);
           d.y = week.getFullYear();
           d.m = week.getMonth();
@@ -65430,7 +69846,7 @@ function locale_formatLocale(locale) {
         }
       } else if ("W" in d || "U" in d) {
         if (!("w" in d)) d.w = "u" in d ? d.u % 7 : "W" in d ? 1 : 0;
-        day = "Z" in d ? src_locale_utcDate(src_locale_newDate(d.y, 0, 1)).getUTCDay() : src_locale_localDate(src_locale_newDate(d.y, 0, 1)).getDay();
+        day = "Z" in d ? locale_utcDate(locale_newDate(d.y, 0, 1)).getUTCDay() : locale_localDate(locale_newDate(d.y, 0, 1)).getDay();
         d.m = 0;
         d.d = "W" in d ? (d.w + 6) % 7 + d.W * 7 - (day + 5) % 7 : d.w + d.U * 7 - (day + 6) % 7;
       } // If a time zone is specified, all fields are interpreted as UTC and then
@@ -65440,11 +69856,11 @@ function locale_formatLocale(locale) {
       if ("Z" in d) {
         d.H += d.Z / 100 | 0;
         d.M += d.Z % 100;
-        return src_locale_utcDate(d);
+        return locale_utcDate(d);
       } // Otherwise, all fields are in local time.
 
 
-      return src_locale_localDate(d);
+      return locale_localDate(d);
     };
   }
 
@@ -65461,7 +69877,7 @@ function locale_formatLocale(locale) {
 
       if (c === 37) {
         c = specifier.charAt(i++);
-        parse = parses[c in locale_pads ? specifier.charAt(i++) : c];
+        parse = parses[c in pads ? specifier.charAt(i++) : c];
         if (!parse || (j = parse(d, string, j)) < 0) return -1;
       } else if (c != string.charCodeAt(j++)) {
         return -1;
@@ -65595,32 +70011,32 @@ function locale_formatLocale(locale) {
     }
   };
 }
-var locale_pads = {
+var pads = {
   "-": "",
   "_": " ",
   "0": "0"
 },
-    locale_numberRe = /^\s*\d+/,
+    numberRe = /^\s*\d+/,
     // note: ignores next directive
-locale_percentRe = /^%/,
-    locale_requoteRe = /[\\^$*+?|[\]().{}]/g;
+percentRe = /^%/,
+    requoteRe = /[\\^$*+?|[\]().{}]/g;
 
-function src_locale_pad(value, fill, width) {
+function locale_pad(value, fill, width) {
   var sign = value < 0 ? "-" : "",
       string = (sign ? -value : value) + "",
       length = string.length;
   return sign + (length < width ? new Array(width - length + 1).join(fill) + string : string);
 }
 
-function locale_requote(s) {
-  return s.replace(locale_requoteRe, "\\$&");
+function requote(s) {
+  return s.replace(requoteRe, "\\$&");
 }
 
-function locale_formatRe(names) {
-  return new RegExp("^(?:" + names.map(locale_requote).join("|") + ")", "i");
+function formatRe(names) {
+  return new RegExp("^(?:" + names.map(requote).join("|") + ")", "i");
 }
 
-function locale_formatLookup(names) {
+function formatLookup(names) {
   var map = {},
       i = -1,
       n = names.length;
@@ -65632,298 +70048,298 @@ function locale_formatLookup(names) {
   return map;
 }
 
-function locale_parseWeekdayNumberSunday(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 1));
+function parseWeekdayNumberSunday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
   return n ? (d.w = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseWeekdayNumberMonday(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 1));
+function parseWeekdayNumberMonday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
   return n ? (d.u = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseWeekNumberSunday(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseWeekNumberSunday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.U = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseWeekNumberISO(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseWeekNumberISO(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.V = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseWeekNumberMonday(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseWeekNumberMonday(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.W = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseFullYear(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 4));
+function parseFullYear(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 4));
   return n ? (d.y = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseYear(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseYear(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.y = +n[0] + (+n[0] > 68 ? 1900 : 2000), i + n[0].length) : -1;
 }
 
-function locale_parseZone(d, string, i) {
+function parseZone(d, string, i) {
   var n = /^(Z)|([+-]\d\d)(?::?(\d\d))?/.exec(string.slice(i, i + 6));
   return n ? (d.Z = n[1] ? 0 : -(n[2] + (n[3] || "00")), i + n[0].length) : -1;
 }
 
-function locale_parseQuarter(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 1));
+function parseQuarter(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 1));
   return n ? (d.q = n[0] * 3 - 3, i + n[0].length) : -1;
 }
 
-function locale_parseMonthNumber(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseMonthNumber(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.m = n[0] - 1, i + n[0].length) : -1;
 }
 
-function locale_parseDayOfMonth(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseDayOfMonth(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.d = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseDayOfYear(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 3));
+function parseDayOfYear(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 3));
   return n ? (d.m = 0, d.d = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseHour24(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseHour24(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.H = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseMinutes(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseMinutes(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.M = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseSeconds(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 2));
+function parseSeconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 2));
   return n ? (d.S = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseMilliseconds(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 3));
+function parseMilliseconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 3));
   return n ? (d.L = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseMicroseconds(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i, i + 6));
+function parseMicroseconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i, i + 6));
   return n ? (d.L = Math.floor(n[0] / 1000), i + n[0].length) : -1;
 }
 
-function locale_parseLiteralPercent(d, string, i) {
-  var n = locale_percentRe.exec(string.slice(i, i + 1));
+function parseLiteralPercent(d, string, i) {
+  var n = percentRe.exec(string.slice(i, i + 1));
   return n ? i + n[0].length : -1;
 }
 
-function locale_parseUnixTimestamp(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i));
+function parseUnixTimestamp(d, string, i) {
+  var n = numberRe.exec(string.slice(i));
   return n ? (d.Q = +n[0], i + n[0].length) : -1;
 }
 
-function locale_parseUnixTimestampSeconds(d, string, i) {
-  var n = locale_numberRe.exec(string.slice(i));
+function parseUnixTimestampSeconds(d, string, i) {
+  var n = numberRe.exec(string.slice(i));
   return n ? (d.s = +n[0], i + n[0].length) : -1;
 }
 
-function locale_formatDayOfMonth(d, p) {
-  return src_locale_pad(d.getDate(), p, 2);
+function formatDayOfMonth(d, p) {
+  return locale_pad(d.getDate(), p, 2);
 }
 
-function locale_formatHour24(d, p) {
-  return src_locale_pad(d.getHours(), p, 2);
+function formatHour24(d, p) {
+  return locale_pad(d.getHours(), p, 2);
 }
 
-function locale_formatHour12(d, p) {
-  return src_locale_pad(d.getHours() % 12 || 12, p, 2);
+function formatHour12(d, p) {
+  return locale_pad(d.getHours() % 12 || 12, p, 2);
 }
 
-function locale_formatDayOfYear(d, p) {
-  return src_locale_pad(1 + d3_time_src_day.count(d3_time_src_year(d), d), p, 3);
+function formatDayOfYear(d, p) {
+  return locale_pad(1 + d3_time_src_day.count(d3_time_src_year(d), d), p, 3);
 }
 
-function locale_formatMilliseconds(d, p) {
-  return src_locale_pad(d.getMilliseconds(), p, 3);
+function formatMilliseconds(d, p) {
+  return locale_pad(d.getMilliseconds(), p, 3);
 }
 
-function locale_formatMicroseconds(d, p) {
-  return locale_formatMilliseconds(d, p) + "000";
+function formatMicroseconds(d, p) {
+  return formatMilliseconds(d, p) + "000";
 }
 
-function locale_formatMonthNumber(d, p) {
-  return src_locale_pad(d.getMonth() + 1, p, 2);
+function formatMonthNumber(d, p) {
+  return locale_pad(d.getMonth() + 1, p, 2);
 }
 
-function locale_formatMinutes(d, p) {
-  return src_locale_pad(d.getMinutes(), p, 2);
+function formatMinutes(d, p) {
+  return locale_pad(d.getMinutes(), p, 2);
 }
 
-function locale_formatSeconds(d, p) {
-  return src_locale_pad(d.getSeconds(), p, 2);
+function formatSeconds(d, p) {
+  return locale_pad(d.getSeconds(), p, 2);
 }
 
-function locale_formatWeekdayNumberMonday(d) {
+function formatWeekdayNumberMonday(d) {
   var day = d.getDay();
   return day === 0 ? 7 : day;
 }
 
-function locale_formatWeekNumberSunday(d, p) {
-  return src_locale_pad(week_sunday.count(d3_time_src_year(d) - 1, d), p, 2);
+function formatWeekNumberSunday(d, p) {
+  return locale_pad(sunday.count(d3_time_src_year(d) - 1, d), p, 2);
 }
 
-function locale_dISO(d) {
+function dISO(d) {
   var day = d.getDay();
-  return day >= 4 || day === 0 ? week_thursday(d) : week_thursday.ceil(d);
+  return day >= 4 || day === 0 ? thursday(d) : thursday.ceil(d);
 }
 
-function locale_formatWeekNumberISO(d, p) {
-  d = locale_dISO(d);
-  return src_locale_pad(week_thursday.count(d3_time_src_year(d), d) + (d3_time_src_year(d).getDay() === 4), p, 2);
+function formatWeekNumberISO(d, p) {
+  d = dISO(d);
+  return locale_pad(thursday.count(d3_time_src_year(d), d) + (d3_time_src_year(d).getDay() === 4), p, 2);
 }
 
-function locale_formatWeekdayNumberSunday(d) {
+function formatWeekdayNumberSunday(d) {
   return d.getDay();
 }
 
-function locale_formatWeekNumberMonday(d, p) {
-  return src_locale_pad(week_monday.count(d3_time_src_year(d) - 1, d), p, 2);
+function formatWeekNumberMonday(d, p) {
+  return locale_pad(monday.count(d3_time_src_year(d) - 1, d), p, 2);
 }
 
-function src_locale_formatYear(d, p) {
-  return src_locale_pad(d.getFullYear() % 100, p, 2);
+function locale_formatYear(d, p) {
+  return locale_pad(d.getFullYear() % 100, p, 2);
 }
 
-function locale_formatYearISO(d, p) {
-  d = locale_dISO(d);
-  return src_locale_pad(d.getFullYear() % 100, p, 2);
+function formatYearISO(d, p) {
+  d = dISO(d);
+  return locale_pad(d.getFullYear() % 100, p, 2);
 }
 
-function locale_formatFullYear(d, p) {
-  return src_locale_pad(d.getFullYear() % 10000, p, 4);
+function formatFullYear(d, p) {
+  return locale_pad(d.getFullYear() % 10000, p, 4);
 }
 
-function locale_formatFullYearISO(d, p) {
+function formatFullYearISO(d, p) {
   var day = d.getDay();
-  d = day >= 4 || day === 0 ? week_thursday(d) : week_thursday.ceil(d);
-  return src_locale_pad(d.getFullYear() % 10000, p, 4);
+  d = day >= 4 || day === 0 ? thursday(d) : thursday.ceil(d);
+  return locale_pad(d.getFullYear() % 10000, p, 4);
 }
 
-function locale_formatZone(d) {
+function formatZone(d) {
   var z = d.getTimezoneOffset();
-  return (z > 0 ? "-" : (z *= -1, "+")) + src_locale_pad(z / 60 | 0, "0", 2) + src_locale_pad(z % 60, "0", 2);
+  return (z > 0 ? "-" : (z *= -1, "+")) + locale_pad(z / 60 | 0, "0", 2) + locale_pad(z % 60, "0", 2);
 }
 
-function locale_formatUTCDayOfMonth(d, p) {
-  return src_locale_pad(d.getUTCDate(), p, 2);
+function formatUTCDayOfMonth(d, p) {
+  return locale_pad(d.getUTCDate(), p, 2);
 }
 
-function locale_formatUTCHour24(d, p) {
-  return src_locale_pad(d.getUTCHours(), p, 2);
+function formatUTCHour24(d, p) {
+  return locale_pad(d.getUTCHours(), p, 2);
 }
 
-function locale_formatUTCHour12(d, p) {
-  return src_locale_pad(d.getUTCHours() % 12 || 12, p, 2);
+function formatUTCHour12(d, p) {
+  return locale_pad(d.getUTCHours() % 12 || 12, p, 2);
 }
 
-function locale_formatUTCDayOfYear(d, p) {
-  return src_locale_pad(1 + d3_time_src_utcDay.count(d3_time_src_utcYear(d), d), p, 3);
+function formatUTCDayOfYear(d, p) {
+  return locale_pad(1 + src_utcDay.count(src_utcYear(d), d), p, 3);
 }
 
-function locale_formatUTCMilliseconds(d, p) {
-  return src_locale_pad(d.getUTCMilliseconds(), p, 3);
+function formatUTCMilliseconds(d, p) {
+  return locale_pad(d.getUTCMilliseconds(), p, 3);
 }
 
-function locale_formatUTCMicroseconds(d, p) {
-  return locale_formatUTCMilliseconds(d, p) + "000";
+function formatUTCMicroseconds(d, p) {
+  return formatUTCMilliseconds(d, p) + "000";
 }
 
-function locale_formatUTCMonthNumber(d, p) {
-  return src_locale_pad(d.getUTCMonth() + 1, p, 2);
+function formatUTCMonthNumber(d, p) {
+  return locale_pad(d.getUTCMonth() + 1, p, 2);
 }
 
-function locale_formatUTCMinutes(d, p) {
-  return src_locale_pad(d.getUTCMinutes(), p, 2);
+function formatUTCMinutes(d, p) {
+  return locale_pad(d.getUTCMinutes(), p, 2);
 }
 
-function locale_formatUTCSeconds(d, p) {
-  return src_locale_pad(d.getUTCSeconds(), p, 2);
+function formatUTCSeconds(d, p) {
+  return locale_pad(d.getUTCSeconds(), p, 2);
 }
 
-function locale_formatUTCWeekdayNumberMonday(d) {
+function formatUTCWeekdayNumberMonday(d) {
   var dow = d.getUTCDay();
   return dow === 0 ? 7 : dow;
 }
 
-function locale_formatUTCWeekNumberSunday(d, p) {
-  return src_locale_pad(utcWeek_utcSunday.count(d3_time_src_utcYear(d) - 1, d), p, 2);
+function formatUTCWeekNumberSunday(d, p) {
+  return locale_pad(utcSunday.count(src_utcYear(d) - 1, d), p, 2);
 }
 
-function locale_UTCdISO(d) {
+function UTCdISO(d) {
   var day = d.getUTCDay();
-  return day >= 4 || day === 0 ? utcWeek_utcThursday(d) : utcWeek_utcThursday.ceil(d);
+  return day >= 4 || day === 0 ? utcThursday(d) : utcThursday.ceil(d);
 }
 
-function locale_formatUTCWeekNumberISO(d, p) {
-  d = locale_UTCdISO(d);
-  return src_locale_pad(utcWeek_utcThursday.count(d3_time_src_utcYear(d), d) + (d3_time_src_utcYear(d).getUTCDay() === 4), p, 2);
+function formatUTCWeekNumberISO(d, p) {
+  d = UTCdISO(d);
+  return locale_pad(utcThursday.count(src_utcYear(d), d) + (src_utcYear(d).getUTCDay() === 4), p, 2);
 }
 
-function locale_formatUTCWeekdayNumberSunday(d) {
+function formatUTCWeekdayNumberSunday(d) {
   return d.getUTCDay();
 }
 
-function locale_formatUTCWeekNumberMonday(d, p) {
-  return src_locale_pad(utcWeek_utcMonday.count(d3_time_src_utcYear(d) - 1, d), p, 2);
+function formatUTCWeekNumberMonday(d, p) {
+  return locale_pad(utcMonday.count(src_utcYear(d) - 1, d), p, 2);
 }
 
-function locale_formatUTCYear(d, p) {
-  return src_locale_pad(d.getUTCFullYear() % 100, p, 2);
+function formatUTCYear(d, p) {
+  return locale_pad(d.getUTCFullYear() % 100, p, 2);
 }
 
-function locale_formatUTCYearISO(d, p) {
-  d = locale_UTCdISO(d);
-  return src_locale_pad(d.getUTCFullYear() % 100, p, 2);
+function formatUTCYearISO(d, p) {
+  d = UTCdISO(d);
+  return locale_pad(d.getUTCFullYear() % 100, p, 2);
 }
 
-function locale_formatUTCFullYear(d, p) {
-  return src_locale_pad(d.getUTCFullYear() % 10000, p, 4);
+function formatUTCFullYear(d, p) {
+  return locale_pad(d.getUTCFullYear() % 10000, p, 4);
 }
 
-function locale_formatUTCFullYearISO(d, p) {
+function formatUTCFullYearISO(d, p) {
   var day = d.getUTCDay();
-  d = day >= 4 || day === 0 ? utcWeek_utcThursday(d) : utcWeek_utcThursday.ceil(d);
-  return src_locale_pad(d.getUTCFullYear() % 10000, p, 4);
+  d = day >= 4 || day === 0 ? utcThursday(d) : utcThursday.ceil(d);
+  return locale_pad(d.getUTCFullYear() % 10000, p, 4);
 }
 
-function locale_formatUTCZone() {
+function formatUTCZone() {
   return "+0000";
 }
 
-function locale_formatLiteralPercent() {
+function formatLiteralPercent() {
   return "%";
 }
 
-function locale_formatUnixTimestamp(d) {
+function formatUnixTimestamp(d) {
   return +d;
 }
 
-function locale_formatUnixTimestampSeconds(d) {
+function formatUnixTimestampSeconds(d) {
   return Math.floor(+d / 1000);
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-time-format/src/defaultLocale.js
 
-var d3_time_format_src_defaultLocale_locale;
-var src_defaultLocale_timeFormat;
+var defaultLocale_locale;
+var defaultLocale_timeFormat;
 var defaultLocale_timeParse;
-var src_defaultLocale_utcFormat;
+var defaultLocale_utcFormat;
 var defaultLocale_utcParse;
-src_defaultLocale_defaultLocale({
+defaultLocale_defaultLocale({
   dateTime: "%x, %X",
   date: "%-m/%-d/%Y",
   time: "%-I:%M:%S %p",
@@ -65933,13 +70349,13 @@ src_defaultLocale_defaultLocale({
   months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
   shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
-function src_defaultLocale_defaultLocale(definition) {
-  d3_time_format_src_defaultLocale_locale = locale_formatLocale(definition);
-  src_defaultLocale_timeFormat = d3_time_format_src_defaultLocale_locale.format;
-  defaultLocale_timeParse = d3_time_format_src_defaultLocale_locale.parse;
-  src_defaultLocale_utcFormat = d3_time_format_src_defaultLocale_locale.utcFormat;
-  defaultLocale_utcParse = d3_time_format_src_defaultLocale_locale.utcParse;
-  return d3_time_format_src_defaultLocale_locale;
+function defaultLocale_defaultLocale(definition) {
+  defaultLocale_locale = formatLocale(definition);
+  defaultLocale_timeFormat = defaultLocale_locale.format;
+  defaultLocale_timeParse = defaultLocale_locale.parse;
+  defaultLocale_utcFormat = defaultLocale_locale.utcFormat;
+  defaultLocale_utcParse = defaultLocale_locale.utcParse;
+  return defaultLocale_locale;
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-time/src/format.js
 
@@ -65954,9 +70370,9 @@ var _defaultSpecifiers;
 
 
 
-var format_defaultSpecifiers = (_defaultSpecifiers = {}, _defineProperty(_defaultSpecifiers, units_YEAR, '%Y '), _defineProperty(_defaultSpecifiers, units_QUARTER, 'Q%q '), _defineProperty(_defaultSpecifiers, units_MONTH, '%b '), _defineProperty(_defaultSpecifiers, units_DATE, '%d '), _defineProperty(_defaultSpecifiers, units_WEEK, 'W%U '), _defineProperty(_defaultSpecifiers, units_DAY, '%a '), _defineProperty(_defaultSpecifiers, units_DAYOFYEAR, '%j '), _defineProperty(_defaultSpecifiers, units_HOURS, '%H:00'), _defineProperty(_defaultSpecifiers, units_MINUTES, '00:%M'), _defineProperty(_defaultSpecifiers, units_SECONDS, ':%S'), _defineProperty(_defaultSpecifiers, units_MILLISECONDS, '.%L'), _defineProperty(_defaultSpecifiers, "".concat(units_YEAR, "-").concat(units_MONTH), '%Y-%m '), _defineProperty(_defaultSpecifiers, "".concat(units_YEAR, "-").concat(units_MONTH, "-").concat(units_DATE), '%Y-%m-%d '), _defineProperty(_defaultSpecifiers, "".concat(units_HOURS, "-").concat(units_MINUTES), '%H:%M'), _defaultSpecifiers);
-function format_timeUnitSpecifier(units, specifiers) {
-  var s = src_extend({}, format_defaultSpecifiers, specifiers),
+var defaultSpecifiers = (_defaultSpecifiers = {}, _defineProperty(_defaultSpecifiers, YEAR, '%Y '), _defineProperty(_defaultSpecifiers, QUARTER, 'Q%q '), _defineProperty(_defaultSpecifiers, MONTH, '%b '), _defineProperty(_defaultSpecifiers, units_DATE, '%d '), _defineProperty(_defaultSpecifiers, WEEK, 'W%U '), _defineProperty(_defaultSpecifiers, DAY, '%a '), _defineProperty(_defaultSpecifiers, DAYOFYEAR, '%j '), _defineProperty(_defaultSpecifiers, HOURS, '%H:00'), _defineProperty(_defaultSpecifiers, MINUTES, '00:%M'), _defineProperty(_defaultSpecifiers, SECONDS, ':%S'), _defineProperty(_defaultSpecifiers, MILLISECONDS, '.%L'), _defineProperty(_defaultSpecifiers, "".concat(YEAR, "-").concat(MONTH), '%Y-%m '), _defineProperty(_defaultSpecifiers, "".concat(YEAR, "-").concat(MONTH, "-").concat(units_DATE), '%Y-%m-%d '), _defineProperty(_defaultSpecifiers, "".concat(HOURS, "-").concat(MINUTES), '%H:%M'), _defaultSpecifiers);
+function timeUnitSpecifier(units, specifiers) {
+  var s = src_extend({}, defaultSpecifiers, specifiers),
       u = units_timeUnits(units),
       n = u.length;
   var fmt = '',
@@ -65979,10 +70395,10 @@ function format_timeUnitSpecifier(units, specifiers) {
   return fmt.trim();
 }
 function format_timeFormat(specifier) {
-  return formatter(src_defaultLocale_timeFormat, interval_timeInterval, specifier);
+  return formatter(defaultLocale_timeFormat, timeInterval, specifier);
 }
 function format_utcFormat(specifier) {
-  return formatter(src_defaultLocale_utcFormat, interval_utcInterval, specifier);
+  return formatter(defaultLocale_utcFormat, utcInterval, specifier);
 }
 
 function formatter(format, interval, specifier) {
@@ -65996,23 +70412,23 @@ function multiFormat(format, interval, spec) {
     src_error("Invalid time multi-format specifier: ".concat(spec));
   }
 
-  var second = interval(units_SECONDS),
-      minute = interval(units_MINUTES),
-      hour = interval(units_HOURS),
+  var second = interval(SECONDS),
+      minute = interval(MINUTES),
+      hour = interval(HOURS),
       day = interval(units_DATE),
-      week = interval(units_WEEK),
-      month = interval(units_MONTH),
-      quarter = interval(units_QUARTER),
-      year = interval(units_YEAR),
-      L = format(spec[units_MILLISECONDS] || '.%L'),
-      S = format(spec[units_SECONDS] || ':%S'),
-      M = format(spec[units_MINUTES] || '%I:%M'),
-      H = format(spec[units_HOURS] || '%I %p'),
-      d = format(spec[units_DATE] || spec[units_DAY] || '%a %d'),
-      w = format(spec[units_WEEK] || '%b %d'),
-      m = format(spec[units_MONTH] || '%B'),
-      q = format(spec[units_QUARTER] || '%B'),
-      y = format(spec[units_YEAR] || '%Y');
+      week = interval(WEEK),
+      month = interval(MONTH),
+      quarter = interval(QUARTER),
+      year = interval(YEAR),
+      L = format(spec[MILLISECONDS] || '.%L'),
+      S = format(spec[SECONDS] || ':%S'),
+      M = format(spec[MINUTES] || '%I:%M'),
+      H = format(spec[HOURS] || '%I %p'),
+      d = format(spec[units_DATE] || spec[DAY] || '%a %d'),
+      w = format(spec[WEEK] || '%b %d'),
+      m = format(spec[MONTH] || '%B'),
+      q = format(spec[QUARTER] || '%B'),
+      y = format(spec[YEAR] || '%Y');
   return function (date) {
     return (second(date) < date ? L : minute(date) < date ? S : hour(date) < date ? M : day(date) < date ? H : month(date) < date ? week(date) < date ? d : w : year(date) < date ? quarter(date) < date ? m : q : y)(date);
   };
@@ -66027,36 +70443,36 @@ var bin_durationSecond = 1000,
     bin_durationHour = bin_durationMinute * 60,
     bin_durationDay = bin_durationHour * 24,
     bin_durationWeek = bin_durationDay * 7,
-    bin_durationMonth = bin_durationDay * 30,
-    bin_durationYear = bin_durationDay * 365;
-var bin_Milli = [units_YEAR, units_MONTH, units_DATE, units_HOURS, units_MINUTES, units_SECONDS, units_MILLISECONDS],
-    bin_Seconds = bin_Milli.slice(0, -1),
-    bin_Minutes = bin_Seconds.slice(0, -1),
-    bin_Hours = bin_Minutes.slice(0, -1),
-    bin_Day = bin_Hours.slice(0, -1),
-    bin_Week = [units_YEAR, units_WEEK],
-    bin_Month = [units_YEAR, units_MONTH],
-    bin_Year = [units_YEAR];
-var bin_intervals = [[bin_Seconds, 1, bin_durationSecond], [bin_Seconds, 5, 5 * bin_durationSecond], [bin_Seconds, 15, 15 * bin_durationSecond], [bin_Seconds, 30, 30 * bin_durationSecond], [bin_Minutes, 1, bin_durationMinute], [bin_Minutes, 5, 5 * bin_durationMinute], [bin_Minutes, 15, 15 * bin_durationMinute], [bin_Minutes, 30, 30 * bin_durationMinute], [bin_Hours, 1, bin_durationHour], [bin_Hours, 3, 3 * bin_durationHour], [bin_Hours, 6, 6 * bin_durationHour], [bin_Hours, 12, 12 * bin_durationHour], [bin_Day, 1, bin_durationDay], [bin_Week, 1, bin_durationWeek], [bin_Month, 1, bin_durationMonth], [bin_Month, 3, 3 * bin_durationMonth], [bin_Year, 1, bin_durationYear]];
+    durationMonth = bin_durationDay * 30,
+    durationYear = bin_durationDay * 365;
+var Milli = [YEAR, MONTH, units_DATE, HOURS, MINUTES, SECONDS, MILLISECONDS],
+    Seconds = Milli.slice(0, -1),
+    Minutes = Seconds.slice(0, -1),
+    Hours = Minutes.slice(0, -1),
+    Day = Hours.slice(0, -1),
+    Week = [YEAR, WEEK],
+    Month = [YEAR, MONTH],
+    Year = [YEAR];
+var intervals = [[Seconds, 1, bin_durationSecond], [Seconds, 5, 5 * bin_durationSecond], [Seconds, 15, 15 * bin_durationSecond], [Seconds, 30, 30 * bin_durationSecond], [Minutes, 1, bin_durationMinute], [Minutes, 5, 5 * bin_durationMinute], [Minutes, 15, 15 * bin_durationMinute], [Minutes, 30, 30 * bin_durationMinute], [Hours, 1, bin_durationHour], [Hours, 3, 3 * bin_durationHour], [Hours, 6, 6 * bin_durationHour], [Hours, 12, 12 * bin_durationHour], [Day, 1, bin_durationDay], [Week, 1, bin_durationWeek], [Month, 1, durationMonth], [Month, 3, 3 * durationMonth], [Year, 1, durationYear]];
 /* harmony default export */ var src_bin = (function (opt) {
   var ext = opt.extent,
       max = opt.maxbins || 40,
       target = Math.abs(src_span(ext)) / max;
-  var i = bisector(function (i) {
+  var i = Object(bisector["a" /* default */])(function (i) {
     return i[2];
-  }).right(bin_intervals, target),
+  }).right(intervals, target),
       units,
       step;
 
-  if (i === bin_intervals.length) {
-    units = bin_Year, step = tickStep(ext[0] / bin_durationYear, ext[1] / bin_durationYear, max);
+  if (i === intervals.length) {
+    units = Year, step = Object(src_ticks["c" /* tickStep */])(ext[0] / durationYear, ext[1] / durationYear, max);
   } else if (i) {
-    i = bin_intervals[target / bin_intervals[i - 1][2] < bin_intervals[i][2] / target ? i - 1 : i];
+    i = intervals[target / intervals[i - 1][2] < intervals[i][2] / target ? i - 1 : i];
     units = i[0];
     step = i[1];
   } else {
-    units = bin_Milli;
-    step = Math.max(tickStep(ext[0], ext[1], max), 1);
+    units = Milli;
+    step = Math.max(Object(src_ticks["c" /* tickStep */])(ext[0], ext[1], max), 1);
   }
 
   return {
@@ -66082,13 +70498,13 @@ var es_array_fill = __webpack_require__("cb29");
 
 
 
-/* harmony default export */ var src_formatDecimal = (function (x) {
+/* harmony default export */ var formatDecimal = (function (x) {
   return Math.abs(x = Math.round(x)) >= 1e21 ? x.toLocaleString("en").replace(/,/g, "") : x.toString(10);
 }); // Computes the decimal coefficient and exponent of the specified number x with
 // significant digits p, where x is positive and p is in [1, 21] or undefined.
 // For example, formatDecimalParts(1.23) returns ["123", 0].
 
-function formatDecimal_formatDecimalParts(x, p) {
+function formatDecimalParts(x, p) {
   if ((i = (x = p ? x.toExponential(p - 1) : x.toExponential()).indexOf("e")) < 0) return null; // NaN, ±Infinity
 
   var i,
@@ -66099,13 +70515,13 @@ function formatDecimal_formatDecimalParts(x, p) {
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-format/src/exponent.js
 
-/* harmony default export */ var d3_format_src_exponent = (function (x) {
-  return x = formatDecimal_formatDecimalParts(Math.abs(x)), x ? x[1] : NaN;
+/* harmony default export */ var src_exponent = (function (x) {
+  return x = formatDecimalParts(Math.abs(x)), x ? x[1] : NaN;
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-format/src/formatGroup.js
 
 
-/* harmony default export */ var src_formatGroup = (function (grouping, thousands) {
+/* harmony default export */ var formatGroup = (function (grouping, thousands) {
   return function (value, width) {
     var i = value.length,
         t = [],
@@ -66126,7 +70542,7 @@ function formatDecimal_formatDecimalParts(x, p) {
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-format/src/formatNumerals.js
 
 
-/* harmony default export */ var src_formatNumerals = (function (numerals) {
+/* harmony default export */ var formatNumerals = (function (numerals) {
   return function (value) {
     return value.replace(/[0-9]/g, function (i) {
       return numerals[+i];
@@ -66142,11 +70558,11 @@ function formatDecimal_formatDecimalParts(x, p) {
 
 
 // [[fill]align][sign][symbol][0][width][,][.precision][~][type]
-var formatSpecifier_re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
 function formatSpecifier_formatSpecifier(specifier) {
-  if (!(match = formatSpecifier_re.exec(specifier))) throw new Error("invalid format: " + specifier);
+  if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
   var match;
-  return new formatSpecifier_FormatSpecifier({
+  return new FormatSpecifier({
     fill: match[1],
     align: match[2],
     sign: match[3],
@@ -66159,9 +70575,9 @@ function formatSpecifier_formatSpecifier(specifier) {
     type: match[10]
   });
 }
-formatSpecifier_formatSpecifier.prototype = formatSpecifier_FormatSpecifier.prototype; // instanceof
+formatSpecifier_formatSpecifier.prototype = FormatSpecifier.prototype; // instanceof
 
-function formatSpecifier_FormatSpecifier(specifier) {
+function FormatSpecifier(specifier) {
   this.fill = specifier.fill === undefined ? " " : specifier.fill + "";
   this.align = specifier.align === undefined ? ">" : specifier.align + "";
   this.sign = specifier.sign === undefined ? "-" : specifier.sign + "";
@@ -66174,13 +70590,13 @@ function formatSpecifier_FormatSpecifier(specifier) {
   this.type = specifier.type === undefined ? "" : specifier.type + "";
 }
 
-formatSpecifier_FormatSpecifier.prototype.toString = function () {
+FormatSpecifier.prototype.toString = function () {
   return this.fill + this.align + this.sign + this.symbol + (this.zero ? "0" : "") + (this.width === undefined ? "" : Math.max(1, this.width | 0)) + (this.comma ? "," : "") + (this.precision === undefined ? "" : "." + Math.max(0, this.precision | 0)) + (this.trim ? "~" : "") + this.type;
 };
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-format/src/formatTrim.js
 
 // Trims insignificant zeros, e.g., replaces 1.2000k with 1.2k.
-/* harmony default export */ var src_formatTrim = (function (s) {
+/* harmony default export */ var formatTrim = (function (s) {
   out: for (var n = s.length, i = 1, i0 = -1, i1; i < n; ++i) {
     switch (s[i]) {
       case ".":
@@ -66211,22 +70627,22 @@ var es_number_to_precision = __webpack_require__("542d");
 
 
 
-var formatPrefixAuto_prefixExponent;
-/* harmony default export */ var src_formatPrefixAuto = (function (x, p) {
-  var d = formatDecimal_formatDecimalParts(x, p);
+var prefixExponent;
+/* harmony default export */ var formatPrefixAuto = (function (x, p) {
+  var d = formatDecimalParts(x, p);
   if (!d) return x + "";
   var coefficient = d[0],
       exponent = d[1],
-      i = exponent - (formatPrefixAuto_prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1,
+      i = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1,
       n = coefficient.length;
-  return i === n ? coefficient : i > n ? coefficient + new Array(i - n + 1).join("0") : i > 0 ? coefficient.slice(0, i) + "." + coefficient.slice(i) : "0." + new Array(1 - i).join("0") + formatDecimal_formatDecimalParts(x, Math.max(0, p + i - 1))[0]; // less than 1y!
+  return i === n ? coefficient : i > n ? coefficient + new Array(i - n + 1).join("0") : i > 0 ? coefficient.slice(0, i) + "." + coefficient.slice(i) : "0." + new Array(1 - i).join("0") + formatDecimalParts(x, Math.max(0, p + i - 1))[0]; // less than 1y!
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-format/src/formatRounded.js
 
 
 
-/* harmony default export */ var src_formatRounded = (function (x, p) {
-  var d = formatDecimal_formatDecimalParts(x, p);
+/* harmony default export */ var formatRounded = (function (x, p) {
+  var d = formatDecimalParts(x, p);
   if (!d) return x + "";
   var coefficient = d[0],
       exponent = d[1];
@@ -66241,7 +70657,7 @@ var formatPrefixAuto_prefixExponent;
 
 
 
-/* harmony default export */ var src_formatTypes = ({
+/* harmony default export */ var formatTypes = ({
   "%": function _(x, p) {
     return (x * 100).toFixed(p);
   },
@@ -66251,7 +70667,7 @@ var formatPrefixAuto_prefixExponent;
   "c": function c(x) {
     return x + "";
   },
-  "d": src_formatDecimal,
+  "d": formatDecimal,
   "e": function e(x, p) {
     return x.toExponential(p);
   },
@@ -66265,10 +70681,10 @@ var formatPrefixAuto_prefixExponent;
     return Math.round(x).toString(8);
   },
   "p": function p(x, _p) {
-    return src_formatRounded(x * 100, _p);
+    return formatRounded(x * 100, _p);
   },
-  "r": src_formatRounded,
-  "s": src_formatPrefixAuto,
+  "r": formatRounded,
+  "s": formatPrefixAuto,
   "X": function X(x) {
     return Math.round(x).toString(16).toUpperCase();
   },
@@ -66298,14 +70714,14 @@ var formatPrefixAuto_prefixExponent;
 
 
 
-var src_locale_map = Array.prototype.map,
-    src_locale_prefixes = ["y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
-/* harmony default export */ var d3_format_src_locale = (function (locale) {
-  var group = locale.grouping === undefined || locale.thousands === undefined ? d3_format_src_identity : src_formatGroup(src_locale_map.call(locale.grouping, Number), locale.thousands + ""),
+var locale_map = Array.prototype.map,
+    locale_prefixes = ["y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+/* harmony default export */ var src_locale = (function (locale) {
+  var group = locale.grouping === undefined || locale.thousands === undefined ? d3_format_src_identity : formatGroup(locale_map.call(locale.grouping, Number), locale.thousands + ""),
       currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "",
       currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "",
       decimal = locale.decimal === undefined ? "." : locale.decimal + "",
-      numerals = locale.numerals === undefined ? d3_format_src_identity : src_formatNumerals(src_locale_map.call(locale.numerals, String)),
+      numerals = locale.numerals === undefined ? d3_format_src_identity : formatNumerals(locale_map.call(locale.numerals, String)),
       percent = locale.percent === undefined ? "%" : locale.percent + "",
       minus = locale.minus === undefined ? "-" : locale.minus + "",
       nan = locale.nan === undefined ? "NaN" : locale.nan + "";
@@ -66324,7 +70740,7 @@ var src_locale_map = Array.prototype.map,
         type = specifier.type; // The "n" type is an alias for ",g".
 
     if (type === "n") comma = true, type = "g"; // The "" type, and any invalid type, is an alias for ".12~g".
-    else if (!src_formatTypes[type]) precision === undefined && (precision = 12), trim = true, type = "g"; // If zero fill is specified, padding goes after sign and before digits.
+    else if (!formatTypes[type]) precision === undefined && (precision = 12), trim = true, type = "g"; // If zero fill is specified, padding goes after sign and before digits.
 
     if (zero || fill === "0" && align === "=") zero = true, fill = "0", align = "="; // Compute the prefix and suffix.
     // For SI-prefix, the suffix is lazily computed.
@@ -66334,7 +70750,7 @@ var src_locale_map = Array.prototype.map,
     // Is this an integer type?
     // Can this type generate exponential notation?
 
-    var formatType = src_formatTypes[type],
+    var formatType = formatTypes[type],
         maybeSuffix = /[defgprs%]/.test(type); // Set the default precision if not specified,
     // or clamp the specified precision to the supported range.
     // For significant precision, it must be in [1, 21].
@@ -66359,12 +70775,12 @@ var src_locale_map = Array.prototype.map,
 
         value = isNaN(value) ? nan : formatType(Math.abs(value), precision); // Trim insignificant zeros.
 
-        if (trim) value = src_formatTrim(value); // If a negative value rounds to zero after formatting, and no explicit positive sign is requested, hide the sign.
+        if (trim) value = formatTrim(value); // If a negative value rounds to zero after formatting, and no explicit positive sign is requested, hide the sign.
 
         if (valueNegative && +value === 0 && sign !== "+") valueNegative = false; // Compute the prefix and suffix.
 
         valuePrefix = (valueNegative ? sign === "(" ? sign : minus : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
-        valueSuffix = (type === "s" ? src_locale_prefixes[8 + formatPrefixAuto_prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : ""); // Break the formatted value into the integer “value” part that can be
+        valueSuffix = (type === "s" ? locale_prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : ""); // Break the formatted value into the integer “value” part that can be
         // grouped, and fractional or exponential “suffix” part that is not.
 
         if (maybeSuffix) {
@@ -66418,9 +70834,9 @@ var src_locale_map = Array.prototype.map,
 
   function formatPrefix(specifier, value) {
     var f = newFormat((specifier = formatSpecifier_formatSpecifier(specifier), specifier.type = "f", specifier)),
-        e = Math.max(-8, Math.min(8, Math.floor(d3_format_src_exponent(value) / 3))) * 3,
+        e = Math.max(-8, Math.min(8, Math.floor(src_exponent(value) / 3))) * 3,
         k = Math.pow(10, -e),
-        prefix = src_locale_prefixes[8 + e / 3];
+        prefix = locale_prefixes[8 + e / 3];
     return function (value) {
       return f(k * value) + prefix;
     };
@@ -66433,21 +70849,21 @@ var src_locale_map = Array.prototype.map,
 });
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/d3-format/src/defaultLocale.js
 
-var d3_format_src_defaultLocale_locale;
-var src_defaultLocale_format;
-var src_defaultLocale_formatPrefix;
-d3_format_src_defaultLocale_defaultLocale({
+var src_defaultLocale_locale;
+var defaultLocale_format;
+var defaultLocale_formatPrefix;
+src_defaultLocale_defaultLocale({
   decimal: ".",
   thousands: ",",
   grouping: [3],
   currency: ["$", ""],
   minus: "-"
 });
-function d3_format_src_defaultLocale_defaultLocale(definition) {
-  d3_format_src_defaultLocale_locale = d3_format_src_locale(definition);
-  src_defaultLocale_format = d3_format_src_defaultLocale_locale.format;
-  src_defaultLocale_formatPrefix = d3_format_src_defaultLocale_locale.formatPrefix;
-  return d3_format_src_defaultLocale_locale;
+function src_defaultLocale_defaultLocale(definition) {
+  src_defaultLocale_locale = src_locale(definition);
+  defaultLocale_format = src_defaultLocale_locale.format;
+  defaultLocale_formatPrefix = src_defaultLocale_locale.formatPrefix;
+  return src_defaultLocale_locale;
 }
 // CONCATENATED MODULE: ./node_modules/vega-lite/node_modules/vega-scale/src/ticks.js
 
@@ -66479,7 +70895,7 @@ var ticks_defaultFormatter = function defaultFormatter(value) {
 function ticks_tickCount(scale, count, minStep) {
   var step;
 
-  if (src_isNumber(count)) {
+  if (isNumber(count)) {
     if (scale.bins) {
       count = Math.max(count, scale.bins.length);
     }
@@ -66495,7 +70911,7 @@ function ticks_tickCount(scale, count, minStep) {
   }
 
   if (isString(count)) {
-    count = scale.type === types_Time ? interval_timeInterval(count) : scale.type == types_UTC ? interval_utcInterval(count) : src_error('Only time and utc scales accept interval strings.');
+    count = scale.type === types_Time ? timeInterval(count) : scale.type == types_UTC ? utcInterval(count) : src_error('Only time and utc scales accept interval strings.');
     if (step) count = count.every(step);
   }
 
@@ -66575,7 +70991,7 @@ function ticks_tickValues(scale, count) {
 
 function ticks_tickFormat(scale, count, specifier, formatType, noSkip) {
   var type = scale.type,
-      format = type === types_Time || formatType === types_Time ? format_timeFormat(specifier) : type === types_UTC || formatType === types_UTC ? format_utcFormat(specifier) : scale.tickFormat ? scale.tickFormat(count, specifier) : specifier ? src_defaultLocale_format(specifier) : ticks_defaultFormatter;
+      format = type === types_Time || formatType === types_Time ? format_timeFormat(specifier) : type === types_UTC || formatType === types_UTC ? format_utcFormat(specifier) : scale.tickFormat ? scale.tickFormat(count, specifier) : specifier ? defaultLocale_format(specifier) : ticks_defaultFormatter;
 
   if (scales_isLogarithmic(type)) {
     var logfmt = variablePrecision(specifier);
@@ -66607,22 +71023,22 @@ function variablePrecision(specifier) {
         break;
     }
 
-    return ticks_trimZeroes(src_defaultLocale_format(s), // number format
-    src_defaultLocale_format('.1f')(1)[1] // decimal point character
+    return trimZeroes(defaultLocale_format(s), // number format
+    defaultLocale_format('.1f')(1)[1] // decimal point character
     );
   } else {
-    return src_defaultLocale_format(s);
+    return defaultLocale_format(s);
   }
 }
 
-function ticks_trimZeroes(format, decimalChar) {
+function trimZeroes(format, decimalChar) {
   return function (x) {
     var str = format(x),
         dec = str.indexOf(decimalChar),
         idx,
         end;
     if (dec < 0) return str;
-    idx = ticks_rightmostDigit(str, dec);
+    idx = rightmostDigit(str, dec);
     end = idx < str.length ? str.slice(idx) : '';
 
     while (--idx > dec) {
@@ -66636,7 +71052,7 @@ function ticks_trimZeroes(format, decimalChar) {
   };
 }
 
-function ticks_rightmostDigit(str, dec) {
+function rightmostDigit(str, dec) {
   var i = str.lastIndexOf('e'),
       c;
   if (i > 0) return i;
@@ -67076,7 +71492,7 @@ var stringify = fast_json_stable_stringify_default.a;
  */
 
 function util_hash(a) {
-  if (src_isNumber(a)) {
+  if (isNumber(a)) {
     return a;
   }
 
@@ -67535,7 +71951,7 @@ function normalizeAngle(angle) {
  */
 
 function isNumeric(value) {
-  if (src_isNumber(value)) {
+  if (isNumber(value)) {
     return true;
   }
 
@@ -69170,7 +73586,7 @@ function normalizeQuarter(q) {
     q = +q;
   }
 
-  if (src_isNumber(q)) {
+  if (isNumber(q)) {
     if (q > 4) {
       log_warn(message.invalidTimeUnit('quarter', q));
     } // We accept 1-based quarter, so need to readjust to 0-based quarter
@@ -69188,7 +73604,7 @@ function normalizeMonth(m) {
     m = +m;
   }
 
-  if (src_isNumber(m)) {
+  if (isNumber(m)) {
     // We accept 1-based month, so need to readjust to 0-based month
     return m - 1;
   } else {
@@ -69216,7 +73632,7 @@ function normalizeDay(d) {
     d = +d;
   }
 
-  if (src_isNumber(d)) {
+  if (isNumber(d)) {
     // mod so that this can be both 0-based where 0 = sunday
     // and 1-based where 7=sunday
     return d % 7;
@@ -69271,7 +73687,7 @@ function dateTimeParts(d, normalize) {
     parts.push(month);
   } else if (d.quarter !== undefined) {
     var quarter = normalize ? normalizeQuarter(d.quarter) : d.quarter;
-    parts.push(src_isNumber(quarter) ? quarter * 3 : quarter + '*3');
+    parts.push(isNumber(quarter) ? quarter * 3 : quarter + '*3');
   } else {
     parts.push(0); // months start at zero in JS
   }
@@ -69282,7 +73698,7 @@ function dateTimeParts(d, normalize) {
     // HACK: Day only works as a standalone unit
     // This is only correct because we always set year to 2006 for day
     var day = normalize ? normalizeDay(d.day) : d.day;
-    parts.push(src_isNumber(day) ? day + 1 : day + '+1');
+    parts.push(isNumber(day) ? day + 1 : day + '+1');
   } else {
     parts.push(1); // Date starts at 1 in JS
   } // Note: can't use TimeUnit enum here as importing it will create
@@ -70802,8 +75218,8 @@ function getTypedFieldDef(channelDef) {
  */
 
 function initChannelDef(channelDef, channel) {
-  if (isString(channelDef) || src_isNumber(channelDef) || src_isBoolean(channelDef)) {
-    var primitiveType = isString(channelDef) ? 'string' : src_isNumber(channelDef) ? 'number' : 'boolean';
+  if (isString(channelDef) || isNumber(channelDef) || isBoolean(channelDef)) {
+    var primitiveType = isString(channelDef) ? 'string' : isNumber(channelDef) ? 'number' : 'boolean';
     log_warn(message.primitiveChannelDef(channel, primitiveType, channelDef));
     return {
       value: channelDef
@@ -70927,7 +75343,7 @@ function initFieldDef(fd, channel) {
   return fieldDef;
 }
 function normalizeBin(bin, channel) {
-  if (src_isBoolean(bin)) {
+  if (isBoolean(bin)) {
     return {
       maxbins: autoMaxBins(channel)
     };
@@ -71092,7 +75508,7 @@ function valueExpr(v, _ref3) {
     }
   } else if (isDateTime(v)) {
     expr = dateTimeToExpr(v);
-  } else if (isString(v) || src_isNumber(v)) {
+  } else if (isString(v) || isNumber(v)) {
     if (unit || type === 'temporal') {
       if (isLocalSingleTimeUnit(unit)) {
         expr = dateTimeToExpr(_defineProperty({}, unit, v));
@@ -71163,7 +75579,7 @@ function binRequiresRange(fieldDef, channel) {
  */
 
 function binToString(bin) {
-  if (src_isBoolean(bin)) {
+  if (isBoolean(bin)) {
     bin = normalizeBin(bin, undefined);
   }
 
@@ -71818,7 +76234,7 @@ function partLayerMixins(markDef, part, compositeMarkConfig, partBaseSpec) {
         type: partBaseSpec.mark
       }), {
         style: "".concat(mark, "-").concat(part)
-      }), src_isBoolean(markDef[part]) ? {} : markDef[part])
+      }), isBoolean(markDef[part]) ? {} : markDef[part])
     })];
   }
 
@@ -71915,7 +76331,7 @@ var BOXPLOT_PART_INDEX = {
 var BOXPLOT_PARTS = util_keys(BOXPLOT_PART_INDEX);
 var boxPlotNormalizer = new base_CompositeMarkNormalizer(BOXPLOT, normalizeBoxPlot);
 function getBoxPlotType(extent) {
-  if (src_isNumber(extent)) {
+  if (isNumber(extent)) {
     return 'tukey';
   } // Ham: If we ever want to, we could add another extent syntax `{kIQR: number}` for the original [Q1-k*IQR, Q3+k*IQR] whisker and call this boxPlotType = `kIQR`. However, I'm not exposing this for now.
 
@@ -72986,7 +77402,7 @@ function extractCompositionLayout(spec, specType, config) {
       if (spec[prop] !== undefined) {
         if (prop === 'spacing') {
           var spacing = spec[prop];
-          layout[prop] = src_isNumber(spacing) ? spacing : {
+          layout[prop] = isNumber(spacing) ? spacing : {
             row: (_a = spacing.row) !== null && _a !== void 0 ? _a : spacingConfig,
             column: (_b = spacing.column) !== null && _b !== void 0 ? _b : spacingConfig
           };
@@ -73829,7 +78245,8 @@ function stack_stack(m, encoding) {
         var f = isStringFieldDef(fieldDef) ? channeldef_vgField(fieldDef, {}) : undefined;
 
         if ( // if fielddef is a repeat, just include it in the stack by
-        !f || f !== dimensionField && f !== stackedField) {
+        !f || // otherwise, the field must be different from x and y fields.
+        f !== dimensionField && f !== stackedField) {
           sc.push({
             channel: channel,
             fieldDef: fieldDef
@@ -73844,7 +78261,7 @@ function stack_stack(m, encoding) {
   var offset;
 
   if (stackedFieldDef.stack !== undefined) {
-    if (src_isBoolean(stackedFieldDef.stack)) {
+    if (isBoolean(stackedFieldDef.stack)) {
       offset = stackedFieldDef.stack ? 'zero' : null;
     } else {
       offset = stackedFieldDef.stack;
@@ -76058,7 +80475,7 @@ function defaultSizeRef(mark, markDef, sizeChannel, scaleName, scale, config, ba
       if (scaleType === ScaleType.POINT) {
         var scaleRange = scale.get('range');
 
-        if (isVgRangeStep(scaleRange) && src_isNumber(scaleRange.step)) {
+        if (isVgRangeStep(scaleRange) && isNumber(scaleRange.step)) {
           return {
             value: scaleRange.step - 2
           };
@@ -77337,7 +81754,7 @@ var clear_clear = {
   },
   parse: function parse(model, selCmpt, selDef) {
     if (selDef.clear) {
-      selCmpt.clear = isString(selDef.clear) ? eventSelector(selDef.clear, 'scope') : selDef.clear;
+      selCmpt.clear = isString(selDef.clear) ? vega_event_selector_module_eventSelector(selDef.clear, 'scope') : selDef.clear;
     }
   },
   topLevelSignals: function topLevelSignals(model, selCmpt, signals) {
@@ -77621,7 +82038,7 @@ var legendBindings = {
     }
 
     var evt = isLegendStreamBinding(selCmpt.bind) ? selCmpt.bind.legend : 'click';
-    var stream = isString(evt) ? eventSelector(evt, 'view') : vega_util_src_array(evt);
+    var stream = isString(evt) ? vega_event_selector_module_eventSelector(evt, 'view') : vega_util_src_array(evt);
     selCmpt.bind = {
       legend: {
         merge: stream
@@ -77774,7 +82191,7 @@ var translate_translate = {
     var _selCmpt$project$hasC = selCmpt.project.hasChannel,
         x = _selCmpt$project$hasC.x,
         y = _selCmpt$project$hasC.y;
-    var events = eventSelector(selCmpt.translate, 'scope');
+    var events = vega_event_selector_module_eventSelector(selCmpt.translate, 'scope');
 
     if (!hasScales) {
       events = events.map(function (e) {
@@ -77866,7 +82283,7 @@ var zoom_zoom = {
         y = _selCmpt$project$hasC.y;
     var sx = stringValue_$(model.scaleName(channel_X));
     var sy = stringValue_$(model.scaleName(channel_Y));
-    var events = eventSelector(selCmpt.zoom, 'scope');
+    var events = vega_event_selector_module_eventSelector(selCmpt.zoom, 'scope');
 
     if (!hasScales) {
       events = events.map(function (e) {
@@ -78034,7 +82451,7 @@ function assembleFacetSignals(model, signals) {
       name: 'facet',
       value: {},
       on: [{
-        events: eventSelector('mousemove', 'scope'),
+        events: vega_event_selector_module_eventSelector('mousemove', 'scope'),
         update: "isTuple(facet) ? facet : group(".concat(name, ").datum")
       }]
     });
@@ -78840,11 +83257,20 @@ function parser_isLineTerminator(ch) {
 
 
 function parser_isIdentifierStart(ch) {
-  return ch === 0x24 || ch === 0x5F || ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A || ch === 0x5C || ch >= 0x80 && parser_RegexNonAsciiIdentifierStart.test(String.fromCharCode(ch));
+  return ch === 0x24 || ch === 0x5F || // $ (dollar) and _ (underscore)
+  ch >= 0x41 && ch <= 0x5A || // A..Z
+  ch >= 0x61 && ch <= 0x7A || // a..z
+  ch === 0x5C || // \ (backslash)
+  ch >= 0x80 && parser_RegexNonAsciiIdentifierStart.test(String.fromCharCode(ch));
 }
 
 function parser_isIdentifierPart(ch) {
-  return ch === 0x24 || ch === 0x5F || ch >= 0x41 && ch <= 0x5A || ch >= 0x61 && ch <= 0x7A || ch >= 0x30 && ch <= 0x39 || ch === 0x5C || ch >= 0x80 && parser_RegexNonAsciiIdentifierPart.test(String.fromCharCode(ch));
+  return ch === 0x24 || ch === 0x5F || // $ (dollar) and _ (underscore)
+  ch >= 0x41 && ch <= 0x5A || // A..Z
+  ch >= 0x61 && ch <= 0x7A || // a..z
+  ch >= 0x30 && ch <= 0x39 || // 0..9
+  ch === 0x5C || // \ (backslash)
+  ch >= 0x80 && parser_RegexNonAsciiIdentifierPart.test(String.fromCharCode(ch));
 } // 7.6.1.1 Keywords
 
 
@@ -80401,6 +84827,8 @@ var vega_util_module_Info = 3;
 var vega_util_module_Debug = 4;
 
 function vega_util_module_logger(_, method) {
+  var handler = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : log$1;
+
   var _level = _ || vega_util_module_None;
 
   return {
@@ -80413,19 +84841,19 @@ function vega_util_module_logger(_, method) {
       }
     },
     error: function error() {
-      if (_level >= Error$1) log$1(method || 'error', 'ERROR', arguments);
+      if (_level >= Error$1) handler(method || 'error', 'ERROR', arguments);
       return this;
     },
     warn: function warn() {
-      if (_level >= vega_util_module_Warn) log$1(method || 'warn', 'WARN', arguments);
+      if (_level >= vega_util_module_Warn) handler(method || 'warn', 'WARN', arguments);
       return this;
     },
     info: function info() {
-      if (_level >= vega_util_module_Info) log$1(method || 'log', 'INFO', arguments);
+      if (_level >= vega_util_module_Info) handler(method || 'log', 'INFO', arguments);
       return this;
     },
     debug: function debug() {
-      if (_level >= vega_util_module_Debug) log$1(method || 'log', 'DEBUG', arguments);
+      if (_level >= vega_util_module_Debug) handler(method || 'log', 'DEBUG', arguments);
       return this;
     }
   };
@@ -81595,7 +86023,7 @@ function parseUnitSelection(model, selDefs) {
       var safeName = varName(name);
       var selCmpt = selCmpts[safeName] = Object.assign(Object.assign({}, selDef), {
         name: safeName,
-        events: isString(selDef.on) ? eventSelector(selDef.on, 'scope') : duplicate(selDef.on)
+        events: isString(selDef.on) ? vega_event_selector_module_eventSelector(selDef.on, 'scope') : duplicate(selDef.on)
       });
       forEachTransform(selCmpt, function (txCompiler) {
         if (txCompiler.has(selCmpt) && txCompiler.parse) {
@@ -86047,7 +90475,7 @@ function getImplicitFromFilterTransform(transform) {
       if (val) {
         if (isDateTime(val)) {
           implicit[filter.field] = 'date';
-        } else if (src_isNumber(val)) {
+        } else if (isNumber(val)) {
           implicit[filter.field] = 'number';
         } else if (isString(val)) {
           implicit[filter.field] = 'string';
@@ -89276,7 +93704,7 @@ function sizeRangeMax(mark, size, model, config) {
 
         var min = minXYStep(size, xyStepSignals, config.view);
 
-        if (src_isNumber(min)) {
+        if (isNumber(min)) {
           return min - 1;
         } else {
           return new signal_SignalRefWrapper(function () {
@@ -89303,7 +93731,7 @@ function sizeRangeMax(mark, size, model, config) {
 
         var pointStep = minXYStep(size, xyStepSignals, config.view);
 
-        if (src_isNumber(pointStep)) {
+        if (isNumber(pointStep)) {
           return Math.pow(MAX_SIZE_RANGE_STEP_RATIO * pointStep, 2);
         } else {
           return new signal_SignalRefWrapper(function () {
@@ -94946,7 +99374,7 @@ function tick_defaultSize(model) {
   } else {
     var scaleRange = scale ? scale.get('range') : undefined;
 
-    if (scaleRange && isVgRangeStep(scaleRange) && src_isNumber(scaleRange.step)) {
+    if (scaleRange && isVgRangeStep(scaleRange) && isNumber(scaleRange.step)) {
       return scaleRange.step * 3 / 4;
     }
 
@@ -98071,10 +102499,11 @@ var VegaEmbed_component = normalizeComponent(
 "use strict";
 
 var $ = __webpack_require__("23e7");
-var isObject = __webpack_require__("861d");
 var isArray = __webpack_require__("e8b5");
+var isConstructor = __webpack_require__("68ee");
+var isObject = __webpack_require__("861d");
 var toAbsoluteIndex = __webpack_require__("23cb");
-var toLength = __webpack_require__("50c4");
+var lengthOfArrayLike = __webpack_require__("07fa");
 var toIndexedObject = __webpack_require__("fc6a");
 var createProperty = __webpack_require__("8418");
 var wellKnownSymbol = __webpack_require__("b622");
@@ -98092,7 +102521,7 @@ var max = Math.max;
 $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
   slice: function slice(start, end) {
     var O = toIndexedObject(this);
-    var length = toLength(O.length);
+    var length = lengthOfArrayLike(O);
     var k = toAbsoluteIndex(start, length);
     var fin = toAbsoluteIndex(end === undefined ? length : end, length);
     // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
@@ -98100,7 +102529,7 @@ $({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
     if (isArray(O)) {
       Constructor = O.constructor;
       // cross-realm fallback
-      if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
+      if (isConstructor(Constructor) && (Constructor === Array || isArray(Constructor.prototype))) {
         Constructor = undefined;
       } else if (isObject(Constructor)) {
         Constructor = Constructor[SPECIES];

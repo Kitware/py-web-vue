@@ -1,3 +1,10 @@
+## [2.1.8](https://github.com/Kitware/py-web-vue/compare/v2.1.7...v2.1.8) (2021-10-19)
+
+
+### Bug Fixes
+
+* **enable_module:** Rename method call while deprecating previous ([15dbd3d](https://github.com/Kitware/py-web-vue/commit/15dbd3df03fa8c36ae39bccca7ce42be76243a83))
+
 ## [2.1.7](https://github.com/Kitware/py-web-vue/compare/v2.1.6...v2.1.7) (2021-10-14)
 
 

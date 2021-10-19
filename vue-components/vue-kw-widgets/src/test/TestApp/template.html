@@ -1,0 +1,38 @@
+<v-app id="app">
+  <v-app-bar app>
+    <v-icon class="mr-4">mdi-menu</v-icon>
+    <span class="title">Test app</span>
+    <v-spacer />
+    <v-slider class="mt-6" v-model="thick" min="0" max="24" dense hide-details thumb-label thumb-size="x-small"/>
+    <v-slider class="mt-6" v-model="x" min="200" max="600" dense hide-details thumb-label thumb-size="x-small"/>
+    <v-slider class="mt-6" v-model="y" min="100" max="600" dense hide-details thumb-label thumb-size="x-small"/>
+  </v-app-bar>
+  <v-main>
+    <v-container class="fill-height" fluid>
+      <kw-float-card elevation="6" handle-position="top" :handle-size="thick" :location="[x, y]" img="https://vuejs.org/images/vueschool.png" height="100" loading>
+        <v-card-title >Top card</v-card-title>
+        <v-card-text>
+          Greyhound divisively hello coldly wonderfully marginally far upon excluding.
+        </v-card-text>
+      </kw-float-card>
+      <kw-float-card  hover handle-position="bottom" :handle-size="thick"  :location="[200, 300]">
+        <v-card-title>Bottom card</v-card-title>
+        <v-card-text>
+          Greyhound divisively hello coldly wonderfully marginally far upon excluding.
+        </v-card-text>
+      </kw-float-card>
+      <kw-float-card dark handle-position="left" :handle-size="thick"  :location="[200, 500]">
+        <v-card-title >Left card</v-card-title>
+        <v-card-text>
+          Greyhound divisively hello coldly wonderfully marginally far upon excluding.
+        </v-card-text>
+      </kw-float-card>
+      <kw-float-card width="300" height="300" handle-position="right" :handle-size="thick" :location="[200, 700]">
+        <v-card-title>Right card</v-card-title>
+        <v-card-text>
+          Greyhound divisively hello coldly wonderfully marginally far upon excluding.
+        </v-card-text>
+      </kw-float-card>
+    </v-container>
+  </v-main>
+</v-app>

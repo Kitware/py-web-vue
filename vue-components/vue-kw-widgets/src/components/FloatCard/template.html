@@ -1,0 +1,26 @@
+<v-card
+  :style="positionStyle"
+  :color="color"
+  :dark="dark"
+  :flat="flat"
+  :height="height"
+  :elevation="elevation"
+  :hover="hover"
+  :img="img"
+  :light="light"
+  :loaderHeight="loaderHeight"
+  :loading="loading"
+  :maxHeight="maxHeight"
+  :maxWidth="maxWidth"
+  :minHeight="minHeight"
+  :minWidth="minWidth"
+  :outlined="outlined"
+  :raised="raised"
+  :rounded="rounded"
+  :shaped="shaped"
+  :tile="tile"
+  :width="width"
+>
+  <div @mousedown="onMouseDown" :style="handleStyle" />
+  <slot></slot>
+</v-card>

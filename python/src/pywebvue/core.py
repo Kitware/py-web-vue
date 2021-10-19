@@ -122,7 +122,7 @@ class App:
     # Initialization helper
     # -------------------------------------------------------------------------
 
-    def enableModule(self, module, **kwargs):
+    def enable_module(self, module, **kwargs):
         if module in self._loaded_modules:
             return
 
@@ -139,16 +139,10 @@ class App:
 
         self._loaded_modules.add(module)
 
-    def disableModule(self, module):
-        for key in ["scripts", "styles", "vue_use"]:
-            if key in module.__dict__:
-                for item in module.__dict__[key]:
-                    self[key].remove(item)
-
-        for key in ["state", "serve", "vuetify"]:
-            if key in module.__dict__:
-                for entry in module.__dict__[key]:
-                    del self[key][entry]
+    # will be removed
+    def enableModule(self, module, **kwargs):
+        print("enableModule is deprecated, you should use 'enable_module' instead.")
+        self.enable_module(module, **kwargs)
 
     # -------------------------------------------------------------------------
     # Annotations

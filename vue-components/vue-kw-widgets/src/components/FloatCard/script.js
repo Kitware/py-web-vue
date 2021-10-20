@@ -105,12 +105,17 @@ export default {
   },
   watch: {
     location(pos) {
-      [this.left, this.top] = pos;
+      if (this.lastUpdate !== JSON.stringify(pos)) {
+        [this.left, this.top] = pos;
+        this.lastUpdate = JSON.stringify(pos);
+      }
+
     },
   },
   computed: {
     positionStyle() {
       return {
+        zIndex: 100,
         position: 'fixed',
         top: `${this.top}px`,
         left: `${this.left}px`,

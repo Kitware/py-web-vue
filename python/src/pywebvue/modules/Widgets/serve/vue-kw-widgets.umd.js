@@ -4806,15 +4806,19 @@ var ORIENTATION = {
   },
   watch: {
     location: function location(pos) {
-      var _pos = _slicedToArray(pos, 2);
+      if (this.lastUpdate !== JSON.stringify(pos)) {
+        var _pos = _slicedToArray(pos, 2);
 
-      this.left = _pos[0];
-      this.top = _pos[1];
+        this.left = _pos[0];
+        this.top = _pos[1];
+        this.lastUpdate = JSON.stringify(pos);
+      }
     }
   },
   computed: {
     positionStyle: function positionStyle() {
       return {
+        zIndex: 100,
         position: 'fixed',
         top: "".concat(this.top, "px"),
         left: "".concat(this.left, "px")

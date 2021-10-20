@@ -1,3 +1,10 @@
+## [2.1.9](https://github.com/Kitware/py-web-vue/compare/v2.1.8...v2.1.9) (2021-10-20)
+
+
+### Bug Fixes
+
+* **vue-kw-widgets:** Improve location handling for FloatCard ([56d3883](https://github.com/Kitware/py-web-vue/commit/56d3883b4aea70c05f177e071769d6d4bb75747b))
+
 ## [2.1.8](https://github.com/Kitware/py-web-vue/compare/v2.1.7...v2.1.8) (2021-10-19)
 
 

@@ -1,3 +1,10 @@
+## [2.1.10](https://github.com/Kitware/py-web-vue/compare/v2.1.9...v2.1.10) (2021-10-21)
+
+
+### Bug Fixes
+
+* **css:** Add 'text-no-select' class ([53640ea](https://github.com/Kitware/py-web-vue/commit/53640eab6f5cf713f14a827c17a61163aab4a7b4))
+
 ## [2.1.9](https://github.com/Kitware/py-web-vue/compare/v2.1.8...v2.1.9) (2021-10-20)
 
 

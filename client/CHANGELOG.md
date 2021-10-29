@@ -1,3 +1,15 @@
+# [2.2.0](https://github.com/Kitware/py-web-vue/compare/v2.1.10...v2.2.0) (2021-10-29)
+
+
+### Bug Fixes
+
+* **web:** Update deps to support volume rendering ([5c90579](https://github.com/Kitware/py-web-vue/commit/5c9057990dc0a72a485b01c684fa3117babc28c2))
+
+
+### Features
+
+* **vtk:** Update code to rely on VTK 9.1-RC3 ([8a94da8](https://github.com/Kitware/py-web-vue/commit/8a94da88a19eefebed461953abd99bd661693eed))
+
 ## [2.1.10](https://github.com/Kitware/py-web-vue/compare/v2.1.9...v2.1.10) (2021-10-21)
 
 

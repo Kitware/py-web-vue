@@ -1,3 +1,11 @@
+## [2.2.1](https://github.com/Kitware/py-web-vue/compare/v2.2.0...v2.2.1) (2021-11-02)
+
+
+### Bug Fixes
+
+* **setup:** move most of setup.py into setup.cfg ([94eeca5](https://github.com/Kitware/py-web-vue/commit/94eeca5ffd0999f79a38b587cf33ef5dd7e52734))
+* **version:** add __version__ to root __init__.py ([4825e69](https://github.com/Kitware/py-web-vue/commit/4825e690236142e7aee0f35b9e9ad626c923e961))
+
 # [2.2.0](https://github.com/Kitware/py-web-vue/compare/v2.1.10...v2.2.0) (2021-10-29)
 
 

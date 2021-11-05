@@ -1,3 +1,10 @@
+## [2.2.2](https://github.com/Kitware/py-web-vue/compare/v2.2.1...v2.2.2) (2021-11-05)
+
+
+### Bug Fixes
+
+* **trigger:** Add client life cycle trigger endpoint ([f2a8dd3](https://github.com/Kitware/py-web-vue/commit/f2a8dd377c2329dd77af47184d191f6fff953924))
+
 ## [2.2.1](https://github.com/Kitware/py-web-vue/compare/v2.2.0...v2.2.1) (2021-11-02)
 
 

@@ -33,6 +33,30 @@ export async function createVueApp(store, options = {}) {
   Vue.component('py-state-update', StateUpdate);
   Vue.component('py-trigger', Trigger);
 
+  let gotJsErrorTrigger = true;
+  let lastError = null;
+  Vue.config.errorHandler = (error) => {
+    if (!gotJsErrorTrigger) {
+      console.error(error);
+      return;
+    }
+    try {
+      const currentError = `${error}`;
+      if (currentError !== lastError) {
+        store.dispatch('APP_TRIGGER', { name: 'js_error', args: [currentError], kwargs: {} });
+        lastError = currentError;
+        console.error(error);
+      }
+    } catch (e) {
+      gotJsErrorTrigger = false;
+    }
+  };
+
+  window.addEventListener('error', (event) => {
+    store.dispatch('APP_TRIGGER', { name: 'js_error', args: [event], kwargs: {} });
+    console.error(event);
+  });
+
   const finalOptions = options || {};
 
   if (store.getters.APP_USE.includes('vuetify')) {

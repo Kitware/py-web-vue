@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/Kitware/py-web-vue/compare/v2.2.2...v2.3.0) (2021-11-08)
+
+
+### Bug Fixes
+
+* **client:** Send JS error to server ([17e36eb](https://github.com/Kitware/py-web-vue/commit/17e36ebc8802eae2c3ea06b8f5e60019cef5efd3))
+
+
+### Features
+
+* **reload:** Add support for app reload ([e995b6b](https://github.com/Kitware/py-web-vue/commit/e995b6bd7a18e878de98abd99853b1955fcbe37c))
+
 ## [2.2.2](https://github.com/Kitware/py-web-vue/compare/v2.2.1...v2.2.2) (2021-11-05)
 
 

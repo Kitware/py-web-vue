@@ -159,6 +159,7 @@ def setup(app, **kwargs):
     global HELPER
     HELPER = Helper(app)
 
+
 def reload_app():
     if HELPER:
         HELPER.reload_app()

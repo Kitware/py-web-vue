@@ -139,6 +139,12 @@ class App:
 
         self._loaded_modules.add(module)
 
+    def reload_app(self):
+        """Used internally to dynamically reload app"""
+        for module in self._loaded_modules:
+            if hasattr(module, "reload_app"):
+                module.reload_app()
+
     # will be removed
     def enableModule(self, module, **kwargs):
         print("enableModule is deprecated, you should use 'enable_module' instead.")

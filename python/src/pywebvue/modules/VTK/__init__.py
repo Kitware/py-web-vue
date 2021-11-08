@@ -144,6 +144,9 @@ class Helper:
         self._hybrid_views[name] = view_helper
         return view_helper
 
+    def reload_app(self):
+        self._hybrid_views = {}
+
 
 # -----------------------------------------------------------------------------
 # Module advanced initialization
@@ -155,6 +158,10 @@ HELPER = None
 def setup(app, **kwargs):
     global HELPER
     HELPER = Helper(app)
+
+def reload_app():
+    if HELPER:
+        HELPER.reload_app()
 
 
 # -----------------------------------------------------------------------------

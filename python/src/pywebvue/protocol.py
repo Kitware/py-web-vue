@@ -268,7 +268,7 @@ class CoreServer(ServerProtocol):
             if name in self.app._triggers:
                 await asyncio.coroutine(self.app._triggers[name])(*args, **kwargs)
             else:
-                print(f"Tigger {name} seems to be missing")
+                print(f"Trigger {name} seems to be missing")
 
     # ---------------------------------------------------------------
 

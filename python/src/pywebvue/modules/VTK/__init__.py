@@ -1,5 +1,9 @@
-from vtkmodules.vtkWebCore import vtkWebApplication
-from vtkmodules.web.utils import mesh as vtk_mesh
+try:
+    from vtkmodules.vtkWebCore import vtkWebApplication
+    from vtkmodules.web.utils import mesh as vtk_mesh
+except ImportError:
+    print("> VTK is not available inside your Python environment")
+
 from pywebvue.modules.VTK.core import HybridView
 
 # -----------------------------------------------------------------------------
@@ -7,6 +11,7 @@ from pywebvue.modules.VTK.core import HybridView
 # -----------------------------------------------------------------------------
 
 vue_use = ["vtk"]
+has_vtk = "vtkWebApplication" in locals()
 
 # -----------------------------------------------------------------------------
 
@@ -15,12 +20,13 @@ class Helper:
     def __init__(self, app):
         self._root_protocol = None
         self._app = app
-        self._vtk_core = vtkWebApplication()
-        self._vtk_core.SetImageEncoding(0)
-        self._hybrid_views = {}
+        if has_vtk:
+            self._vtk_core = vtkWebApplication()
+            self._vtk_core.SetImageEncoding(0)
+            self._hybrid_views = {}
 
-        # Link our custom protocols initialization
-        app.add_protocol_to_configure(self.configure_protocol)
+            # Link our custom protocols initialization
+            app.add_protocol_to_configure(self.configure_protocol)
 
     def id(self, vtk_obj):
         if not vtk_obj:
@@ -157,7 +163,8 @@ HELPER = None
 
 def setup(app, **kwargs):
     global HELPER
-    HELPER = Helper(app)
+    if has_vtk:
+        HELPER = Helper(app)
 
 
 def reload_app():

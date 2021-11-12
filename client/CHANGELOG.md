@@ -1,3 +1,11 @@
+## [2.3.1](https://github.com/Kitware/py-web-vue/compare/v2.3.0...v2.3.1) (2021-11-12)
+
+
+### Bug Fixes
+
+* **version:** When used in pvpython ([ba8bfbc](https://github.com/Kitware/py-web-vue/commit/ba8bfbce23285ed8e6e4487d92950073fc276cd4))
+* **VTK:** Make VTK optional when using client only code ([2c8900b](https://github.com/Kitware/py-web-vue/commit/2c8900b6aa4636e2240d673eec09caff54560eca))
+
 # [2.3.0](https://github.com/Kitware/py-web-vue/compare/v2.2.2...v2.3.0) (2021-11-08)
 
 

@@ -382,7 +382,6 @@ class App:
                 for key in self.serve:
                     endpoints.append(f"{key}={abs_path(self.serve[key], self._root)}")
                 args.fsEndpoints = "|".join(endpoints)
-                print(args.fsEndpoints)
 
             CoreServer.configure(args)
             CoreServer.start_webserver(args)

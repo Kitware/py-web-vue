@@ -1,3 +1,10 @@
+## [2.3.2](https://github.com/Kitware/py-web-vue/compare/v2.3.1...v2.3.2) (2021-11-15)
+
+
+### Bug Fixes
+
+* **debug:** Remove debug output ([2e14e3f](https://github.com/Kitware/py-web-vue/commit/2e14e3f8eb885468452a6e56d75a0c195a6657ac))
+
 ## [2.3.1](https://github.com/Kitware/py-web-vue/compare/v2.3.0...v2.3.1) (2021-11-12)
 
 

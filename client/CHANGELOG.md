@@ -1,3 +1,10 @@
+## [2.3.3](https://github.com/Kitware/py-web-vue/compare/v2.3.2...v2.3.3) (2021-11-16)
+
+
+### Bug Fixes
+
+* **vtk:** LocalRendering Normals/TCoords handling ([42df0d1](https://github.com/Kitware/py-web-vue/commit/42df0d1508e78a29364b116006b7c158aa63b798))
+
 ## [2.3.2](https://github.com/Kitware/py-web-vue/compare/v2.3.1...v2.3.2) (2021-11-15)
 
 

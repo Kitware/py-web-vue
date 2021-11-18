@@ -1,3 +1,10 @@
+## [2.3.4](https://github.com/Kitware/py-web-vue/compare/v2.3.3...v2.3.4) (2021-11-18)
+
+
+### Bug Fixes
+
+* **vtkSerializer:** Match VTK/master fix ([b4432de](https://github.com/Kitware/py-web-vue/commit/b4432deb0b30abe4d38d232be7140ed32e7bf1c9))
+
 ## [2.3.3](https://github.com/Kitware/py-web-vue/compare/v2.3.2...v2.3.3) (2021-11-16)
 
 

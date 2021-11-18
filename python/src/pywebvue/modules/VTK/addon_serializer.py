@@ -5,7 +5,7 @@ def extractRequiredFields(
     extractedFields, parent, dataset, context, requestedFields=["Normals", "TCoords"]
 ):
     arrays_to_export = set()
-    export_all = '*' in requestedFields
+    export_all = "*" in requestedFields
     # Identify arrays to export
     if not export_all:
         # FIXME should evolve and support funky mapper which leverage many arrays
@@ -29,20 +29,26 @@ def extractRequiredFields(
                     array_to_export = dataset.GetCellData().GetScalars()
                 arrays_to_export.add(array_to_export)
             if scalarVisibility and scalarMode == 0:
-              array_to_export = dataset.GetPointData().GetScalars()
-              if array_to_export is None:
+                array_to_export = dataset.GetPointData().GetScalars()
+                if array_to_export is None:
                     array_to_export = dataset.GetCellData().GetScalars()
-              arrays_to_export.add(array_to_export)
+                arrays_to_export.add(array_to_export)
 
         if parent and parent.IsA("vtkTexture") and dataset.GetPointData().GetScalars():
             arrays_to_export.add(dataset.GetPointData().GetScalars())
 
         arrays_to_export.update(
-            [getattr(dataset.GetPointData(), "Get" + requestedField)() for requestedField in requestedFields]
+            [
+                getattr(dataset.GetPointData(), "Get" + requestedField, lambda: None)()
+                for requestedField in requestedFields
+            ]
         )
 
     # Browse all arrays
-    for location, field_data in [('pointData', dataset.GetPointData()), ('cellData', dataset.GetCellData())]:
+    for location, field_data in [
+        ("pointData", dataset.GetPointData()),
+        ("cellData", dataset.GetCellData()),
+    ]:
         for array_index in range(field_data.GetNumberOfArrays()):
             array = field_data.GetArray(array_index)
             if export_all or array in arrays_to_export:
@@ -50,9 +56,12 @@ def extractRequiredFields(
                 if arrayMeta:
                     arrayMeta["location"] = location
                     attribute = field_data.IsArrayAnAttribute(array_index)
-                    arrayMeta["registration"] = "set" + field_data.GetAttributeTypeAsString(attribute) if attribute >= 0 else 'addArray'
+                    arrayMeta["registration"] = (
+                        "set" + field_data.GetAttributeTypeAsString(attribute)
+                        if attribute >= 0
+                        else "addArray"
+                    )
                     extractedFields.append(arrayMeta)
-
 
 
 def registerAddOnSerializers():

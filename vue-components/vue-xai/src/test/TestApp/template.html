@@ -1,0 +1,28 @@
+<div>
+<XaiImage
+  :src="image"
+  max-height="300"
+
+  :areas="areas"
+  :areaSelected="areaSelected"
+  area-opacity="0.3"
+  :areaStyle="areaStyle"
+  @areaSelectionChange="updateSelection"
+
+  :heatmapOpacity="heatmapOpacity"
+  :heatmapColorPreset="heatmapColorPreset"
+  :heatmaps="heatMaps"
+  :heatmapActive="heatmapActive"
+  :heatmapColorMode="heatmapColorMode"
+/>
+<button @click="heatmapColorMode = 'full'">Full</button>
+<button @click="heatmapColorMode = 'maxSym'">maxSym</button>
+<button @click="heatmapColorMode = 'minSym'">minSym</button>
+<button @click="heatmapColorMode = 'positive'">positive</button>
+<button @click="heatmapColorMode = 'negative'">negative</button>
+<button @click="heatmapActive = 'map1'">map1</button>
+<button @click="heatmapActive = 'map2'">map2</button>
+<button @click="heatmapActive = 'map3'">map3</button>
+<input type="range" min="0" max="1" step="0.1" v-model="heatmapOpacity" />
+
+</div>

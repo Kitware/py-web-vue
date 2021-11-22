@@ -1,0 +1,25 @@
+<div :style="containerStyle">
+  <img  ref="image" :src="src" :style="imageStyle" />
+  <svg :style="annotationStyle" :viewBox="`0 0 ${imageWidth} ${imageHeight}`" xmlns="http://www.w3.org/2000/svg">
+    <rect
+      v-for="item, idx in decoratedAreas"
+      :key="idx"
+      :x="item.area[0]"
+      :y="item.area[1]"
+      :width="item.area[2]"
+      :height="item.area[3]"
+      :stroke="item.color"
+      :opacity="item.opacity"
+      fill="none"
+      v-bind="areaStyle"
+    />
+  </svg>
+  <xai-heat-map
+    :style="heatMapStyle"
+    :heatmap="activeHeatmap"
+    :shape="shape"
+    :colorMode="heatmapColorMode"
+    :colorRange="heatmapColorRange"
+    :colorPreset="heatmapColorPreset"
+  />
+</div>

@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/Kitware/py-web-vue/compare/v2.3.4...v2.4.0) (2021-11-22)
+
+
+### Features
+
+* **XAI:** Add xai widgets ([d22a044](https://github.com/Kitware/py-web-vue/commit/d22a0445a0403cccdaa46a700a8b03ec6a6d705d))
+
 ## [2.3.4](https://github.com/Kitware/py-web-vue/compare/v2.3.3...v2.3.4) (2021-11-18)
 
 

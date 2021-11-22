@@ -103,9 +103,6 @@ export default {
     maxHeight() {
       this.updateSizes();
     },
-    areas() {
-      this.updateAreas();
-    },
   },
   computed: {
     decoratedAreas() {

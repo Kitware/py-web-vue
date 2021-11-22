@@ -14729,9 +14729,6 @@ var XaiHeatMap_component = normalizeComponent(
     },
     maxHeight: function maxHeight() {
       this.updateSizes();
-    },
-    areas: function areas() {
-      this.updateAreas();
     }
   },
   computed: {

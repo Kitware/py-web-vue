@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/Kitware/py-web-vue/compare/v2.4.0...v2.4.1) (2021-11-22)
+
+
+### Bug Fixes
+
+* **xai:** remove invalid method call ([da61ddc](https://github.com/Kitware/py-web-vue/commit/da61ddc42422cb8df830b032180c980b06f6e1d7))
+
 # [2.4.0](https://github.com/Kitware/py-web-vue/compare/v2.3.4...v2.4.0) (2021-11-22)
 
 

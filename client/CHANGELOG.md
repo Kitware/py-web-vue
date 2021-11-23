@@ -1,3 +1,10 @@
+## [2.4.3](https://github.com/Kitware/py-web-vue/compare/v2.4.2...v2.4.3) (2021-11-23)
+
+
+### Bug Fixes
+
+* **xai:** properly forward events ([af92028](https://github.com/Kitware/py-web-vue/commit/af92028d6f9bb0d00467193314f29eb90142fb56))
+
 ## [2.4.2](https://github.com/Kitware/py-web-vue/compare/v2.4.1...v2.4.2) (2021-11-23)
 
 

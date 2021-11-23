@@ -1,3 +1,10 @@
+## [2.4.2](https://github.com/Kitware/py-web-vue/compare/v2.4.1...v2.4.2) (2021-11-23)
+
+
+### Bug Fixes
+
+* **xai:** Trigger event for colorRange ([c1ad637](https://github.com/Kitware/py-web-vue/commit/c1ad63711a0ce891575e07951b9cf56440b1c2d4))
+
 ## [2.4.1](https://github.com/Kitware/py-web-vue/compare/v2.4.0...v2.4.1) (2021-11-22)
 
 

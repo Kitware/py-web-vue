@@ -89,7 +89,7 @@ export default {
         case 'negative':
           return this.negativeRange;
         case 'custom':
-          return this.colorRange;
+          return this.colorRange.map(Number);
         default:
           return this.fullRange;
       }
@@ -106,8 +106,9 @@ export default {
       this.lut.applyColorMap(vtkColorMaps.getPresetByName(this.colorPreset));
       this.$nextTick(this.render);
     },
-    colorRangeToUse() {
+    colorRangeToUse(range) {
       this.$nextTick(this.render);
+      this.$emit("colorRange", range);
     },
   },
   mounted() {

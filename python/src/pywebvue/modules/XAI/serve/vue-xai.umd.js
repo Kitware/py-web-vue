@@ -14319,6 +14319,8 @@ function getPixels(width, height, values, convert) {
 
 
 
+
+
 /* harmony default export */ var scriptvue_type_script_lang_js_ = ({
   name: 'XaiHeatMap',
   props: {
@@ -14420,7 +14422,7 @@ function getPixels(width, height, values, convert) {
           return this.negativeRange;
 
         case 'custom':
-          return this.colorRange;
+          return this.colorRange.map(Number);
 
         default:
           return this.fullRange;
@@ -14438,8 +14440,9 @@ function getPixels(width, height, values, convert) {
       this.lut.applyColorMap(ColorTransferFunction_ColorMaps.getPresetByName(this.colorPreset));
       this.$nextTick(this.render);
     },
-    colorRangeToUse: function colorRangeToUse() {
+    colorRangeToUse: function colorRangeToUse(range) {
       this.$nextTick(this.render);
+      this.$emit("colorRange", range);
     }
   },
   mounted: function mounted() {

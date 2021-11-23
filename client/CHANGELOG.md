@@ -1,3 +1,10 @@
+## [2.4.4](https://github.com/Kitware/py-web-vue/compare/v2.4.3...v2.4.4) (2021-11-23)
+
+
+### Bug Fixes
+
+* **xai:** make sure to trigger event when data change ([40e761b](https://github.com/Kitware/py-web-vue/commit/40e761bb559e055552f264c028fe12c0f1017be8))
+
 ## [2.4.3](https://github.com/Kitware/py-web-vue/compare/v2.4.2...v2.4.3) (2021-11-23)
 
 

@@ -14395,29 +14395,18 @@ function getPixels(width, height, values, convert) {
 
       return [min, 0];
     },
+    colorRanges: function colorRanges() {
+      return {
+        full: this.fullRange,
+        maxSym: this.maxSymRange,
+        minSym: this.minSymRange,
+        positive: this.positiveRange,
+        negative: this.negativeRange,
+        custom: this.colorRange.map(Number)
+      };
+    },
     colorRangeToUse: function colorRangeToUse() {
-      switch (this.colorMode) {
-        case 'full':
-          return this.fullRange;
-
-        case 'maxSym':
-          return this.maxSymRange;
-
-        case 'minSym':
-          return this.minSymRange;
-
-        case 'positive':
-          return this.positiveRange;
-
-        case 'negative':
-          return this.negativeRange;
-
-        case 'custom':
-          return this.colorRange.map(Number);
-
-        default:
-          return this.fullRange;
-      }
+      return this.colorRanges[this.colorMode] || this.fullRange;
     }
   },
   watch: {
@@ -14431,9 +14420,8 @@ function getPixels(width, height, values, convert) {
       this.lut.applyColorMap(ColorTransferFunction_ColorMaps.getPresetByName(this.colorPreset));
       this.$nextTick(this.render);
     },
-    colorRangeToUse: function colorRangeToUse(range) {
+    colorRangeToUse: function colorRangeToUse() {
       this.$nextTick(this.render);
-      this.$emit("colorRange", range);
     }
   },
   mounted: function mounted() {
@@ -14449,6 +14437,7 @@ function getPixels(width, height, values, convert) {
         return;
       }
 
+      this.$emit('colorRange', [min, max]);
       this.lut.setMappingRange(min, max);
       this.lut.updateRange();
 

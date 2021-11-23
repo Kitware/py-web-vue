@@ -76,23 +76,18 @@ export default {
       const [min] = this.fullRange;
       return [min, 0];
     },
+    colorRanges() {
+      return {
+        full: this.fullRange,
+        maxSym: this.maxSymRange,
+        minSym: this.minSymRange,
+        positive: this.positiveRange,
+        negative: this.negativeRange,
+        custom: this.colorRange.map(Number),
+      };
+    },
     colorRangeToUse() {
-      switch (this.colorMode) {
-        case 'full':
-          return this.fullRange;
-        case 'maxSym':
-          return this.maxSymRange;
-        case 'minSym':
-          return this.minSymRange;
-        case 'positive':
-          return this.positiveRange;
-        case 'negative':
-          return this.negativeRange;
-        case 'custom':
-          return this.colorRange.map(Number);
-        default:
-          return this.fullRange;
-      }
+      return this.colorRanges[this.colorMode] || this.fullRange;
     },
   },
   watch: {
@@ -106,9 +101,8 @@ export default {
       this.lut.applyColorMap(vtkColorMaps.getPresetByName(this.colorPreset));
       this.$nextTick(this.render);
     },
-    colorRangeToUse(range) {
+    colorRangeToUse() {
       this.$nextTick(this.render);
-      this.$emit("colorRange", range);
     },
   },
   mounted() {
@@ -121,6 +115,7 @@ export default {
         return;
       }
 
+      this.$emit('colorRange', [min, max]);
       this.lut.setMappingRange(min, max);
       this.lut.updateRange();
 

@@ -21,5 +21,8 @@
     :colorMode="heatmapColorMode"
     :colorRange="heatmapColorRange"
     :colorPreset="heatmapColorPreset"
+    @colorRange="$emit('colorRange', $event)"
+    @hover="$emit('hover', $event)"
+    @enter="$emit('enter', $event)"
   />
 </div>

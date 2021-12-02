@@ -1,3 +1,10 @@
+## [2.4.5](https://github.com/Kitware/py-web-vue/compare/v2.4.4...v2.4.5) (2021-12-02)
+
+
+### Bug Fixes
+
+* **dep:** Update dependencies vtk, vuetify, icons ([994aa18](https://github.com/Kitware/py-web-vue/commit/994aa18789d37dd132eca4c61d6a698a40e246e1))
+
 ## [2.4.4](https://github.com/Kitware/py-web-vue/compare/v2.4.3...v2.4.4) (2021-11-23)
 
 

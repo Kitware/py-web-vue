@@ -1,3 +1,15 @@
+# [2.5.0](https://github.com/Kitware/py-web-vue/compare/v2.4.5...v2.5.0) (2021-12-06)
+
+
+### Bug Fixes
+
+* **vue-xai:** YFlip for heatmap handling ([118f521](https://github.com/Kitware/py-web-vue/commit/118f521e83c8ace79769362a869a294a4d476377))
+
+
+### Features
+
+* **on_ready:** on_ready is called when server is listening ([97a7ccc](https://github.com/Kitware/py-web-vue/commit/97a7ccc6aa26cdb707d2a6c9df9ed4266ad09cf4))
+
 ## [2.4.5](https://github.com/Kitware/py-web-vue/compare/v2.4.4...v2.4.5) (2021-12-02)
 
 

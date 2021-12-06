@@ -18,7 +18,7 @@ app.state = {
         {"make": "Porsche", "model": "Boxter", "price": 72000},
     ],
 }
-app.enableModule(AGGrid)
+app.enable_module(AGGrid)
 
 # -----------------------------------------------------------------------------
 # Start server

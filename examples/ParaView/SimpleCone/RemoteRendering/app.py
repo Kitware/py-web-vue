@@ -22,7 +22,7 @@ from paraview import simple
 
 app = App("ParaView Remote Rendering")
 app.state = {"resolution": 6}
-app.enableModule(ParaView)
+app.enable_module(ParaView)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

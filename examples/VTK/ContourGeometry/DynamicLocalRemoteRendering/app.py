@@ -26,7 +26,7 @@ app.state = {
     "contour_value": 0,
     "override": "auto",
 }
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

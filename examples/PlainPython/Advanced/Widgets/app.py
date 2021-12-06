@@ -2,7 +2,7 @@ import pywebvue
 from pywebvue.modules import Widgets
 
 app = pywebvue.App("KW Widgets")
-app.enableModule(Widgets)
+app.enable_module(Widgets)
 
 app.layout = """
     <v-app>

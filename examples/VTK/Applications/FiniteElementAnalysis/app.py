@@ -48,7 +48,7 @@ app.state = {
     "interactorSettings": VIEW_INTERACT,
     "pickingModes": [],
 }
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

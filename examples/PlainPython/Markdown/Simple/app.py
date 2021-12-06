@@ -3,7 +3,7 @@ from pywebvue import App
 from pywebvue.modules import Markdown
 
 app = App("Basic Markdown Example")
-app.enableModule(Markdown)
+app.enable_module(Markdown)
 
 # Read markdown file
 md_file_path = os.path.join(os.path.dirname(__file__), "demo.md")

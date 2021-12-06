@@ -63,7 +63,7 @@ app.state = {
     # View interactions
     "interactorSettings": VIEW_INTERACT,
 }
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

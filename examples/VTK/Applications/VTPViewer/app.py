@@ -14,7 +14,7 @@ app.state = {
     "field": "solid",
     "fields": [],
 }
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 
 # -----------------------------------------------------------------------------

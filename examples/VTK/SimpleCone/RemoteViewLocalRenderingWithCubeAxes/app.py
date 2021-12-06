@@ -29,7 +29,7 @@ import vtkmodules.vtkRenderingOpenGL2
 
 app = App("VTK axesGrid")
 app.state = {"resolution": 6}
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

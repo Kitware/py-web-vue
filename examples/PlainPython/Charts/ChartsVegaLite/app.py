@@ -19,7 +19,7 @@ app.state = {
         "y": {"field": "value", "type": "quantitative"},
     },
 }
-app.enableModule(VegaLite)
+app.enable_module(VegaLite)
 
 # -----------------------------------------------------------------------------
 # Actions

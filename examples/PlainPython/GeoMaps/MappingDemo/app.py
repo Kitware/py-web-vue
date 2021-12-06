@@ -42,7 +42,7 @@ app.state = {
     # Expect MAPBOX_API_KEY environment variable
     "mapboxApiKey": os.environ["MAPBOX_API_KEY"],
 }
-app.enableModule(Deck)
+app.enable_module(Deck)
 
 # -----------------------------------------------------------------------------
 

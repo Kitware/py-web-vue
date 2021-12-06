@@ -20,7 +20,7 @@ import vtkmodules.vtkRenderingOpenGL2
 
 app = App("VTK Remote Rendering")
 app.state = {"resolution": 6}
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

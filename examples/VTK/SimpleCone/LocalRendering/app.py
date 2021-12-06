@@ -9,7 +9,7 @@ from vtkmodules.vtkFiltersSources import vtkConeSource
 
 app = App("VTK processing with local Rendering")
 app.state = {"resolution": 6}
-app.enableModule(VTK)
+app.enable_module(VTK)
 
 # -----------------------------------------------------------------------------
 # VTK pipeline

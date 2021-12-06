@@ -23,7 +23,7 @@ from paraview import simple
 
 app = App("ParaView processing with local Rendering")
 app.state = {"resolution": 6}
-app.enableModule(ParaView)
+app.enable_module(ParaView)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

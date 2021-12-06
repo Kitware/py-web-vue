@@ -27,7 +27,7 @@ app.state = {
     "data_range": [0, 1],
     "contour_value": 0,
 }
-app.enableModule(ParaView)
+app.enable_module(ParaView)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

@@ -27,8 +27,8 @@ app.state = {
     "userSelection": None,
 }
 
-app.enableModule(AGGrid)
-app.enableModule(VegaEmbed)
+app.enable_module(AGGrid)
+app.enable_module(VegaEmbed)
 
 # -----------------------------------------------------------------------------
 

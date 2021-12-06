@@ -22,7 +22,7 @@ app.state = {
         {"text": "Stacked Density Estimates", "value": "StackedDensityEstimates"},
     ],
 }
-app.enableModule(VegaEmbed)
+app.enable_module(VegaEmbed)
 
 # -----------------------------------------------------------------------------
 

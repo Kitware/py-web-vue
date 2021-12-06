@@ -23,8 +23,8 @@ app.state = {
     ],  # <-- Expect MAPBOX_API_KEY environment variable
 }
 
-app.enableModule(VegaEmbed)
-app.enableModule(Deck)
+app.enable_module(VegaEmbed)
+app.enable_module(Deck)
 
 # -----------------------------------------------------------------------------
 

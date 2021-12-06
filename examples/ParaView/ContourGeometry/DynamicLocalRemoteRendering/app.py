@@ -28,7 +28,7 @@ app.state = {
     "contour_value": 0,
     "override": "auto",
 }
-app.enableModule(ParaView)
+app.enable_module(ParaView)
 
 # -----------------------------------------------------------------------------
 # ParaView pipeline

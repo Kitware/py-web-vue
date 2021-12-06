@@ -14258,13 +14258,13 @@ function getPixels(width, height, values, convert) {
 
   for (var j = 0; j < height; j++) {
     for (var i = 0; i < width; i++) {
-      var idxSrc = i + j * width;
-      var idxDst = i + (height - j - 1) * width;
-      var value = convert(values[idxSrc]);
-      rawPixels.data[idxDst * 4 + 0] = value[0];
-      rawPixels.data[idxDst * 4 + 1] = value[1];
-      rawPixels.data[idxDst * 4 + 2] = value[2];
-      rawPixels.data[idxDst * 4 + 3] = 255; // Opaque
+      var idx = i + j * width; // const idxDst = i + (height - j - 1) * width;
+
+      var value = convert(values[idx]);
+      rawPixels.data[idx * 4 + 0] = value[0];
+      rawPixels.data[idx * 4 + 1] = value[1];
+      rawPixels.data[idx * 4 + 2] = value[2];
+      rawPixels.data[idx * 4 + 3] = 255; // Opaque
     }
   }
 

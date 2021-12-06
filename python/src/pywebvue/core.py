@@ -355,7 +355,7 @@ class App:
     # Start server
     # -------------------------------------------------------------------------
 
-    def run_server(self, port=None):
+    def run_server(self, port=None, thread=False):
         # Prevent faulty state synchronization with naive usage
         if self._eager_state_listening:
             self.listen(*list(self.state.keys()))
@@ -365,11 +365,14 @@ class App:
 
         args = self.cli_args
 
-        if port:
+        if port is not None:
             args.port = port
 
         if not args.content:
             args.content = WWW_DIR
+
+        if thread:
+            args.nosignalhandlers = True
 
         if args.launcher:
             CoreServer.start_launcher(args)
@@ -385,3 +388,10 @@ class App:
 
             CoreServer.configure(args)
             CoreServer.start_webserver(args)
+
+    def stop_server(self):
+        CoreServer.stop_webserver()
+
+    @property
+    def server_port(self):
+        return CoreServer.port_webserver()

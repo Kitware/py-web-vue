@@ -96,6 +96,14 @@ class CoreServer(ServerProtocol):
         server.start_webserver(options=args, protocol=CoreServer)
 
     @staticmethod
+    def stop_webserver():
+        server.stop_webserver()
+
+    @staticmethod
+    def port_webserver():
+        return server.get_port()
+
+    @staticmethod
     def get_launcher_config(args):
         config = {}
         config.update(DEFAULT_LAUNCHER_CONFIG)
@@ -200,6 +208,8 @@ class CoreServer(ServerProtocol):
 
         self.updateSecret(CoreServer.authentication_token)
 
+
+    def port_callback(self, port_used):
         if self.app.on_ready:
             try:
                 self.app.on_ready(**self.app.state)

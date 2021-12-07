@@ -1,3 +1,15 @@
+## [2.5.1](https://github.com/Kitware/py-web-vue/compare/v2.5.0...v2.5.1) (2021-12-07)
+
+
+### Bug Fixes
+
+* **AGGrid:** remove unused files ([b3a3060](https://github.com/Kitware/py-web-vue/commit/b3a30604fcb0e772968b9bd6becc414ccb86b59f))
+* **client:** smaller bundle size ([dd842ff](https://github.com/Kitware/py-web-vue/commit/dd842ffd94ab96ed1b21b20388af66ee55575f0b))
+* **Deck:** remove unused files ([9426041](https://github.com/Kitware/py-web-vue/commit/9426041f860e8c5cc4b393623544399880a6434e))
+* **VegaEmbed:** remove unused files ([18d4c1a](https://github.com/Kitware/py-web-vue/commit/18d4c1a5b2e8a105ea2a4a1e660cbcc65494dfb8))
+* **Widgets:** remove unused files ([1ea8dca](https://github.com/Kitware/py-web-vue/commit/1ea8dca4e4e43867c655238cf8741cf84e4d9346))
+* **XAI:** remove unused files ([c0001d5](https://github.com/Kitware/py-web-vue/commit/c0001d5768e95d89b319b13f6a1e36e6e70393e8))
+
 # [2.5.0](https://github.com/Kitware/py-web-vue/compare/v2.4.5...v2.5.0) (2021-12-06)
 
 

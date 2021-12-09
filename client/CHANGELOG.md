@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/Kitware/py-web-vue/compare/v2.5.1...v2.5.2) (2021-12-09)
+
+
+### Bug Fixes
+
+* **wslink:** update min wslink version to 1.2.0 ([07e5afd](https://github.com/Kitware/py-web-vue/commit/07e5afdfd0f335ac2d7ef2acda6ae65de0f4293a))
+
 ## [2.5.1](https://github.com/Kitware/py-web-vue/compare/v2.5.0...v2.5.1) (2021-12-07)
 
 

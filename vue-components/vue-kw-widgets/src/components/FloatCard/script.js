@@ -109,7 +109,6 @@ export default {
         [this.left, this.top] = pos;
         this.lastUpdate = JSON.stringify(pos);
       }
-
     },
   },
   computed: {

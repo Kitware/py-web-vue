@@ -84,6 +84,9 @@ function extractBranchesAndForks(model, leaf) {
     currentNode.parent !== rootId &&
     map[currentNode.parent].x === branch.x
   ) {
+    if (!branch.color) {
+      branch.color = currentNode.color;
+    }
     currentNode = map[currentNode.parent];
     branch.to = currentNode.y;
   }
@@ -100,6 +103,7 @@ function extractBranchesAndForks(model, leaf) {
       y: map[currentNode.parent].y,
       toX: currentNode.x,
       toY: currentNode.y,
+      color: currentNode.color,
     });
   }
 }
@@ -236,7 +240,8 @@ export default {
         const x1 = this.deltaX * branch.x + this.offset;
         const y1 = this.deltaY * branch.y + this.deltaY / 2;
         const y2 = this.deltaY * branch.to + this.deltaY / 2;
-        const strokeColor = this.palette[branch.x % this.palette.length];
+        const strokeColor =
+          branch.color || this.palette[branch.x % this.palette.length];
 
         return {
           key: `branch-${index}`,
@@ -251,7 +256,8 @@ export default {
         const y1 = this.deltaY * fork.y + this.deltaY / 2 + this.radius;
         const x2 = this.deltaX * fork.toX + this.offset;
         const y2 = this.deltaY * fork.toY + this.deltaY / 2 + this.radius;
-        const strokeColor = this.palette[fork.toX % this.palette.length];
+        const strokeColor =
+          fork.color || this.palette[fork.toX % this.palette.length];
         const dPath =
           `M${x1},${y1} ` +
           `Q${x1},${y1 + this.deltaY / 3},${(x1 + x2) / 2},${y1 +
@@ -269,7 +275,8 @@ export default {
       return this.nodes.map((node, index) => {
         const isActive = this.activesToRender.includes(index);
         const isVisible = !!node.visible;
-        const branchColor = this.palette[node.x % this.palette.length];
+        const branchColor =
+          node.color || this.palette[node.x % this.palette.length];
 
         // Styles
         const currentTextColor = this.textColor[isActive ? 1 : 0];

@@ -1,3 +1,11 @@
+## [2.5.3](https://github.com/Kitware/py-web-vue/compare/v2.5.2...v2.5.3) (2021-12-16)
+
+
+### Bug Fixes
+
+* **kw-widgets:** add actions icons ([f1d1b0f](https://github.com/Kitware/py-web-vue/commit/f1d1b0fcd981913861135575fd24848fb9534aa1))
+* **kw-widgets:** Add node color override ([dc560b6](https://github.com/Kitware/py-web-vue/commit/dc560b674cd3af647249ad55825ed37bbe1b7606))
+
 ## [2.5.2](https://github.com/Kitware/py-web-vue/compare/v2.5.1...v2.5.2) (2021-12-09)
 
 

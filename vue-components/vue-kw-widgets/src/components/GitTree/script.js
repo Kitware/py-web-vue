@@ -140,6 +140,17 @@ function processData(list, activeIds = [], rootIdRef = '0') {
   return { nodes, branches, forks, actives, leaves };
 }
 
+function toAction(y, maxX, lineSize, iconSize, actions) {
+  const yOffset = 0.5 * (Number(lineSize) - Number(iconSize));
+  return (name, idx) => ({
+    name,
+    x: maxX - 1.1 * iconSize * (idx + 1),
+    y: Number(y) + yOffset,
+    size: iconSize,
+    href: actions[name],
+  });
+}
+
 // ----------------------------------------------------------------------------
 
 export default {
@@ -216,6 +227,13 @@ export default {
     textWeight: {
       type: Array,
       default: () => ['normal', 'bold'], // Normal, Active
+    },
+    actionMap: {
+      type: Object,
+    },
+    actionSize: {
+      type: [String, Number],
+      default: 25,
     },
   },
   data() {
@@ -294,6 +312,17 @@ export default {
         const tx = cx + this.radius * 2;
         const ty = cy + (this.radius - 1);
 
+        // Actions
+        const actions = (node.actions || []).map(
+          toAction(
+            this.deltaY * node.y,
+            this.width,
+            this.deltaY,
+            this.actionSize,
+            this.actionMap
+          )
+        );
+
         return {
           key: `node-${index}`,
           id: node.y,
@@ -312,6 +341,7 @@ export default {
             fontSize: this.fontSize,
             content: node.name,
           },
+          actions,
         };
       });
     },

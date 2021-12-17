@@ -1,3 +1,10 @@
+## [2.5.4](https://github.com/Kitware/py-web-vue/compare/v2.5.3...v2.5.4) (2021-12-17)
+
+
+### Bug Fixes
+
+* **GitTree:** validated action event id ([3a22119](https://github.com/Kitware/py-web-vue/commit/3a221197d509a358cf7f1c70e9a6b752055358d0))
+
 ## [2.5.3](https://github.com/Kitware/py-web-vue/compare/v2.5.2...v2.5.3) (2021-12-16)
 
 

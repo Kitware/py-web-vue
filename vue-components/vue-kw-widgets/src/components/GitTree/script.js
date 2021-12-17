@@ -401,6 +401,12 @@ export default {
 
       this.$emit('visibilityChange', { id: node.id, visible: node.visible });
     },
+    triggerAction(event) {
+      const yVal = parseInt(event.currentTarget.dataset.id, 10);
+      const action = event.currentTarget.dataset.name;
+      const { id } = this.nodes[yVal];
+      this.$emit('action', { id, action });
+    },
   },
   mounted() {
     this.updateData(this.sources, this.actives);

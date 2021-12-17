@@ -66,15 +66,20 @@
       {{node.text.content}}
     </text>
     <image
+
       v-for="(action, idx) in node.actions"
       :key="action.name"
+
+      :data-id="node.id"
+      :data-name="action.name"
+
       :x="action.x"
       :y="action.y"
       :width="action.size"
       :height="action.size"
       :href="action.href"
       preserveAspectRatio="xMidYMid meet"
-      @click="$emit('action', { id: node.id, name: action.name })"
+      @click="triggerAction"
     />
   </g>
 </svg>

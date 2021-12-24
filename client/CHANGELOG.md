@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/Kitware/py-web-vue/compare/v2.5.4...v2.6.0) (2021-12-24)
+
+
+### Features
+
+* **plotly:** add support for plotly ([51bcdc5](https://github.com/Kitware/py-web-vue/commit/51bcdc5ced2ab5f7ae535e63ebdcc07fd3c1c7bd))
+
 ## [2.5.4](https://github.com/Kitware/py-web-vue/compare/v2.5.3...v2.5.4) (2021-12-17)
 
 

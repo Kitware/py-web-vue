@@ -1,0 +1,9 @@
+serve/demo.html
+serve/vue-mpld3.common.js
+serve/vue-mpld3.common.js.map
+serve/vue-mpld3.umd.js
+serve/vue-mpld3.umd.js.map
+#serve/vue-mpld3.umd.min.js
+serve/vue-mpld3.umd.min.js.map
+
+serve/mpld3.v0.5.7.js

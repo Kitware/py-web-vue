@@ -1,0 +1,22 @@
+<v-app>
+  <v-app-bar app dense>
+    <v-icon class="mr-2">mdi-chart-donut-variant</v-icon>
+    <div class="title">Matplotlib examples</div>
+    <v-spacer />
+    <v-select
+      v-model="active"
+      :items="examples"
+      dense
+      hide-details
+      style="max-width: 240px;"
+    />
+  </v-app-bar>
+  <v-main>
+    <v-container class="text-center">
+      <Matplotlib
+        name="fig_1"
+        :spec="spec"
+      />
+    </v-container>
+  </v-main>
+</v-app>

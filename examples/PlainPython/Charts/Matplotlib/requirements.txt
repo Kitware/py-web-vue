@@ -1,0 +1,3 @@
+pywebvue
+mpld3
+numpy

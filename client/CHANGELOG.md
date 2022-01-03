@@ -1,3 +1,10 @@
+# [2.7.0](https://github.com/Kitware/py-web-vue/compare/v2.6.0...v2.7.0) (2022-01-03)
+
+
+### Features
+
+* **mpld3:** Add vue component for matplotlib ([793776a](https://github.com/Kitware/py-web-vue/commit/793776a92dfe1e99bcb18fd59deebd2ab4435fe5))
+
 # [2.6.0](https://github.com/Kitware/py-web-vue/compare/v2.5.4...v2.6.0) (2021-12-24)
 
 

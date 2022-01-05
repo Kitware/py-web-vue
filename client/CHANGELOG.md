@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/Kitware/py-web-vue/compare/v2.7.0...v2.7.1) (2022-01-05)
+
+
+### Bug Fixes
+
+* **vue-vtk-js:** update dependency for SyncView perf ([450bef1](https://github.com/Kitware/py-web-vue/commit/450bef1c458cf460f93e68bba9c8a8ee46db2f78))
+
 # [2.7.0](https://github.com/Kitware/py-web-vue/compare/v2.6.0...v2.7.0) (2022-01-03)
 
 

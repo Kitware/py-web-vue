@@ -33,7 +33,7 @@
     "vtk.js": "21.1.5",
     "vue": "^2.6.14",
     "vue-router": "^3.5.3",
-    "vue-vtk-js": "1.2.1",
+    "vue-vtk-js": "1.3.0",
     "vuetify": "2.6.1",
     "vuex": "^3.4.0",
     "wslink": "1.1.1"

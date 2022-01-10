@@ -1,3 +1,10 @@
+# [2.8.0](https://github.com/Kitware/py-web-vue/compare/v2.7.1...v2.8.0) (2022-01-10)
+
+
+### Features
+
+* **SizeObserver:** add new component to help size monitoring ([4dca77f](https://github.com/Kitware/py-web-vue/commit/4dca77f24816594d4d9e7b7d4e2643a931447e70))
+
 ## [2.7.1](https://github.com/Kitware/py-web-vue/compare/v2.7.0...v2.7.1) (2022-01-05)
 
 

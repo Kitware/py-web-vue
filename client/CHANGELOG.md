@@ -1,3 +1,10 @@
+## [2.8.1](https://github.com/Kitware/py-web-vue/compare/v2.8.0...v2.8.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* **SizeObserver:** use proper file name ([3fe3c81](https://github.com/Kitware/py-web-vue/commit/3fe3c81120cf9281b42590c5b1778a9bfaec8899))
+
 # [2.8.0](https://github.com/Kitware/py-web-vue/compare/v2.7.1...v2.8.0) (2022-01-10)
 
 

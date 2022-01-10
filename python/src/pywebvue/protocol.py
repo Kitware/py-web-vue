@@ -208,7 +208,6 @@ class CoreServer(ServerProtocol):
 
         self.updateSecret(CoreServer.authentication_token)
 
-
     def port_callback(self, port_used):
         if self.app.on_ready:
             try:

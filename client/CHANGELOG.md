@@ -1,3 +1,10 @@
+## [2.8.2](https://github.com/Kitware/py-web-vue/compare/v2.8.1...v2.8.2) (2022-01-16)
+
+
+### Bug Fixes
+
+* **plotly:** add event helper ([be0b9d9](https://github.com/Kitware/py-web-vue/commit/be0b9d90a7dfd6cdb0a790a7fff1f1b21227320e))
+
 ## [2.8.1](https://github.com/Kitware/py-web-vue/compare/v2.8.0...v2.8.1) (2022-01-10)
 
 

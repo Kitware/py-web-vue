@@ -383,7 +383,12 @@ class App:
             if len(self.serve):
                 endpoints = []
                 for key in self.serve:
-                    endpoints.append(f"{key}={abs_path(self.serve[key], self._root)}")
+                    value = self.serve[key]
+                    if isinstance(value, (list, tuple)):
+                        # tuple are use to describe sync loading (affect client)
+                        endpoints.append(f"{key}={abs_path(value[0], self._root)}")
+                    else:
+                        endpoints.append(f"{key}={abs_path(value, self._root)}")
                 args.fsEndpoints = "|".join(endpoints)
 
             CoreServer.configure(args)

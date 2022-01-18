@@ -1,4 +1,4 @@
-import { loadScript, loadCSS } from 'vtk.js/Sources/IO/Core/ResourceLoader';
+import { loadScript, loadCSS, loadScriptsSerially } from 'vtk.js/Sources/IO/Core/ResourceLoader';
 import Vue from 'vue';
 import { fileHandler, fileListHandler, fileInObjectHandler } from '../decorators';
 
@@ -155,17 +155,40 @@ export default {
 
       // Load exteranl scripts/css
       await Promise.all(styles.map(loadCSS));
-      // Allow the last script to wait for the others to be loaded
-      // There is a chance that the last script is user specific.
-      const lastScript = scripts.pop();
-      await Promise.all(scripts.map(loadScript));
-      if (lastScript) {
-        await loadScript(lastScript);
-      }
 
-      use.forEach((libName) => {
+      // Load scripts asynchronously unless in serial group
+      const serialGroups = {};
+      const others = [];
+      for (let i = 0; i < scripts.length; i++) {
+        let container = others;
+        let scriptUrl = scripts[i];
+        if (Array.isArray(scriptUrl)) {
+          const groupName = scriptUrl[1].serial;
+          if (groupName) {
+            if (!serialGroups[groupName]) {
+              serialGroups[groupName] = [];
+            }
+            container = serialGroups[groupName];
+          }
+          [scriptUrl] = scriptUrl;
+        }
+        container.push(scriptUrl);
+      }
+      const scriptsPromises = others.map(loadScript);
+      const serialScripts = Object.values(serialGroups);
+      for (let i = 0; i < serialScripts.length; i++) {
+        scriptsPromises.push(loadScriptsSerially(serialScripts[i]));
+      }
+      await Promise.all(scriptsPromises);
+
+      use.forEach((libUseEntry) => {
         window.get = get;
-        let lib = get(window, libName);
+        let libKey = libUseEntry;
+        let libOptions = {};
+        if (Array.isArray(libUseEntry)) {
+          [libKey, libOptions] = libUseEntry;
+        }
+        let lib = get(window, libKey);
 
         // Invalid lib name
         if (!lib) {
@@ -176,14 +199,14 @@ export default {
           lib = lib.default;
         }
 
-        console.log(`Vue.use(${libName}) - ${!!lib} - install(${!!lib.install})`);
+        console.log(`Vue.use(${libKey}, ${JSON.stringify(libOptions)}) - ${!!lib} - install(${!!lib.install})`);
         if (lib.install) {
-          Vue.use(lib);
+          Vue.use(lib, libOptions);
           if (lib.getOptions) {
             vueOptions = { ...vueOptions, ...lib.getOptions() };
           }
         } else {
-          Vue.use({ install: lib });
+          Vue.use({ install: lib }, libOptions);
         }
       });
 

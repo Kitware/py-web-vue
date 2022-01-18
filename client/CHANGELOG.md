@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/Kitware/py-web-vue/compare/v2.8.2...v2.9.0) (2022-01-18)
+
+
+### Features
+
+* **scripts:** Allow serial loading and Vue.use options ([a3822d7](https://github.com/Kitware/py-web-vue/commit/a3822d76d27ce4216007ec03b55562354cf8cb6c))
+
 ## [2.8.2](https://github.com/Kitware/py-web-vue/compare/v2.8.1...v2.8.2) (2022-01-16)
 
 

@@ -1,3 +1,10 @@
+## [2.9.1](https://github.com/Kitware/py-web-vue/compare/v2.9.0...v2.9.1) (2022-01-22)
+
+
+### Bug Fixes
+
+* **dep:** Update vue-vtk-js to support box selection ([86323e0](https://github.com/Kitware/py-web-vue/commit/86323e0c6d75fac23fcc8662dcb43fb656dfc449))
+
 # [2.9.0](https://github.com/Kitware/py-web-vue/compare/v2.8.2...v2.9.0) (2022-01-18)
 
 

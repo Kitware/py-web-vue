@@ -1,10 +1,17 @@
-import { loadScript, loadCSS, loadScriptsSerially } from 'vtk.js/Sources/IO/Core/ResourceLoader';
+import { loadScript, loadCSS } from 'vtk.js/Sources/IO/Core/ResourceLoader';
 import Vue from 'vue';
 import { fileHandler, fileListHandler, fileInObjectHandler } from '../decorators';
 
 const SHARED_STATE = Object.create(null);
 const SHARED_STATE_DIRTY_KEYS = new Set();
 const STATE_DECORATORS = [fileHandler, fileListHandler, fileInObjectHandler];
+
+async function loadScriptsSerially(urls) {
+  for (let i = 0; i < urls.length; i++) {
+    /* eslint-disable no-await-in-loop */
+    await loadScript(urls[i]);
+  }
+}
 
 function get(obj, path) {
   let current = obj;

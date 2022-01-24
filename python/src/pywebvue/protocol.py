@@ -240,7 +240,26 @@ class CoreServer(ServerProtocol):
 
     def push_state_change(self, modified_state):
         if CoreServer.DEBUG:
-            print(f"=> Push state {len(json.dumps(modified_state))}")
+            try:
+                print(f"=> Push state {len(json.dumps(modified_state))}")
+            except:
+                unserializable_keys = []
+                for key in modified_state:
+                    try:
+                        json.dumps(modified_state[key])
+                    except:
+                        unserializable_keys.append(key)
+
+                message = (
+                    "\nERROR: The following keys in your state are not serializable"
+                    if len(unserializable_keys) > 1
+                    else "\nERROR: The following key in your state is not serializable"
+                )
+                print(message)
+                for key in unserializable_keys:
+                    print(f" - {key}")
+                print()
+
         self.publish("topic.ws.vue.state", modified_state)
 
     # ---------------------------------------------------------------

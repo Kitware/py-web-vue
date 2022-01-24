@@ -1,3 +1,10 @@
+## [2.9.2](https://github.com/Kitware/py-web-vue/compare/v2.9.1...v2.9.2) (2022-01-24)
+
+
+### Bug Fixes
+
+* **dev:** Print state var when serialization issue ([61fb603](https://github.com/Kitware/py-web-vue/commit/61fb6039630771233b233e967a0fd7c1d40be72c))
+
 ## [2.9.1](https://github.com/Kitware/py-web-vue/compare/v2.9.0...v2.9.1) (2022-01-22)
 
 

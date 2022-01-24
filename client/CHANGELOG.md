@@ -1,3 +1,10 @@
+## [2.9.3](https://github.com/Kitware/py-web-vue/compare/v2.9.2...v2.9.3) (2022-01-24)
+
+
+### Bug Fixes
+
+* **client:** Add missing serial load scripts ([dd47e63](https://github.com/Kitware/py-web-vue/commit/dd47e63fceb9c5233e40df43aa2053c0ad83edda))
+
 ## [2.9.2](https://github.com/Kitware/py-web-vue/compare/v2.9.1...v2.9.2) (2022-01-24)
 
 

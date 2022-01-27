@@ -223,11 +223,11 @@ export default {
 
       return vueOptions;
     },
-    APP_SET({ state, dispatch }, { key, value }) {
+    async APP_SET({ state, dispatch }, { key, value }) {
       SHARED_STATE[key] = value;
       if (state.serverStateKeys.indexOf(key) !== -1) {
         SHARED_STATE_DIRTY_KEYS.add(key);
-        dispatch('APP_FLUSH_DIRTY_STATE');
+        await dispatch('APP_FLUSH_DIRTY_STATE');
       }
       state.stateTS++;
     },
@@ -250,7 +250,7 @@ export default {
 
       state.stateTS++;
     },
-    APP_DIRTY({ state, dispatch }, key) {
+    async APP_DIRTY({ state, dispatch }, key) {
       if (Array.isArray(key)) {
         for (let i = 0; i < key.length; i++) {
           SHARED_STATE_DIRTY_KEYS.add(key[i]);
@@ -294,7 +294,7 @@ export default {
         SHARED_STATE_DIRTY_KEYS.clear();
         const values = await Promise.all(waitOn);
         const deltaState = keys.map((key, i) => ({ key, value: values[i] }));
-        dispatch('WS_STATE_UPDATE', deltaState);
+        await dispatch('WS_STATE_UPDATE', deltaState);
       }
     },
     APP_ACTIONS_PROCESSED({ state }) {

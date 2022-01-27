@@ -56,10 +56,10 @@ export default {
       flushState: 'APP_DIRTY',
     }),
     set(key, value) {
-      this.serverSet({ key, value });
+      return this.serverSet({ key, value });
     },
     trigger(name, args, kwargs) {
-      this.serverTrigger({ name, args, kwargs });
+      return this.serverTrigger({ name, args, kwargs });
     },
     getRef(ref) {
       const { root } = this.$refs;

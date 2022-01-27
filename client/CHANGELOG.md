@@ -1,3 +1,10 @@
+## [2.9.5](https://github.com/Kitware/py-web-vue/compare/v2.9.4...v2.9.5) (2022-01-27)
+
+
+### Bug Fixes
+
+* **args:** replace --deploy by --www usage ([780a6e1](https://github.com/Kitware/py-web-vue/commit/780a6e11e0f50f3b926384dbbdf3f468a46fa0e6))
+
 ## [2.9.4](https://github.com/Kitware/py-web-vue/compare/v2.9.3...v2.9.4) (2022-01-27)
 
 

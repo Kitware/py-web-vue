@@ -1,3 +1,12 @@
+## [2.9.4](https://github.com/Kitware/py-web-vue/compare/v2.9.3...v2.9.4) (2022-01-27)
+
+
+### Bug Fixes
+
+* **client:** Ensure trigger args and kwargs get properly serialized ([80236e4](https://github.com/Kitware/py-web-vue/commit/80236e4f4ddf32076169df0c18bab77cb1c28ba6))
+* **client:** Injected methods (set, trigger, ...) now return a Promise ([faa8a61](https://github.com/Kitware/py-web-vue/commit/faa8a6154fce210bbf5c83fec01579a19c865d91))
+* **python:** Small fixes to support dynamic reload ([de33f44](https://github.com/Kitware/py-web-vue/commit/de33f444e57ab0f9843439a28b87d88eff8f785b))
+
 ## [2.9.3](https://github.com/Kitware/py-web-vue/compare/v2.9.2...v2.9.3) (2022-01-24)
 
 

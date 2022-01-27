@@ -21,6 +21,9 @@ function configDecorator(config) {
     config.sessionURL = config.sessionURL.replaceAll('USE_HOST', window.location.host);
   }
 
+  // Extract app-name from html
+  config.application = document.querySelector('html').dataset.appName || config.application;
+
   // If name is provided we use it as our application and
   // expand any other url params into our config.
   if (userParams.name) {

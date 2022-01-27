@@ -200,13 +200,8 @@ class App:
             action="store_true",
         )
 
-        # Deploy helper
-        self._parser.add_argument("--deploy", help="Prepare a deployable directory")
-        self._parser.add_argument(
-            "--name",
-            default="pywebvue",
-            help="Name to use for that application in the deploy tree",
-        )
+        # www client helper
+        self._parser.add_argument("--www", help="Write client side application into directory. (Expected format AppName:/path/to/destination/www")
 
         CoreServer.add_arguments(self._parser)
 
@@ -377,8 +372,8 @@ class App:
         if args.launcher:
             CoreServer.start_launcher(args)
             # FIXME we don't support yet self.serve with launcher...
-        elif args.deploy:
-            CoreServer.deploy_setup(args)
+        elif args.www:
+            CoreServer.wwww_client(args)
         else:
             if len(self.serve):
                 endpoints = []

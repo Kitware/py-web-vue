@@ -135,7 +135,9 @@ class Helper:
         **kwargs,
     ):
         if name in self._hybrid_views:
-            raise ValueError(f"A view with name ({name}) is already registered")
+            print(f"A view with name ({name}) is already registered")
+            print(" => returning previous one")
+            return self._hybrid_views[name]
 
         view_helper = HybridView(
             self,

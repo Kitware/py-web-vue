@@ -259,11 +259,29 @@ export default {
         SHARED_STATE_DIRTY_KEYS.add(key);
       }
 
-      dispatch('APP_FLUSH_DIRTY_STATE');
+      await dispatch('APP_FLUSH_DIRTY_STATE');
       state.stateTS++;
     },
     async APP_TRIGGER({ dispatch }, { name, args, kwargs }) {
-      dispatch('WS_TRIGGER', { name, args, kwargs });
+      let decoratedArgs;
+      let decoratedKwargs;
+
+      if (args) {
+        const decorateArgs = args.map((arg) => decorate(arg));
+        decoratedArgs = await Promise.all(decorateArgs);
+      }
+
+      if (kwargs) {
+        const decorateKwargs = Object.values(kwargs).map((val) => decorate(val));
+        const kwargsKeys = Object.keys(kwargs);
+
+        const decoratedKwargsValues = await Promise.all(decorateKwargs);
+        decoratedKwargs = kwargsKeys.reduce((tot, key, i) => (
+          { ...tot, [key]: decoratedKwargsValues[i] }
+        ), {});
+      }
+
+      await dispatch('WS_TRIGGER', { name, args: decoratedArgs, kwargs: decoratedKwargs });
     },
     async APP_FLUSH_DIRTY_STATE({ getters, dispatch }) {
       if (SHARED_STATE_DIRTY_KEYS.size && !getters.WS_BUSY) {

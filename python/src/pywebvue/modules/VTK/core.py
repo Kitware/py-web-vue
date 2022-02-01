@@ -36,6 +36,11 @@ class HybridView:
         self._app.trigger(f"{self.animation_key}Start")(self.start_animation)
         self._app.trigger(f"{self.animation_key}Stop")(self.stop_animation)
 
+    def replace_view(self, new_view):
+        self._view = new_view
+        self._view_id = self._helper.id(new_view)
+        self._app.set(self.id_key, self._view_id)
+
     def start_animation(self):
         self._app.set(self.mode_key, "remote")
         self._app.protocol_call(

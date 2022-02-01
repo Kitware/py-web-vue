@@ -132,11 +132,15 @@ class Helper:
         interactive_quality=60,
         still_ratio=1,
         still_quality=98,
+        force_replace=False,
         **kwargs,
     ):
         if name in self._hybrid_views:
-            print(f"A view with name ({name}) is already registered")
-            print(" => returning previous one")
+            if force_replace:
+                self._hybrid_views[name].replace_view(view)
+            else:
+                print(f"A view with name ({name}) is already registered")
+                print(" => returning previous one")
             return self._hybrid_views[name]
 
         view_helper = HybridView(

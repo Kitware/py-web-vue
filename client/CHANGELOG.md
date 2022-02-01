@@ -1,3 +1,10 @@
+## [2.9.8](https://github.com/Kitware/py-web-vue/compare/v2.9.7...v2.9.8) (2022-02-01)
+
+
+### Bug Fixes
+
+* **reset_camera:** Allow to resetCamera at render update ([e6a43bf](https://github.com/Kitware/py-web-vue/commit/e6a43bf31e6c33bff50b0a313f34e38c1100f684))
+
 ## [2.9.7](https://github.com/Kitware/py-web-vue/compare/v2.9.6...v2.9.7) (2022-02-01)
 
 

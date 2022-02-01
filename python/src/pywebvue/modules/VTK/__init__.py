@@ -52,9 +52,15 @@ class Helper:
             "viewport.geometry.view.get.state", self.id(render_window), True
         )
 
-    def push_image(self, render_window):
+    def push_image(self, render_window, reset_camera=False):
         # Disable any double render...
         render_window.GetInteractor().EnableRenderOff()
+
+        if reset_camera:
+            self._app.protocol_call(
+                "viewport.camera.reset", {"view": self.id(render_window)}
+            )
+
         return self._app.protocol_call(
             "viewport.image.push", {"view": self.id(render_window)}
         )
@@ -195,12 +201,15 @@ def mesh(dataset, field_to_keep=None, point_arrays=None, cell_arrays=None):
     return HELPER.mesh(dataset, field_to_keep, point_arrays, cell_arrays)
 
 
-def scene(render_window):
-    return HELPER.scene(render_window)
+def scene(render_window, reset_camera=False):
+    scene_state = HELPER.scene(render_window)
+    if reset_camera:
+        scene_state.setdefault("extra", {})["resetCamera"] = 1
+    return scene_state
 
 
-def push_image(render_window):
-    return HELPER.push_image(render_window)
+def push_image(render_window, reset_camera=False):
+    return HELPER.push_image(render_window, reset_camera)
 
 
 def camera(render_window):

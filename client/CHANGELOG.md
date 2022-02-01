@@ -1,3 +1,10 @@
+## [2.9.7](https://github.com/Kitware/py-web-vue/compare/v2.9.6...v2.9.7) (2022-02-01)
+
+
+### Bug Fixes
+
+* **router:** Expose it as module ([290ae77](https://github.com/Kitware/py-web-vue/commit/290ae77dacd04f651b98b10cbff92a4bc5d65d46))
+
 ## [2.9.6](https://github.com/Kitware/py-web-vue/compare/v2.9.5...v2.9.6) (2022-02-01)
 
 

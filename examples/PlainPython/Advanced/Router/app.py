@@ -1,7 +1,8 @@
 import pywebvue
+from pywebvue.modules import Router
 
 app = pywebvue.App("Routing example")
-app.vue_use += ["router"]
+app.enable_module(Router)
 
 app.routes = [
     {

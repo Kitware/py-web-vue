@@ -1,3 +1,10 @@
+## [2.9.6](https://github.com/Kitware/py-web-vue/compare/v2.9.5...v2.9.6) (2022-02-01)
+
+
+### Bug Fixes
+
+* **RemoteLocalView:** Allow view swap ([5864b8e](https://github.com/Kitware/py-web-vue/commit/5864b8ee8d40378778c7472d03a0337c04c244e8))
+
 ## [2.9.5](https://github.com/Kitware/py-web-vue/compare/v2.9.4...v2.9.5) (2022-01-27)
 
 

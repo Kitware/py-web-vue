@@ -1,3 +1,10 @@
+## [2.9.9](https://github.com/Kitware/py-web-vue/compare/v2.9.8...v2.9.9) (2022-02-02)
+
+
+### Bug Fixes
+
+* **ListBrowser:** add filterQuery property ([943f688](https://github.com/Kitware/py-web-vue/commit/943f6885d5ee8e824e2fa703fee096304718fe7c))
+
 ## [2.9.8](https://github.com/Kitware/py-web-vue/compare/v2.9.7...v2.9.8) (2022-02-01)
 
 

@@ -1,3 +1,10 @@
+## [2.9.10](https://github.com/Kitware/py-web-vue/compare/v2.9.9...v2.9.10) (2022-02-02)
+
+
+### Bug Fixes
+
+* **ListBrowser:** Allow external filterQuery ([98bd34a](https://github.com/Kitware/py-web-vue/commit/98bd34a2e01a88a689cf9e0664b575ee8218f2bb))
+
 ## [2.9.9](https://github.com/Kitware/py-web-vue/compare/v2.9.8...v2.9.9) (2022-02-02)
 
 

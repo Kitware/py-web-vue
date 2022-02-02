@@ -23,9 +23,15 @@ export default {
     list: {
       type: Array,
     },
+    filterQuery: {
+      type: String,
+    },
   },
   computed: {
     filterValues() {
+      if (this.filterQuery) {
+        return this.filterQuery.toLowerCase().split(' ');
+      }
       return this.filterText.toLowerCase().split(' ');
     },
     activeFolderName() {

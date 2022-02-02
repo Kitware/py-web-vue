@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     show(item) {
-      if (!this.filterText) {
+      if (!this.filterValues.length) {
         return true;
       }
       const txt = [item.text.toLowerCase(), item.type.toLowerCase()].join('  ');

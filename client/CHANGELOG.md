@@ -1,3 +1,10 @@
+## [2.9.11](https://github.com/Kitware/py-web-vue/compare/v2.9.10...v2.9.11) (2022-02-09)
+
+
+### Bug Fixes
+
+* **ChangeMonitor:** Better dirty management ([0284034](https://github.com/Kitware/py-web-vue/commit/02840340e6aa7a3f9464504d27f3b0d98ac6788a))
+
 ## [2.9.10](https://github.com/Kitware/py-web-vue/compare/v2.9.9...v2.9.10) (2022-02-02)
 
 

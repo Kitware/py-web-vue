@@ -165,6 +165,7 @@ class ChangeHandler:
         self._modified_keys = set()
         self._all_modified_keys = set()
         self._actions = []
+        self._original_dirty = None
 
     def modified(self, name, value):
         self._modified_keys.add(name)
@@ -205,6 +206,7 @@ class ChangeHandler:
         return self._actions
 
     def __enter__(self):
+        self._original_dirty = self._app._dirty_set
         self._app._dirty_set = self._known_state
         if self not in self._app._change_handlers:
             self._app._change_handlers.append(self)
@@ -232,7 +234,7 @@ class ChangeHandler:
             callbacks.clear()
 
         self._app._change_handlers.remove(self)
-        self._app._dirty_set = None
+        self._app._dirty_set = self._original_dirty
 
         if self._protocol:
             self._protocol.push_state_change(self.modified_state)

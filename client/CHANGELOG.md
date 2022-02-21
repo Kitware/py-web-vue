@@ -1,3 +1,10 @@
+## [2.9.12](https://github.com/Kitware/py-web-vue/compare/v2.9.11...v2.9.12) (2022-02-21)
+
+
+### Bug Fixes
+
+* **ParaView:** defer import to support --www usecase ([4cba0fd](https://github.com/Kitware/py-web-vue/commit/4cba0fdad7de5c6d4a876dfeb709b8bf2039aa1a))
+
 ## [2.9.11](https://github.com/Kitware/py-web-vue/compare/v2.9.10...v2.9.11) (2022-02-09)
 
 

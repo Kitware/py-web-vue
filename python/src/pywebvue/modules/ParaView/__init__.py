@@ -1,10 +1,4 @@
 from pywebvue.modules.VTK.core import HybridView
-from pywebvue.modules.ParaView.core import apply_default_interaction_settings
-
-from paraview import servermanager
-from paraview.modules.vtkPVClientWeb import vtkPVWebApplication
-
-from vtkmodules.web.utils import mesh as mesh_vtk
 
 # -----------------------------------------------------------------------------
 # Basic application setup
@@ -19,12 +13,22 @@ class Helper:
     def __init__(self, app):
         self._root_protocol = None
         self._app = app
-        self._pv_core = vtkPVWebApplication()
-        self._pv_core.SetImageEncoding(0)
         self._hybrid_views = {}
 
-        # Link our custom protocols initialization
-        app.add_protocol_to_configure(self.configure_protocol)
+        try: # defer need to paraview to support --www usecase
+            from paraview import servermanager
+            from paraview.modules.vtkPVClientWeb import vtkPVWebApplication
+            from vtkmodules.web.utils import mesh as mesh_vtk
+            self._pv_core = vtkPVWebApplication()
+            self._pv_core.SetImageEncoding(0)
+            self._servermanager = servermanager
+            self._mesh_vtk = mesh_vtk
+
+            # Link our custom protocols initialization
+            app.add_protocol_to_configure(self.configure_protocol)
+        except:
+            print("ParaView is not available")
+
 
     def id(self, pv_proxy):
         if pv_proxy:
@@ -38,15 +42,15 @@ class Helper:
             return None
         if pv_id <= 0:
             return None
-        return servermanager._getPyProxy(
-            servermanager.ActiveConnection.Session.GetRemoteObject(pv_id)
+        return self._servermanager._getPyProxy(
+            self._servermanager.ActiveConnection.Session.GetRemoteObject(pv_id)
         )
 
     def mesh(self, proxy, field_to_keep=None, point_arrays=None, cell_arrays=None):
         proxy.UpdatePipeline()
         source = proxy.GetClientSideObject()
         dataset = source.GetOutput()
-        return mesh_vtk(
+        return self._mesh_vtk(
             dataset,
             field_to_keep=field_to_keep,
             point_arrays=point_arrays,
@@ -139,6 +143,7 @@ class Helper:
         registerAddOnSerializers()
 
         # Mimic client interactor on server side
+        from pywebvue.modules.ParaView.core import apply_default_interaction_settings
         apply_default_interaction_settings()
 
     def add_hybrid_view(

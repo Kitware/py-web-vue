@@ -1,3 +1,10 @@
+## [2.9.14](https://github.com/Kitware/py-web-vue/compare/v2.9.13...v2.9.14) (2022-03-04)
+
+
+### Bug Fixes
+
+* **wslink:** relative path handling ([84da400](https://github.com/Kitware/py-web-vue/commit/84da400dfcbca830a36253ff6d4d3304f4858fbb))
+
 ## [2.9.13](https://github.com/Kitware/py-web-vue/compare/v2.9.12...v2.9.13) (2022-03-04)
 
 

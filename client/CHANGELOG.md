@@ -1,3 +1,11 @@
+## [2.9.13](https://github.com/Kitware/py-web-vue/compare/v2.9.12...v2.9.13) (2022-03-04)
+
+
+### Bug Fixes
+
+* **client:** Use relative path through resources ([40caeec](https://github.com/Kitware/py-web-vue/commit/40caeec20448ebbc39decc16e4b976bdbf9c6268))
+* **python:** Use relative path through modules ([6f4e35f](https://github.com/Kitware/py-web-vue/commit/6f4e35f6df9cea60e4bc6793c12d05509e069e07))
+
 ## [2.9.12](https://github.com/Kitware/py-web-vue/compare/v2.9.11...v2.9.12) (2022-02-21)
 
 

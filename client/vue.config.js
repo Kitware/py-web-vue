@@ -9,4 +9,5 @@ module.exports = {
     // Add vtk.js rules
     vtkChainWebpack(config);
   },
+  publicPath: './',
 };

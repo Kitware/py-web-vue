@@ -24,19 +24,19 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@mdi/font": "6.5.95",
+    "@mdi/font": "6.6.96",
     "core-js": "^3.20.3",
     "lodash": "^4.17.21",
     "semantic-release-pypi": "^2.5.0",
     "typeface-roboto": "^1.1.13",
     "v-runtime-template": "^1.10.0",
-    "vtk.js": "22.1.7",
+    "vtk.js": "24.0.2",
     "vue": "^2.6.14",
     "vue-router": "^3.5.3",
-    "vue-vtk-js": "1.4.3",
-    "vuetify": "2.6.2",
+    "vue-vtk-js": "1.4.4",
+    "vuetify": "2.6.4",
     "vuex": "^3.4.0",
-    "wslink": "1.4.2"
+    "wslink": "1.4.3"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",

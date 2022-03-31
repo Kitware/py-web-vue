@@ -1,3 +1,10 @@
+## [2.9.15](https://github.com/Kitware/py-web-vue/compare/v2.9.14...v2.9.15) (2022-03-31)
+
+
+### Bug Fixes
+
+* **dep:** Update dep versions ([4dddd30](https://github.com/Kitware/py-web-vue/commit/4dddd30614e894e79cc1d908e339dbc6e20774fa))
+
 ## [2.9.14](https://github.com/Kitware/py-web-vue/compare/v2.9.13...v2.9.14) (2022-03-04)
 
 

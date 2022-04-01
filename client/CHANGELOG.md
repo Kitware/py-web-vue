@@ -1,3 +1,10 @@
+# [2.10.0](https://github.com/Kitware/py-web-vue/compare/v2.9.15...v2.10.0) (2022-04-01)
+
+
+### Features
+
+* **run_server:** add **kwargs App.run_server() ([6e34190](https://github.com/Kitware/py-web-vue/commit/6e34190d81b53005b6cc2fae288e9045d29967e6))
+
 ## [2.9.15](https://github.com/Kitware/py-web-vue/compare/v2.9.14...v2.9.15) (2022-03-31)
 
 

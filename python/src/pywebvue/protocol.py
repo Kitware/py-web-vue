@@ -92,8 +92,8 @@ class CoreServer(ServerProtocol):
         CoreServer.authentication_token = args.authKey
 
     @staticmethod
-    def start_webserver(args):
-        server.start_webserver(options=args, protocol=CoreServer)
+    def start_webserver(args, **kwargs):
+        server.start_webserver(options=args, protocol=CoreServer, **kwargs)
 
     @staticmethod
     def stop_webserver():

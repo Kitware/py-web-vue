@@ -350,7 +350,7 @@ class App:
     # Start server
     # -------------------------------------------------------------------------
 
-    def run_server(self, port=None, thread=False):
+    def run_server(self, port=None, thread=False, **kwargs):
         # Prevent faulty state synchronization with naive usage
         if self._eager_state_listening:
             self.listen(*list(self.state.keys()))
@@ -387,7 +387,7 @@ class App:
                 args.fsEndpoints = "|".join(endpoints)
 
             CoreServer.configure(args)
-            CoreServer.start_webserver(args)
+            CoreServer.start_webserver(args, **kwargs)
 
     def stop_server(self):
         CoreServer.stop_webserver()

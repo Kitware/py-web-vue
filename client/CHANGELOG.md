@@ -1,3 +1,11 @@
+## [2.10.1](https://github.com/Kitware/py-web-vue/compare/v2.10.0...v2.10.1) (2022-04-07)
+
+
+### Bug Fixes
+
+* **license:** package LICENSE file in pywebvue directory ([8195595](https://github.com/Kitware/py-web-vue/commit/8195595a4f6e15bdb2ed42ac9d7e2f7057167132))
+* **vtk:** Update dependency ([b2fa5e6](https://github.com/Kitware/py-web-vue/commit/b2fa5e63bce53903ebb68f106c8ee12d65d65f1a))
+
 # [2.10.0](https://github.com/Kitware/py-web-vue/compare/v2.9.15...v2.10.0) (2022-04-01)
 
 

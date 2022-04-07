@@ -30,10 +30,10 @@
     "semantic-release-pypi": "^2.5.0",
     "typeface-roboto": "^1.1.13",
     "v-runtime-template": "^1.10.0",
-    "vtk.js": "24.0.2",
+    "vtk.js": "24.4.1",
     "vue": "^2.6.14",
     "vue-router": "^3.5.3",
-    "vue-vtk-js": "1.4.4",
+    "vue-vtk-js": "1.4.5",
     "vuetify": "2.6.4",
     "vuex": "^3.4.0",
     "wslink": "1.4.3"

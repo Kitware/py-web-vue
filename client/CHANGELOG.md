@@ -1,3 +1,10 @@
+# [2.11.0](https://github.com/Kitware/py-web-vue/compare/v2.10.1...v2.11.0) (2022-04-08)
+
+
+### Features
+
+* **vtk:** use viewId instead of id for remoteView ([6adf0f0](https://github.com/Kitware/py-web-vue/commit/6adf0f04ed0cab070647fb1d2700edd41438063b))
+
 ## [2.10.1](https://github.com/Kitware/py-web-vue/compare/v2.10.0...v2.10.1) (2022-04-07)
 
 

@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/Kitware/py-web-vue/compare/v2.11.1...v2.11.2) (2022-04-22)
+
+
+### Bug Fixes
+
+* **Windows:** VtkRemoteView should work now on windows desktop mode ([e73f063](https://github.com/Kitware/py-web-vue/commit/e73f06355ea5279cf49d92ba543fc9fb51ad96de))
+
 ## [2.11.1](https://github.com/Kitware/py-web-vue/compare/v2.11.0...v2.11.1) (2022-04-22)
 
 

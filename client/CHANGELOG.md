@@ -1,3 +1,12 @@
+## [2.11.1](https://github.com/Kitware/py-web-vue/compare/v2.11.0...v2.11.1) (2022-04-22)
+
+
+### Bug Fixes
+
+* **trame.client:** Inject trame instance with client inside ([6a714e8](https://github.com/Kitware/py-web-vue/commit/6a714e8459f7568e81ae81f917b68f6da3b93760))
+* **vtk:** Use fallback injected client ([c55af9c](https://github.com/Kitware/py-web-vue/commit/c55af9cb06a8fad6e13040e96631490f244e5a32))
+* **vue-kw-widgets:** Add LifeCycleMonitor component ([2af72da](https://github.com/Kitware/py-web-vue/commit/2af72daba87b69ca36e96916d13a8aff64a12dbf))
+
 # [2.11.0](https://github.com/Kitware/py-web-vue/compare/v2.10.1...v2.11.0) (2022-04-08)
 
 

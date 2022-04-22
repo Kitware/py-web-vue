@@ -92,6 +92,7 @@ export default {
       window: this.window,
       registerDecorator: (decorator) => this.registerDecorator(decorator),
       download: (filename, content, type) => this.download(filename, content, type),
+      trame: { client: this.wsClient },
     };
   },
   mounted() {

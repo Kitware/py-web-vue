@@ -1,3 +1,10 @@
+## [2.11.3](https://github.com/Kitware/py-web-vue/compare/v2.11.2...v2.11.3) (2022-04-26)
+
+
+### Bug Fixes
+
+* **vtk:** properly expose events ([a71e9e3](https://github.com/Kitware/py-web-vue/commit/a71e9e3822f2052fb84a257a3b8133e0293a7dac))
+
 ## [2.11.2](https://github.com/Kitware/py-web-vue/compare/v2.11.1...v2.11.2) (2022-04-22)
 
 

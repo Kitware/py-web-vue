@@ -1,3 +1,10 @@
+## [2.11.4](https://github.com/Kitware/py-web-vue/compare/v2.11.3...v2.11.4) (2022-04-27)
+
+
+### Bug Fixes
+
+* **vtkEvent:** add vtk event wrapper ([6e6fee6](https://github.com/Kitware/py-web-vue/commit/6e6fee6e95c9bff22bba8ea70009dd94c4f8597c))
+
 ## [2.11.3](https://github.com/Kitware/py-web-vue/compare/v2.11.2...v2.11.3) (2022-04-26)
 
 

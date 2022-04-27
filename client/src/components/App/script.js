@@ -2,6 +2,20 @@ import VRuntimeTemplate from 'v-runtime-template';
 import { mapGetters, mapActions } from 'vuex';
 import { generateModels } from '../../store/app';
 
+const VTK_EVENT_KEYS = [
+  'type',
+  'key',
+  'keyCode',
+  'controlKey',
+  'altKey',
+  'shiftKey',
+  'position',
+  'spinX',
+  'spinY',
+  'pixelX',
+  'pixelY',
+];
+
 export default {
   name: 'App',
   components: {
@@ -78,6 +92,16 @@ export default {
       anchor.click();
       document.body.removeChild(anchor);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+    },
+    vtkEvent(e) {
+      const event = {};
+      for (let i = 0; i < VTK_EVENT_KEYS.length; i++) {
+        const key = VTK_EVENT_KEYS[i];
+        if (key in e) {
+          event[key] = e[key];
+        }
+      }
+      return event;
     },
   },
   provide() {

@@ -1,3 +1,10 @@
+## [2.11.5](https://github.com/Kitware/py-web-vue/compare/v2.11.4...v2.11.5) (2022-04-29)
+
+
+### Bug Fixes
+
+* **vtk:** Local rendering was missing trame inject ([3cfc40c](https://github.com/Kitware/py-web-vue/commit/3cfc40c8e33aaaeb91a2a126e68031c47911c2e0))
+
 ## [2.11.4](https://github.com/Kitware/py-web-vue/compare/v2.11.3...v2.11.4) (2022-04-27)
 
 

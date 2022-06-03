@@ -1,5 +1,13 @@
 # py-web-vue
 
+---
+**DEPRECATED**
+
+pywebvue was the core of trame v1 but now that [trame v2](https://kitware.github.io/trame/docs/trame_v2_migration.html) is out, that code base is now deprecated.
+Moving forward the development will focus on [trame](https://kitware.github.io/trame/) which provide similar if not more features.
+
+---
+
 Python package that let you create web based application by just writting a Python file and forget about JavaScript.
 PyWebVue rely on a pre-built generic web client that let you focus on what matters to you.
 In order to reduce the burden on both side we took an oppiniated approach that might not fit every needs but should satisfy most of the use cases for building a Vue.js based application relaying on a Python server for heavier computation while offering efficient communication paradigms to enable interactive 3D visualization using VTK or ParaView.
